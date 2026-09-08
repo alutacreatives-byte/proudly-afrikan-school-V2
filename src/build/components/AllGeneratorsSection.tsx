@@ -95,7 +95,7 @@ export const AllGeneratorsSection: React.FC<AllGeneratorsSectionProps> = ({ onSe
             <div
               key={gen.id}
               onClick={() => onSelectTool(gen.id)}
-              className="bg-white rounded-[2rem] border border-stone-200/90 hover:border-[#E63956] p-7 sm:p-8 flex flex-col justify-between cursor-pointer group shadow-[0_16px_40px_rgba(0,0,0,0.06)] hover:shadow-[0_24px_50px_rgba(230,57,86,0.15)] transition-all hover:-translate-y-1"
+              className="card-3d-elevated p-7 sm:p-8 flex flex-col justify-between cursor-pointer group"
             >
               <div>
                 <div className="flex items-center justify-between mb-5">

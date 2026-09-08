@@ -95,10 +95,10 @@ export const StudyThreeWaysSection: React.FC<StudyThreeWaysSectionProps> = ({
               <div
                 key={card.id}
                 onClick={() => handleCardClick(card.id)}
-                className={`bg-white rounded-[2rem] border transition-all p-6 sm:p-7 flex flex-col justify-between cursor-pointer group ${
+                className={`card-3d-elevated p-6 sm:p-7 flex flex-col justify-between cursor-pointer group ${
                   isSelected
-                    ? 'border-[#E63956] shadow-[0_20px_45px_-10px_rgba(230,57,86,0.18)] ring-2 ring-[#E63956]/20'
-                    : 'border-stone-200/90 shadow-[0_16px_40px_rgba(0,0,0,0.06)] hover:shadow-[0_24px_50px_rgba(230,57,86,0.14)] hover:-translate-y-1 hover:border-[#E63956]/40'
+                    ? 'border-2 border-[#E63956] ring-2 ring-[#E63956]/20'
+                    : 'hover:border-[#E63956]/40'
                 }`}
               >
                 <div>

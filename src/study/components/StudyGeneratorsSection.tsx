@@ -108,7 +108,7 @@ export const StudyGeneratorsSection: React.FC<StudyGeneratorsSectionProps> = ({
             <div
               key={gen.id}
               onClick={() => onSelectTool(gen.id)}
-              className="rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_18px_40px_rgba(230,57,86,0.12)] hover:border-[#E63956]/40 transition-all p-6 flex flex-col justify-between cursor-pointer group"
+              className="card-3d-elevated p-6 flex flex-col justify-between cursor-pointer group"
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
