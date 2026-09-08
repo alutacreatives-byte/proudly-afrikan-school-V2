@@ -33,7 +33,7 @@ export function saveSearchResult(item: {
     subject: category,
     topic: cleanQuery,
     createdAt: new Date().toISOString(),
-    data: {
+    content: {
       query: cleanQuery,
       title,
       summary,
