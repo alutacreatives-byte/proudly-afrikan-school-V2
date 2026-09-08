@@ -9,6 +9,24 @@ interface CameraCaptureModalProps {
   subtitle?: string;
 }
 
+// Helper to determine if device is mobile or tablet
+const isMobileOrTabletDevice = (): boolean => {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || navigator.vendor || (window as any).opera || '';
+  if (/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|tablet|mobile/i.test(ua)) {
+    return true;
+  }
+  if (navigator.maxTouchPoints && navigator.maxTouchPoints > 1 && /Macintosh|MacIntel/i.test(ua)) {
+    return true;
+  }
+  if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
+    return true;
+  }
+  return false;
+};
+
+export const isMobileOrTablet = isMobileOrTabletDevice;
+
 export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
   isOpen,
   onClose,
@@ -42,6 +60,12 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
 
   // Request camera stream and permission on demand
   const startCamera = useCallback(async (desiredFacing: 'environment' | 'user') => {
+    // Desktop: never request camera permission
+    if (!isMobileOrTabletDevice()) {
+      setIsInitializing(false);
+      return;
+    }
+
     setCameraError(null);
     setIsPermissionDenied(false);
     setIsInitializing(true);
@@ -127,14 +151,18 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
     }
   }, [stream]);
 
-  // Start camera ONLY when modal is opened by user interaction
+  // Start camera ONLY when modal is opened by user interaction on mobile/tablet devices
   useEffect(() => {
     if (isOpen) {
       setCapturedDataUrl(null);
       setCapturedBlob(null);
       setCameraError(null);
       setIsPermissionDenied(false);
-      startCamera(facingMode);
+      // Mobile/tablet: request camera permission only after the user clicks [CAPTURE IT]
+      // Desktop: never request camera permission
+      if (isMobileOrTabletDevice()) {
+        startCamera(facingMode);
+      }
     } else {
       stopStream();
       setCapturedDataUrl(null);
@@ -364,21 +392,25 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
                   </div>
                   <div className="space-y-1 text-stone-200">
                     <h3 className="font-display font-black text-lg uppercase">
-                      Open Camera
+                      {!isMobileOrTabletDevice() ? 'Upload Study Photo' : 'Open Camera'}
                     </h3>
                     <p className="text-xs font-mono text-stone-400">
-                      {cameraError || 'Use your device camera to photograph your study materials.'}
+                      {!isMobileOrTabletDevice()
+                        ? 'Camera capture is designed for mobile and tablet devices. On desktop, choose a photo of your study material below.'
+                        : (cameraError || 'Use your device camera to photograph your study materials.')}
                     </p>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-3 pt-2 justify-center">
-                    <button
-                      type="button"
-                      onClick={() => startCamera(facingMode)}
-                      className="px-6 py-3.5 rounded-full bg-[#D92B8A] hover:bg-[#c02479] text-white font-display font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
-                    >
-                      <RefreshCw className="w-4 h-4" />
-                      <span>Retry Camera</span>
-                    </button>
+                    {isMobileOrTabletDevice() && (
+                      <button
+                        type="button"
+                        onClick={() => startCamera(facingMode)}
+                        className="px-6 py-3.5 rounded-full bg-[#D92B8A] hover:bg-[#c02479] text-white font-display font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                        <span>Retry Camera</span>
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}

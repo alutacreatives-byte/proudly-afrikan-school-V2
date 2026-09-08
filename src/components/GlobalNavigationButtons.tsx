@@ -4,9 +4,7 @@ import { ArrowLeft, Home } from 'lucide-react';
 export interface GlobalNavigationButtonsProps {
   onBack?: () => void;
   onGoHome?: () => void;
-  onHome?: () => void;
   className?: string;
-  label?: string;
   backLabel?: string;
   homeLabel?: string;
 }
@@ -14,17 +12,13 @@ export interface GlobalNavigationButtonsProps {
 export const GlobalNavigationButtons: React.FC<GlobalNavigationButtonsProps> = ({
   onBack,
   onGoHome,
-  onHome,
   className = '',
-  label,
   backLabel = 'BACK',
   homeLabel = 'HOME',
 }) => {
   const handleHome = () => {
     if (onGoHome) {
       onGoHome();
-    } else if (onHome) {
-      onHome();
     } else if (onBack) {
       onBack();
     }

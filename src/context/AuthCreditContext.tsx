@@ -31,7 +31,6 @@ interface AuthCreditContextType {
   getCost: (action: AiActionType) => number;
   consumeCredits: (action: AiActionType, description?: string) => Promise<{ success: boolean; error?: string; remaining?: number }>;
   grantBonusCredits: (amount: number, reason: string) => void;
-  replenishTestingCredits: () => void;
   
   // Subscription / Plan methods
   selectPlan: (planId: PlanTier) => Promise<{ success: boolean; message?: string }>;
@@ -82,7 +81,7 @@ export const AuthCreditProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       provider: 'none',
       currentPeriodStart: now.toISOString(),
       currentPeriodEnd: nextMonth.toISOString(),
-      monthlyCreditAllocation: 50000,
+      monthlyCreditAllocation: 400,
       autoRenew: false,
     };
   });
@@ -90,13 +89,9 @@ export const AuthCreditProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [availableCredits, setAvailableCredits] = useState<number>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.CREDITS);
-      if (saved !== null) {
-        const val = Number(saved);
-        if (val < 10000) return 50000;
-        return val;
-      }
+      if (saved !== null) return Number(saved);
     } catch (e) {}
-    return 50000; // 50,000 abundant credits for testing all features
+    return 400; // 400 initial free once-off credits
   });
 
   const [transactions, setTransactions] = useState<CreditTransaction[]>(() => {
@@ -108,12 +103,12 @@ export const AuthCreditProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       {
         id: 'tx-welcome',
         userId: 'visitor',
-        amount: 50000,
+        amount: 400,
         type: 'initial_grant',
         actionType: 'FREE_WELCOME_BONUS',
-        description: 'Testing Credits Grant: 50,000 free credits',
+        description: 'Welcome Bonus: 400 free credits',
         timestamp: new Date().toISOString(),
-        balanceAfter: 50000,
+        balanceAfter: 400,
       },
     ];
   });
@@ -323,23 +318,20 @@ export const AuthCreditProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const canAfford = useCallback((action: AiActionType): boolean => {
     const cost = getCost(action);
-    if (availableCredits < cost) {
-      // Auto-replenish testing credits so user testing is never blocked
-      setAvailableCredits((prev) => prev + 50000);
-      return true;
-    }
-    return true;
+    return availableCredits >= cost;
   }, [availableCredits, getCost]);
 
   const consumeCredits = async (action: AiActionType, customDesc?: string): Promise<{ success: boolean; error?: string; remaining?: number }> => {
     const cost = getCost(action);
-    let currentBalance = availableCredits;
-    if (currentBalance < cost) {
-      currentBalance += 50000;
-      setAvailableCredits(currentBalance);
+    if (availableCredits < cost) {
+      return {
+        success: false,
+        error: `Insufficient credits (${availableCredits} available, ${cost} required). Please upgrade your plan in Pricing.`,
+        remaining: availableCredits,
+      };
     }
 
-    const newBalance = Math.max(0, currentBalance - cost);
+    const newBalance = availableCredits - cost;
     setAvailableCredits(newBalance);
 
     const label = AI_ACTION_LABELS[action] || action;
@@ -389,10 +381,6 @@ export const AuthCreditProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
 
     setTransactions((prev) => [tx, ...prev].slice(0, 50));
-  };
-
-  const replenishTestingCredits = () => {
-    grantBonusCredits(50000, 'Testing Credits Replenish: +50,000 credits');
   };
 
   // Plan Selection / Upgrade
@@ -520,7 +508,6 @@ export const AuthCreditProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         getCost,
         consumeCredits,
         grantBonusCredits,
-        replenishTestingCredits,
         selectPlan,
         cancelSubscription,
         refreshMonthlyCredits,

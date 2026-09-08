@@ -50,8 +50,6 @@ export interface StudyConcept {
   category: string;
   difficulty: DifficultyLevel;
   tags: string[];
-  definition?: string;
-  examples?: string[];
 
   // Deep Lesson & Teaching Material
   explanation: string;

@@ -27,12 +27,22 @@ import { StudySetDetailView } from './components/StudySetDetailView';
 import { StudyTutorModal } from './components/StudyTutorModal';
 import { StorageService } from './services/storageService';
 import { getSavedResources } from '../build/utils/storage';
+import { GlobalNavigationButtons } from '../components/GlobalNavigationButtons';
 
 export interface StudyAppProps {
   initialSet?: StudySet | null;
   initialView?: AppView;
   onNavigateToTab?: (tab: 'STUDY' | 'QUIZ' | 'BUILD' | 'MY SETS' | 'PLANNER') => void;
   onOpenGlobalTutor?: () => void;
+  onGoHome?: () => void;
+  onBackToPreviousPage?: () => void;
+}
+
+interface StudyHistoryItem {
+  tool: StudyToolType | 'my-resources' | 'legacy-view' | null;
+  resource: any;
+  legacySet: StudySet | null;
+  legacyView: AppView | null;
 }
 
 export default function StudyApp({
@@ -40,8 +50,12 @@ export default function StudyApp({
   initialView,
   onNavigateToTab,
   onOpenGlobalTutor,
+  onGoHome,
+  onBackToPreviousPage,
 }: StudyAppProps = {}) {
-  const [activeTool, setActiveTool] = useState<StudyToolType | 'my-resources' | 'legacy-view' | null>(null);
+  const [activeTool, setActiveTool] = useState<StudyToolType | 'my-resources' | 'legacy-view' | null>(
+    initialView && initialView !== 'home' ? 'legacy-view' : null
+  );
   const [activeResource, setActiveResource] = useState<any>(null);
   const [savedCount, setSavedCount] = useState<number>(() => getSavedResources().length);
 
@@ -50,12 +64,26 @@ export default function StudyApp({
   const [legacyView, setLegacyView] = useState<AppView | null>(initialView || null);
   const [isTutorOpen, setIsTutorOpen] = useState<boolean>(false);
 
+  // Navigation history stack for internal Study views
+  const [historyStack, setHistoryStack] = useState<StudyHistoryItem[]>([
+    {
+      tool: initialView && initialView !== 'home' ? 'legacy-view' : null,
+      resource: null,
+      legacySet: initialSet || null,
+      legacyView: initialView && initialView !== 'home' ? initialView : null,
+    },
+  ]);
+
   useEffect(() => {
     if (initialSet) {
       setActiveLegacySet(initialSet);
       if (initialView && initialView !== 'home') {
         setLegacyView(initialView);
         setActiveTool('legacy-view');
+        setHistoryStack([
+          { tool: null, resource: null, legacySet: null, legacyView: null },
+          { tool: 'legacy-view', resource: null, legacySet: initialSet, legacyView: initialView },
+        ]);
       }
     }
   }, [initialSet, initialView]);
@@ -74,8 +102,9 @@ export default function StudyApp({
     prefillCategory?: string,
     initialData?: { sourceSnippet?: string; documentName?: string; capturedPhotoUrl?: string; [key: string]: any }
   ) => {
+    let nextResource: any = null;
     if (initialData) {
-      setActiveResource({
+      nextResource = {
         id: `temp-${Date.now()}`,
         title: prefillTopic || initialData.documentName || 'Study Material',
         topic: prefillTopic || initialData.documentName || 'Study Material',
@@ -85,26 +114,116 @@ export default function StudyApp({
         createdAt: new Date().toISOString(),
         toolType: toolId,
         ...initialData,
-      });
+      };
     } else if (prefillTopic) {
-      setActiveResource({
+      nextResource = {
         id: `temp-${Date.now()}`,
         title: prefillTopic,
         topic: prefillTopic,
         subject: prefillCategory,
         createdAt: new Date().toISOString(),
         toolType: toolId,
-      });
-    } else {
-      setActiveResource(null);
+      };
     }
+
+    setActiveResource(nextResource);
     setActiveTool(toolId);
+    setHistoryStack((prev) => [
+      ...prev,
+      {
+        tool: toolId,
+        resource: nextResource,
+        legacySet: activeLegacySet,
+        legacyView,
+      },
+    ]);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleOpenSavedResource = (resource: any) => {
-    setActiveResource(resource.data || resource);
-    setActiveTool(resource.toolType as StudyToolType);
+    const res = resource.data || resource;
+    const toolType = resource.toolType as StudyToolType;
+    setActiveResource(res);
+    setActiveTool(toolType);
+    setHistoryStack((prev) => [
+      ...prev,
+      {
+        tool: toolType,
+        resource: res,
+        legacySet: activeLegacySet,
+        legacyView,
+      },
+    ]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleOpenMyResources = () => {
+    setActiveTool('my-resources');
+    setHistoryStack((prev) => [
+      ...prev,
+      {
+        tool: 'my-resources',
+        resource: null,
+        legacySet: activeLegacySet,
+        legacyView,
+      },
+    ]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLaunchLegacyMode = (mode: AppView) => {
+    setLegacyView(mode);
+    setActiveTool('legacy-view');
+    setHistoryStack((prev) => [
+      ...prev,
+      {
+        tool: 'legacy-view',
+        resource: null,
+        legacySet: activeLegacySet,
+        legacyView: mode,
+      },
+    ]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // [Back] returns to the previous page (internal Study history, or previous page/tab)
+  const handleBack = () => {
+    if (historyStack.length > 1) {
+      const nextStack = [...historyStack];
+      nextStack.pop();
+      const prevEntry = nextStack[nextStack.length - 1];
+      setHistoryStack(nextStack);
+      setActiveTool(prevEntry.tool);
+      setActiveResource(prevEntry.resource);
+      setActiveLegacySet(prevEntry.legacySet);
+      setLegacyView(prevEntry.legacyView);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (activeTool !== null || (legacyView !== null && legacyView !== 'home')) {
+      handleBackToGrid();
+    } else {
+      if (onBackToPreviousPage) {
+        onBackToPreviousPage();
+      } else if (typeof window !== 'undefined' && window.history.length > 1) {
+        window.history.back();
+      }
+    }
+  };
+
+  // [Home] returns to the main School home page
+  const handleGoHome = () => {
+    setActiveTool(null);
+    setActiveResource(null);
+    setActiveLegacySet(null);
+    setLegacyView(null);
+    setHistoryStack([
+      { tool: null, resource: null, legacySet: null, legacyView: null },
+    ]);
+    if (onGoHome) {
+      onGoHome();
+    } else if (onNavigateToTab) {
+      onNavigateToTab('STUDY');
+    }
+    refreshSavedCount();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -112,6 +231,9 @@ export default function StudyApp({
     setActiveTool(null);
     setActiveResource(null);
     setLegacyView(null);
+    setHistoryStack([
+      { tool: null, resource: null, legacySet: activeLegacySet, legacyView: null },
+    ]);
     refreshSavedCount();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -125,149 +247,174 @@ export default function StudyApp({
     StorageService.recordPracticeAnswer(conceptId, isCorrect);
   };
 
-  // 1. My Saved Study Library
-  if (activeTool === 'my-resources') {
-    return (
-      <StudyMyResources
-        onBack={handleBackToGrid}
-        onOpenResource={handleOpenSavedResource}
-      />
-    );
-  }
-
-  // 2. Study Guide Generator (Tool 01)
-  if (activeTool === 'study-guide') {
-    return (
-      <StudyGuideGenerator
-        onBack={handleBackToGrid}
-        onSaved={refreshSavedCount}
-        existingResource={activeResource as StudyGuideResult}
-      />
-    );
-  }
-
-  // 3. Flashcard Generator (Tool 02)
-  if (activeTool === 'flashcards') {
-    return (
-      <FlashcardGenerator
-        onBack={handleBackToGrid}
-        onSaved={refreshSavedCount}
-        existingResource={activeResource as FlashcardsResult}
-      />
-    );
-  }
-
-  // 4. Practice Quiz Generator (Tool 03)
-  if (activeTool === 'quiz') {
-    return (
-      <StudyQuizGenerator
-        onBack={handleBackToGrid}
-        onSaved={refreshSavedCount}
-        existingResource={activeResource as StudyQuizResult}
-      />
-    );
-  }
-
-  // 5. PDF & Document Quiz (Tool 04)
-  if (activeTool === 'pdf-quiz') {
-    return (
-      <PdfQuizGenerator
-        onBack={handleBackToGrid}
-        onSaved={refreshSavedCount}
-        existingResource={activeResource as PdfQuizResult}
-      />
-    );
-  }
-
-  // 6. Presentation Slide Generator (Tool 05)
-  if (activeTool === 'presentation') {
-    return (
-      <StudyPresentationGenerator
-        onBack={handleBackToGrid}
-        onSaved={refreshSavedCount}
-        existingResource={activeResource as PresentationResult}
-      />
-    );
-  }
-
-  // 7. Course Curriculum Generator (Tool 06)
-  if (activeTool === 'course') {
-    return (
-      <StudyCourseGenerator
-        onBack={handleBackToGrid}
-        onSaved={refreshSavedCount}
-        existingResource={activeResource as CourseResult}
-      />
-    );
-  }
-
-  // 8. Learning Pathway Generator (Tool 07)
-  if (activeTool === 'learning-path') {
-    return (
-      <StudyLearningPathGenerator
-        onBack={handleBackToGrid}
-        onSaved={refreshSavedCount}
-        existingResource={activeResource as LearningPathResult}
-      />
-    );
-  }
-
-  // Legacy Views for sets launched from My Sets workspace or Planner
-  if (activeTool === 'legacy-view' && activeLegacySet) {
-    if (legacyView === 'flashcards') {
+  const renderActiveContent = () => {
+    // 1. My Saved Study Library
+    if (activeTool === 'my-resources') {
       return (
-        <FlashcardsView
-          studySet={activeLegacySet}
-          onBack={handleBackToGrid}
-          onGoHome={handleBackToGrid}
-          onRecordRating={handleRecordFlashcardRating}
-          onCompleteSession={() => handleBackToGrid()}
+        <StudyMyResources
+          onBack={handleBack}
+          onOpenResource={handleOpenSavedResource}
         />
       );
     }
-    if (legacyView === 'practice') {
-      return (
-        <PracticeView
-          studySet={activeLegacySet}
-          onBack={handleBackToGrid}
-          onGoHome={handleBackToGrid}
-          onRecordAnswer={handleRecordPracticeAnswer}
-          onCompletePractice={() => handleBackToGrid()}
-          onNavigateToFlashcards={() => setLegacyView('flashcards')}
-        />
-      );
-    }
-    if (legacyView === 'study' || legacyView === 'learn') {
-      return (
-        <StudySessionView
-          studySet={activeLegacySet}
-          onBack={handleBackToGrid}
-          onGoHome={handleBackToGrid}
-          onFinishLesson={() => handleBackToGrid()}
-          onNavigateToFlashcards={() => setLegacyView('flashcards')}
-          onNavigateToPractice={() => setLegacyView('practice')}
-        />
-      );
-    }
-    return (
-      <StudySetDetailView
-        studySet={activeLegacySet}
-        onBack={handleBackToGrid}
-        onGoHome={handleBackToGrid}
-        onLaunchMode={(mode) => setLegacyView(mode)}
-        onLaunchConceptLesson={() => setLegacyView('study')}
-      />
-    );
-  }
 
-  // Default Main Study View (Home Grid)
-  return (
-    <div className="w-full">
+    // 2. Study Guide Generator (Tool 01)
+    if (activeTool === 'study-guide') {
+      return (
+        <StudyGuideGenerator
+          onBack={handleBack}
+          onSaved={refreshSavedCount}
+          existingResource={activeResource as StudyGuideResult}
+        />
+      );
+    }
+
+    // 3. Flashcard Generator (Tool 02)
+    if (activeTool === 'flashcards') {
+      return (
+        <FlashcardGenerator
+          onBack={handleBack}
+          onSaved={refreshSavedCount}
+          existingResource={activeResource as FlashcardsResult}
+        />
+      );
+    }
+
+    // 4. Practice Quiz Generator (Tool 03)
+    if (activeTool === 'quiz') {
+      return (
+        <StudyQuizGenerator
+          onBack={handleBack}
+          onSaved={refreshSavedCount}
+          existingResource={activeResource as StudyQuizResult}
+        />
+      );
+    }
+
+    // 5. PDF & Document Quiz (Tool 04)
+    if (activeTool === 'pdf-quiz') {
+      return (
+        <PdfQuizGenerator
+          onBack={handleBack}
+          onSaved={refreshSavedCount}
+          existingResource={activeResource as PdfQuizResult}
+        />
+      );
+    }
+
+    // 6. Presentation Slide Generator (Tool 05)
+    if (activeTool === 'presentation') {
+      return (
+        <StudyPresentationGenerator
+          onBack={handleBack}
+          onSaved={refreshSavedCount}
+          existingResource={activeResource as PresentationResult}
+        />
+      );
+    }
+
+    // 7. Course Curriculum Generator (Tool 06)
+    if (activeTool === 'course') {
+      return (
+        <StudyCourseGenerator
+          onBack={handleBack}
+          onSaved={refreshSavedCount}
+          existingResource={activeResource as CourseResult}
+        />
+      );
+    }
+
+    // 8. Learning Pathway Generator (Tool 07)
+    if (activeTool === 'learning-path') {
+      return (
+        <StudyLearningPathGenerator
+          onBack={handleBack}
+          onSaved={refreshSavedCount}
+          existingResource={activeResource as LearningPathResult}
+        />
+      );
+    }
+
+    // Legacy Views for sets launched from My Sets workspace or Planner
+    if (activeTool === 'legacy-view' && activeLegacySet) {
+      if (legacyView === 'flashcards') {
+        return (
+          <FlashcardsView
+            studySet={activeLegacySet}
+            onBack={handleBack}
+            onGoHome={handleGoHome}
+            onRecordRating={handleRecordFlashcardRating}
+            onCompleteSession={() => handleBack()}
+          />
+        );
+      }
+      if (legacyView === 'practice') {
+        return (
+          <PracticeView
+            studySet={activeLegacySet}
+            onBack={handleBack}
+            onGoHome={handleGoHome}
+            onRecordAnswer={handleRecordPracticeAnswer}
+            onCompletePractice={() => handleBack()}
+            onNavigateToFlashcards={() => handleLaunchLegacyMode('flashcards')}
+          />
+        );
+      }
+      if (legacyView === 'study' || legacyView === 'learn') {
+        return (
+          <StudySessionView
+            studySet={activeLegacySet}
+            onBack={handleBack}
+            onGoHome={handleGoHome}
+            onFinishLesson={() => handleBack()}
+            onNavigateToFlashcards={() => handleLaunchLegacyMode('flashcards')}
+            onNavigateToPractice={() => handleLaunchLegacyMode('practice')}
+          />
+        );
+      }
+      return (
+        <StudySetDetailView
+          studySet={activeLegacySet}
+          onBack={handleBack}
+          onGoHome={handleGoHome}
+          onLaunchMode={handleLaunchLegacyMode}
+          onLaunchConceptLesson={() => handleLaunchLegacyMode('study')}
+        />
+      );
+    }
+
+    // Default Main Study View (Home Grid)
+    return (
       <StudyHome
         onSelectTool={handleSelectTool}
-        onOpenMyResources={() => setActiveTool('my-resources')}
+        onOpenMyResources={handleOpenMyResources}
         savedCount={savedCount}
       />
+    );
+  };
+
+  return (
+    <div className="w-full">
+      {/* Top Navigation Header in STUDY: [Back] and [Home] - displayed ONLY when a user opens a module */}
+      {activeTool !== null && (
+        <div className="w-full bg-[#FAF7F0] border-b border-stone-200/80 sticky top-0 z-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between">
+            <GlobalNavigationButtons
+              onBack={handleBack}
+              onGoHome={handleGoHome}
+              backLabel="Back"
+              homeLabel="Home"
+            />
+
+            <div className="text-xs font-mono font-bold text-stone-500 uppercase tracking-wider hidden sm:block">
+              {`STUDY • ${String(activeTool).replace('-', ' ').toUpperCase()}`}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Active Study View */}
+      {renderActiveContent()}
 
       {/* Global AI Tutor Modal */}
       {isTutorOpen && (

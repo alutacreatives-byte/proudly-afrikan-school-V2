@@ -51,5 +51,3 @@ export function saveSearchResult(item: {
   saveResourceToStorage(resource);
   return resource;
 }
-
-export const saveSearchResultToMySets = saveSearchResult;

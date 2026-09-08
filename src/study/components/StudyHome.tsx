@@ -3,7 +3,7 @@ import { StudyHero } from './StudyHero';
 import { StudyThreeWaysSection, StudyCreationMethod } from './StudyThreeWaysSection';
 import { StudyGeneratorsSection } from './StudyGeneratorsSection';
 import { StudyFaqSection } from './StudyFaqSection';
-import { CameraCaptureModal } from './CameraCaptureModal';
+import { CameraCaptureModal, isMobileOrTablet } from './CameraCaptureModal';
 import { AIService } from '../services/aiService';
 import { StudyToolType } from '../types';
 import {
@@ -87,13 +87,6 @@ export const StudyHome: React.FC<StudyHomeProps> = ({
   // Called when learner selects an input method card (TYPE IT, PASTE IT, UPLOAD IT, CAPTURE IT)
   const handleSelectMethod = (method: StudyCreationMethod) => {
     setActiveMethod(method);
-
-    if (method === 'capture') {
-      // If the user clicks CAPTURE IT, open the camera modal immediately to request camera permission at that moment only
-      if (!capturedPhoto) {
-        setIsCameraModalOpen(true);
-      }
-    }
 
     // Scroll to workbench
     const el = document.getElementById('study-input-workbench') || document.getElementById('study-generators-section');
@@ -271,12 +264,7 @@ export const StudyHome: React.FC<StudyHomeProps> = ({
             <button
               type="button"
               id="workbench-tab-capture"
-              onClick={() => {
-                setActiveMethod('capture');
-                if (!capturedPhoto) {
-                  setIsCameraModalOpen(true);
-                }
-              }}
+              onClick={() => setActiveMethod('capture')}
               className={`px-3.5 py-2 rounded-xl sm:rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeMethod === 'capture' ? 'bg-[#D92B8A] text-white shadow-[0_4px_12px_rgba(217,43,138,0.35)]' : 'text-stone-700 hover:text-[#D92B8A]'
               }`}
@@ -318,15 +306,27 @@ export const StudyHome: React.FC<StudyHomeProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2 self-end sm:self-center">
-                    <button
-                      type="button"
-                      id="retake-camera-photo-btn"
-                      onClick={() => setIsCameraModalOpen(true)}
-                      className="px-4 py-2.5 rounded-full bg-white hover:bg-stone-50 text-stone-800 font-mono text-xs font-bold uppercase tracking-wider border border-stone-300 transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95"
-                    >
-                      <Camera className="w-3.5 h-3.5 text-[#D92B8A]" />
-                      <span>Retake Photo</span>
-                    </button>
+                    {isMobileOrTablet() ? (
+                      <button
+                        type="button"
+                        id="retake-camera-photo-btn"
+                        onClick={() => setIsCameraModalOpen(true)}
+                        className="px-4 py-2.5 rounded-full bg-white hover:bg-stone-50 text-stone-800 font-mono text-xs font-bold uppercase tracking-wider border border-stone-300 transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95"
+                      >
+                        <Camera className="w-3.5 h-3.5 text-[#D92B8A]" />
+                        <span>Retake Photo</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        id="change-photo-btn"
+                        onClick={() => cameraFallbackInputRef.current?.click()}
+                        className="px-4 py-2.5 rounded-full bg-white hover:bg-stone-50 text-stone-800 font-mono text-xs font-bold uppercase tracking-wider border border-stone-300 transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95"
+                      >
+                        <ImageIcon className="w-3.5 h-3.5 text-stone-600" />
+                        <span>Change Photo</span>
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => {
@@ -416,22 +416,24 @@ export const StudyHome: React.FC<StudyHomeProps> = ({
                 </div>
 
                 <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-                  <button
-                    type="button"
-                    id="open-device-camera-cta-btn"
-                    onClick={() => setIsCameraModalOpen(true)}
-                    className="px-7 py-4 rounded-full bg-[#D92B8A] hover:bg-[#c02479] text-white font-display font-black text-xs uppercase tracking-wider transition-all shadow-[0_4px_16px_rgba(217,43,138,0.35)] flex items-center gap-2 cursor-pointer active:scale-95"
-                  >
-                    <Camera className="w-4 h-4" />
-                    <span>Open Device Camera</span>
-                  </button>
+                  {isMobileOrTablet() && (
+                    <button
+                      type="button"
+                      id="open-device-camera-cta-btn"
+                      onClick={() => setIsCameraModalOpen(true)}
+                      className="px-7 py-4 rounded-full bg-[#D92B8A] hover:bg-[#c02479] text-white font-display font-black text-xs uppercase tracking-wider transition-all shadow-[0_4px_16px_rgba(217,43,138,0.35)] flex items-center gap-2 cursor-pointer active:scale-95"
+                    >
+                      <Camera className="w-4 h-4" />
+                      <span>Open Device Camera</span>
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => cameraFallbackInputRef.current?.click()}
                     className="px-5 py-4 rounded-full bg-white hover:bg-stone-100 text-stone-800 font-display font-bold text-xs uppercase tracking-wider transition-all border border-stone-300 flex items-center gap-2 cursor-pointer shadow-xs"
                   >
                     <ImageIcon className="w-4 h-4 text-stone-600" />
-                    <span>Choose Photo File</span>
+                    <span>{isMobileOrTablet() ? 'Choose Photo File' : 'Upload Study Photo'}</span>
                   </button>
                 </div>
 

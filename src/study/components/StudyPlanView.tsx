@@ -4,7 +4,7 @@ import { StorageService } from '../services/storageService';
 import { AIService } from '../services/aiService';
 import { isTextCorruptedOrUnreadable } from '../utils/textValidation';
 import { GlobalNavigationButtons } from './GlobalNavigationButtons';
-import { CameraCaptureModal } from './CameraCaptureModal';
+import { CameraCaptureModal, isMobileOrTablet } from './CameraCaptureModal';
 import { 
   Clock, 
   Sparkles, 
@@ -701,12 +701,7 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
           <button
             type="button"
             id="planner-tab-capture"
-            onClick={() => {
-              setInputMethod('capture');
-              if (!capturedImage) {
-                setIsCameraModalOpen(true);
-              }
-            }}
+            onClick={() => setInputMethod('capture')}
             className={`py-3 px-2 sm:px-3 rounded-xl font-display text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap ${
               inputMethod === 'capture'
                 ? 'bg-white text-stone-950 shadow-sm border border-stone-200/60'
@@ -966,22 +961,24 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-3 pt-2 w-full sm:w-auto">
-                  <button
-                    type="button"
-                    id="open-camera-viewfinder-btn"
-                    onClick={() => setIsCameraModalOpen(true)}
-                    className="w-full sm:w-auto py-3 px-6 rounded-full bg-[#E63956] hover:bg-[#D32F4C] text-white font-display font-black text-xs uppercase tracking-wider transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Camera className="w-4 h-4" />
-                    <span>Open Device Camera</span>
-                  </button>
+                  {isMobileOrTablet() && (
+                    <button
+                      type="button"
+                      id="open-camera-viewfinder-btn"
+                      onClick={() => setIsCameraModalOpen(true)}
+                      className="w-full sm:w-auto py-3 px-6 rounded-full bg-[#E63956] hover:bg-[#D32F4C] text-white font-display font-black text-xs uppercase tracking-wider transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Camera className="w-4 h-4" />
+                      <span>Open Device Camera</span>
+                    </button>
+                  )}
 
                   <button
                     type="button"
                     onClick={() => cameraFileInputRef.current?.click()}
                     className="w-full sm:w-auto py-3 px-5 rounded-full border border-stone-300 hover:bg-stone-100 text-stone-700 font-display font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <span>Choose / Upload Photo</span>
+                    <span>{isMobileOrTablet() ? 'Choose / Upload Photo' : 'Upload Study Photo'}</span>
                   </button>
                 </div>
               </div>
@@ -1016,13 +1013,23 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2 self-end sm:self-center">
-                    <button
-                      type="button"
-                      onClick={() => setIsCameraModalOpen(true)}
-                      className="py-1.5 px-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 font-mono text-xs font-bold text-stone-800 transition-colors cursor-pointer"
-                    >
-                      Retake Photo
-                    </button>
+                    {isMobileOrTablet() ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsCameraModalOpen(true)}
+                        className="py-1.5 px-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 font-mono text-xs font-bold text-stone-800 transition-colors cursor-pointer"
+                      >
+                        Retake Photo
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => cameraFileInputRef.current?.click()}
+                        className="py-1.5 px-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 font-mono text-xs font-bold text-stone-800 transition-colors cursor-pointer"
+                      >
+                        Change Photo
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={handleClearCapturedPhoto}

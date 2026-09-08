@@ -62,6 +62,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
     { label: 'Quiz / Flashcards', cost: AI_CREDIT_COSTS.QUIZ_FLASHCARDS, category: 'Revision' },
     { label: 'Study Guide', cost: AI_CREDIT_COSTS.STUDY_GUIDE, category: 'Study' },
     { label: 'Worksheet', cost: AI_CREDIT_COSTS.WORKSHEET, category: 'Practice' },
+    { label: 'Mind Map Visualizer', cost: AI_CREDIT_COSTS.MIND_MAP, category: 'Visual Study' },
     { label: 'Exam & Rubric', cost: AI_CREDIT_COSTS.EXAM, category: 'Assessment' },
     { label: 'Lesson Plan', cost: AI_CREDIT_COSTS.LESSON_PLAN, category: 'Curriculum' },
     { label: 'PDF Study Pack', cost: AI_CREDIT_COSTS.PDF_STUDY_PACK, category: 'Deep Review' },

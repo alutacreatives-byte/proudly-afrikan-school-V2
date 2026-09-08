@@ -2,7 +2,6 @@ import express from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
 import { GoogleGenAI, Type } from '@google/genai';
-import mammoth from 'mammoth';
 
 
 dotenv.config();
@@ -31,8 +30,8 @@ async function generateJsonWithGemini(prompt: string, temperature = 0.4) {
   const ai = getGeminiClient();
   if (!ai) return null;
 
-  // Candidate models with modern priority fallback
-  const models = ['gemini-3.1-flash-lite', 'gemini-3.7-flash', 'gemini-2.5-flash'];
+  // Use gemini-3.8-flash per guidelines, fallback to gemini-3.1-flash-lite and gemini-2.5-flash
+  const models = ['gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-flash'];
   let lastError: any = null;
 
   for (const model of models) {
@@ -47,7 +46,13 @@ async function generateJsonWithGemini(prompt: string, temperature = 0.4) {
       });
 
       if (response && response.text) {
-        return JSON.parse(response.text);
+        let cleaned = response.text.trim();
+        if (cleaned.startsWith('```json')) {
+          cleaned = cleaned.replace(/^```json\s*/i, '').replace(/\s*```$/, '');
+        } else if (cleaned.startsWith('```')) {
+          cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '');
+        }
+        return JSON.parse(cleaned);
       }
     } catch (err: any) {
       console.warn(`Gemini generation with ${model} encountered an issue:`, err?.message || err);
@@ -641,264 +646,135 @@ Return a valid JSON object matching this schema:
   }
 });
 
-// 9. Mind Map Generator Endpoint
-app.post(['/api/generate-mind-map', '/api/generate/mind-map'], async (req, res) => {
-  const {
-    topic = '',
-    subject = '',
-    gradeLevel = '',
-    sourceMaterial = '',
-  } = req.body;
+  // 9. Mind Map Generator Endpoint
+  app.post(['/api/generate-mind-map', '/api/generate/mind-map'], async (req, res) => {
+    const {
+      topic = '',
+      subject = 'Sciences & STEM',
+      gradeLevel = 'Senior Secondary / High School (Grades 9-12)',
+      sourceMaterial = '',
+      sourceFileName = '',
+    } = req.body;
 
-  try {
-    const prompt = `You are an expert curriculum designer and mind-map architect for Proudly Afrikan Build.
-Create an in-depth hierarchical mind map for the topic: "${topic}".
-Subject Category: ${subject}
-Target Grade / Level: ${gradeLevel}
-Source Material (if provided): ${sourceMaterial ? sourceMaterial.slice(0, 12000) : 'None'}
+    const trimmedTopic = String(topic || '').trim();
+    if (!trimmedTopic) {
+      return res.status(400).json({ error: 'Topic is required for mind map generation' });
+    }
 
-Return a JSON object with this exact structure:
+    try {
+      const prompt = `You are a curriculum visualizer and conceptual mapping expert for the Proudly Afrikan Education ecosystem.
+Generate a structured, rigorous, authentic, and beautiful hierarchical Mind Map for students and educators.
+Subject: ${subject}
+Topic: ${trimmedTopic}
+Grade Level: ${gradeLevel}
+Source Material: ${sourceMaterial ? sourceMaterial.slice(0, 10000) : 'None provided (use comprehensive domain expertise)'}
+
+Return a valid JSON object matching this schema:
 {
-  "summary": "Brief 1-2 sentence executive overview of the conceptual scope",
+  "summary": "2-3 sentence conceptual executive summary of ${trimmedTopic} explaining its core principles, African context, and significance.",
   "rootNode": {
-    "id": "root-1",
-    "label": "${topic}",
-    "notes": "Foundational central concept",
+    "id": "root-node",
+    "label": "${trimmedTopic}",
+    "notes": "Central topic and core scope",
     "children": [
       {
-        "id": "sub-1",
-        "label": "First major conceptual branch",
-        "notes": "Contextual description of this pillar",
+        "id": "branch-1",
+        "label": "First Major Concept / Pillar",
+        "notes": "Pedagogical explanation of this pillar",
         "children": [
-          { "id": "leaf-1", "label": "Key detail or subtopic", "notes": "Specific detail" },
-          { "id": "leaf-2", "label": "Key detail or subtopic", "notes": "Specific detail" }
+          {
+            "id": "leaf-1a",
+            "label": "Subtopic / Component / Term",
+            "notes": "Detailed description or application in African context"
+          },
+          {
+            "id": "leaf-1b",
+            "label": "Subtopic / Component / Principle",
+            "notes": "Underlying mechanism or formula"
+          },
+          {
+            "id": "leaf-1c",
+            "label": "Case Study / Example",
+            "notes": "Concrete real-world example"
+          }
         ]
       },
       {
-        "id": "sub-2",
-        "label": "Second major conceptual branch",
-        "notes": "Contextual description of this pillar",
+        "id": "branch-2",
+        "label": "Second Major Concept / Pillar",
+        "notes": "Pedagogical explanation of this pillar",
         "children": [
-          { "id": "leaf-3", "label": "Key detail or subtopic" },
-          { "id": "leaf-4", "label": "Key detail or subtopic" }
+          {
+            "id": "leaf-2a",
+            "label": "Subtopic / Component",
+            "notes": "Detailed description"
+          },
+          {
+            "id": "leaf-2b",
+            "label": "Subtopic / Component",
+            "notes": "Detailed description"
+          }
         ]
       },
       {
-        "id": "sub-3",
-        "label": "Third major conceptual branch",
-        "notes": "Contextual description of this pillar",
+        "id": "branch-3",
+        "label": "Real-World Applications & Impact",
+        "notes": "Industrial, ecological, or societal relevance across Africa and globally",
         "children": [
-          { "id": "leaf-5", "label": "Key detail or subtopic" },
-          { "id": "leaf-6", "label": "Key detail or subtopic" }
+          {
+            "id": "leaf-3a",
+            "label": "Regional Case Studies & Implementations",
+            "notes": "Key projects and practical implementations"
+          },
+          {
+            "id": "leaf-3b",
+            "label": "Socioeconomic & Environmental Impact",
+            "notes": "Direct effects on communities and development"
+          }
         ]
       },
       {
-        "id": "sub-4",
-        "label": "Applications & Real-World Context",
-        "notes": "Practical implications and relevance",
+        "id": "branch-4",
+        "label": "Challenges, Innovations & Future Directions",
+        "notes": "Critical thinking, identified bottlenecks, and future research",
         "children": [
-          { "id": "leaf-7", "label": "Case study or application" },
-          { "id": "leaf-8", "label": "Future horizons or synthesis" }
+          {
+            "id": "leaf-4a",
+            "label": "Key Constraints & Bottlenecks",
+            "notes": "Critical technical or logistical hurdles"
+          },
+          {
+            "id": "leaf-4b",
+            "label": "Emerging Innovations & Solutions",
+            "notes": "Modern solutions and strategic advancements"
+          }
         ]
       }
     ]
   }
 }`;
 
-    const parsed = await generateJsonWithGemini(prompt, 0.4);
-    if (parsed && parsed.rootNode) {
-      return res.json({
-        success: true,
-        summary: parsed.summary || `Mind map breakdown of ${topic}`,
-        rootNode: parsed.rootNode,
-      });
-    }
-    throw new Error('Gemini returned empty or invalid mind map');
-  } catch (error: any) {
-    console.error('Error generating mind map (using fallback):', error?.message || error);
-    return res.json({
-      success: true,
-      summary: `Mind map breakdown of ${topic}`,
-      rootNode: {
-        id: 'root-1',
-        label: topic || 'Core Topic',
-        notes: `Core structured conceptual domain for ${topic || 'subject'}`,
-        children: [
-          {
-            id: 'branch-1',
-            label: 'Fundamental Principles',
-            notes: 'Core theoretical and foundational concepts.',
-            children: [
-              { id: 'leaf-1a', label: 'Key Definitions & Terminology' },
-              { id: 'leaf-1b', label: 'Historical Context & Evolution' },
-            ],
-          },
-          {
-            id: 'branch-2',
-            label: 'Core Mechanics & Dynamics',
-            notes: 'Active processes, formulas, and operational models.',
-            children: [
-              { id: 'leaf-2a', label: 'Primary Mechanisms' },
-              { id: 'leaf-2b', label: 'System Interactions' },
-            ],
-          },
-          {
-            id: 'branch-3',
-            label: 'Real-World Applications',
-            notes: 'Practical implementations and impact.',
-            children: [
-              { id: 'leaf-3a', label: 'Industry & Continental Case Studies' },
-              { id: 'leaf-3b', label: 'Problem Solving & Analysis' },
-            ],
-          },
-          {
-            id: 'branch-4',
-            label: 'Evaluation & Future Horizons',
-            notes: 'Critical assessments and emerging trends.',
-            children: [
-              { id: 'leaf-4a', label: 'Strategic Opportunities & Challenges' },
-              { id: 'leaf-4b', label: 'Next Generation Innovations' },
-            ],
-          },
-        ],
-      },
-    });
-  }
-});
-
-  // 10. Parse uploaded document file base64 or text
-  app.post('/api/build/parse-file', async (req: express.Request, res: express.Response) => {
-    try {
-      const { fileName, fileBase64, mimeType } = req.body;
-      if (!fileBase64) {
-        return res.status(400).json({ error: 'fileBase64 is required' });
-      }
-      const buffer = Buffer.from(fileBase64, 'base64');
-      let extractedText = '';
-
-      if (fileName?.endsWith('.docx') || mimeType?.includes('wordprocessingml')) {
-        const result = await (mammoth as any).extractRawText({ buffer });
-        extractedText = result.value;
-      } else {
-        extractedText = buffer.toString('utf-8');
-      }
-
-      extractedText = extractedText.replace(/\r\n/g, '\n').trim();
-
-      res.json({
-        success: true,
-        fileName,
-        characterCount: extractedText.length,
-        extractedText: extractedText.slice(0, 50000)
-      });
-    } catch (err: any) {
-      console.error('File parsing error:', err);
-      res.status(500).json({ error: 'Failed to parse file: ' + err.message });
-    }
-  });
-
-  // 11. AI Build Assistant: generates flashcards or questions from topic/text
-  app.post('/api/build/generate-cards', async (req: express.Request, res: express.Response) => {
-    try {
-      const { prompt, count = 6, subject = 'General' } = req.body;
-      if (!prompt) {
-        return res.status(400).json({ error: 'Prompt is required' });
-      }
-
-      const client = getGeminiClient();
-      if (!client) {
+      const parsed = await generateJsonWithGemini(prompt, 0.4);
+      if (parsed) {
+        const normalized = normalizeMindMap(parsed, trimmedTopic, subject, gradeLevel, sourceFileName);
         return res.json({
           success: true,
-          cards: [
-            {
-              front: `What is the significance of ${prompt}?`,
-              back: `${prompt} represents a critical subject in modern African and global academic discourse.`,
-              hint: 'Analyze primary principles.',
-              africanContext: 'Relevant across pan-African educational syllabi.'
-            },
-            {
-              front: `How does ${prompt} apply in practical problem-solving?`,
-              back: `By combining rigorous theoretical foundations with localized African case studies.`,
-              hint: 'Consider community impact.',
-              africanContext: 'Supports youth-led sustainable innovation.'
-            }
-          ]
+          rootNode: normalized.rootNode,
+          summary: normalized.summary,
+          data: normalized,
         });
       }
-
-      const candidateModels = ['gemini-3.1-flash-lite', 'gemini-3.7-flash', 'gemini-2.5-flash'];
-      let cards: any[] = [];
-      let lastErr: any = null;
-
-      for (const model of candidateModels) {
-        try {
-          const aiResponse = await client.models.generateContent({
-            model,
-            contents: `Generate ${count} high-quality study flashcards based on this input: "${prompt}".
-Subject context: "${subject}".
-Include front (question/prompt), back (clear concise answer), a helpful hint, and an 'africanContext' connecting it to African innovators, history, or continent-wide applications where suitable.`,
-            config: {
-              responseMimeType: 'application/json',
-              responseSchema: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    front: { type: Type.STRING },
-                    back: { type: Type.STRING },
-                    hint: { type: Type.STRING },
-                    africanContext: { type: Type.STRING }
-                  },
-                  required: ['front', 'back']
-                }
-              }
-            }
-          });
-
-          cards = JSON.parse(aiResponse.text?.trim() || '[]');
-          if (Array.isArray(cards) && cards.length > 0) {
-            break;
-          }
-        } catch (mErr) {
-          lastErr = mErr;
-          console.warn(`[Build] Model ${model} generation attempt failed, trying next candidate...`);
-        }
-      }
-
-      if (!cards || cards.length === 0) {
-        // High-quality contextual fallback
-        cards = [
-          {
-            front: `What is the significance of ${prompt}?`,
-            back: `A vital concept in ${subject} illuminating critical principles and real-world methodologies.`,
-            hint: `Focus on key mechanisms and outcomes in ${subject}.`,
-            africanContext: 'Reflected across African educational leadership and regional development frameworks.'
-          },
-          {
-            front: `How does ${prompt} apply in practical problem-solving?`,
-            back: `By combining rigorous theoretical foundations with localized African case studies and innovations.`,
-            hint: 'Consider community impact and scalable implementation.',
-            africanContext: 'Supports youth-led sustainable innovation across the African continent.'
-          }
-        ];
-      }
-
-      res.json({
+      throw new Error('Gemini returned empty response');
+    } catch (error: any) {
+      console.error('Error generating mind map (using fallback):', error?.message || error);
+      const fallback = generateFallbackMindMap(trimmedTopic, subject, gradeLevel, sourceMaterial, sourceFileName);
+      const normalized = normalizeMindMap(fallback, trimmedTopic, subject, gradeLevel, sourceFileName);
+      return res.json({
         success: true,
-        cards
-      });
-    } catch (err: any) {
-      console.error('Build card generator error:', err);
-      res.json({
-        success: true,
-        cards: [
-          {
-            front: `Core Principles of ${req.body?.prompt || 'Curriculum Subject'}`,
-            back: `Primary conceptual framework and analytical methods in ${req.body?.subject || 'Studies'}.`,
-            hint: 'Review core definitions.',
-            africanContext: 'Applied across African educational institutes.'
-          }
-        ]
+        fallbackUsed: true,
+        rootNode: normalized.rootNode,
+        summary: normalized.summary,
+        data: normalized,
       });
     }
   });
@@ -1917,3 +1793,169 @@ function generateFallbackLearningPath(title: string, subject: string, goal: stri
     createdAt: new Date().toISOString(),
   };
 }
+
+function sanitizeMindMapNode(rawNode: any, defaultLabel: string, depth = 0): any {
+  if (!rawNode || typeof rawNode !== 'object') {
+    return {
+      id: `node-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      label: defaultLabel,
+    };
+  }
+
+  const label = typeof rawNode.label === 'string' && rawNode.label.trim()
+    ? rawNode.label.trim()
+    : defaultLabel;
+
+  const id = typeof rawNode.id === 'string' && rawNode.id.trim()
+    ? rawNode.id.trim()
+    : `node-${depth}-${Math.random().toString(36).substring(2, 6)}`;
+
+  const node: any = { id, label };
+
+  if (rawNode.notes && typeof rawNode.notes === 'string') {
+    node.notes = rawNode.notes.trim();
+  }
+
+  if (Array.isArray(rawNode.children) && rawNode.children.length > 0) {
+    node.children = rawNode.children.map((child: any, idx: number) =>
+      sanitizeMindMapNode(child, `Concept ${idx + 1}`, depth + 1)
+    );
+  }
+
+  return node;
+}
+
+function normalizeMindMap(data: any, topic: string, subject: string, gradeLevel: string, sourceFileName?: string) {
+  const cleanTopic = topic || 'Educational Domain';
+  const summary = typeof data?.summary === 'string' && data.summary.trim()
+    ? data.summary.trim()
+    : `Comprehensive hierarchical breakdown of ${cleanTopic} across key concepts, mechanisms, applications, and critical analysis.`;
+
+  let rootNode = data?.rootNode;
+  if (!rootNode && data?.children) {
+    rootNode = {
+      id: 'root-node',
+      label: cleanTopic,
+      notes: `Central subject domain for ${cleanTopic}`,
+      children: data.children,
+    };
+  }
+
+  const sanitizedRoot = sanitizeMindMapNode(rootNode, cleanTopic, 0);
+
+  return {
+    id: `mm-${Date.now()}`,
+    title: cleanTopic,
+    subject,
+    topic: cleanTopic,
+    gradeLevel,
+    rootNode: sanitizedRoot,
+    summary,
+    sourceDocName: sourceFileName || undefined,
+    createdAt: new Date().toISOString(),
+    toolType: 'mind-map' as const,
+  };
+}
+
+function generateFallbackMindMap(topic: string, subject: string, gradeLevel: string, _sourceMaterial?: string, _sourceFileName?: string) {
+  const cleanTopic = (topic || 'Core Subject').trim();
+  return {
+    summary: `Structured hierarchical conceptual breakdown for ${cleanTopic} across theoretical foundations, systemic mechanisms, regional African applications, and forward-looking strategic challenges.`,
+    rootNode: {
+      id: 'root-node',
+      label: cleanTopic,
+      notes: `Core structured conceptual domain for ${cleanTopic} (${subject}, ${gradeLevel}).`,
+      children: [
+        {
+          id: 'branch-1',
+          label: 'Theoretical Foundations & Definitions',
+          notes: 'Core theoretical, definitional, and historical principles.',
+          children: [
+            {
+              id: 'leaf-1a',
+              label: 'Essential Terminology & Key Vocabulary',
+              notes: 'Fundamental terms, symbols, and standard notations required for conceptual mastery.'
+            },
+            {
+              id: 'leaf-1b',
+              label: 'Core Governing Laws & Mechanisms',
+              notes: 'Fundamental mechanics, primary equations, and structural relationships.'
+            },
+            {
+              id: 'leaf-1c',
+              label: 'Historical Evolution & Scientific Benchmarks',
+              notes: 'Key milestones, foundational experiments, and historical breakthroughs.'
+            }
+          ]
+        },
+        {
+          id: 'branch-2',
+          label: 'Systemic Methodologies & Frameworks',
+          notes: 'Functional structures, analytical models, and operational paradigms.',
+          children: [
+            {
+              id: 'leaf-2a',
+              label: 'Structural Classification & Taxonomy',
+              notes: 'Systematic classification and functional subdivisions within the domain.'
+            },
+            {
+              id: 'leaf-2b',
+              label: 'Experimental & Diagnostic Procedures',
+              notes: 'Standardized protocols, measurement techniques, and problem-solving workflows.'
+            },
+            {
+              id: 'leaf-2c',
+              label: 'Quantitative Modeling & Performance Metrics',
+              notes: 'Critical formulas, evaluation metrics, and comparative assessment benchmarks.'
+            }
+          ]
+        },
+        {
+          id: 'branch-3',
+          label: 'Real-World Applications in Africa & Beyond',
+          notes: 'Practical industrial, technological, and socioeconomic use cases across the African continent.',
+          children: [
+            {
+              id: 'leaf-3a',
+              label: 'Regional Infrastructure & Case Studies',
+              notes: 'Leading infrastructure, public sector deployments, and enterprise case studies.'
+            },
+            {
+              id: 'leaf-3b',
+              label: 'Socioeconomic & Ecological Impact',
+              notes: 'Direct contribution to community empowerment, sustainability, and regional industrial growth.'
+            },
+            {
+              id: 'leaf-3c',
+              label: 'Cross-Disciplinary Technological Synergy',
+              notes: 'Integration with adjacent engineering, agricultural, health, and data science frontiers.'
+            }
+          ]
+        },
+        {
+          id: 'branch-4',
+          label: 'Challenges, Innovations & Strategic Outlook',
+          notes: 'Identified bottlenecks, contemporary innovations, and strategic developmental horizons.',
+          children: [
+            {
+              id: 'leaf-4a',
+              label: 'Key Constraints & Structural Roadblocks',
+              notes: 'Critical financial, technological, and infrastructural hurdles to navigate.'
+            },
+            {
+              id: 'leaf-4b',
+              label: 'Emerging Indigenous & Global Innovations',
+              notes: 'Pioneering African and international technologies transforming implementation.'
+            },
+            {
+              id: 'leaf-4c',
+              label: 'Future Research & Policy Horizons',
+              notes: 'Upcoming frontiers, educational curricula reform, and strategic long-term vision.'
+            }
+          ]
+        }
+      ]
+    }
+  };
+}
+

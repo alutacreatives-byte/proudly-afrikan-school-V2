@@ -71,7 +71,7 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
           className="flex items-center gap-3 sm:gap-3.5 cursor-pointer group shrink-0"
         >
           {/* Logo Emblem Box: Vibrant Crimson Rounded Squircle */}
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-[#E02D68] via-[#D92B8A] to-[#C92255] shadow-[0_4px_14px_rgba(217,43,138,0.35)] p-1.5 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-r from-[#D92B8A] via-[#E03A6A] to-[#E63956] shadow-[0_4px_14px_rgba(230,57,86,0.35)] p-1.5 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
             {!logoError ? (
               <img
                 src="https://sifisos.com/wp-content/uploads/2026/04/Proudly-Afrikan-Logo.png"
@@ -124,7 +124,7 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
                   </span>
                 )}
                 {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#D92B8A] rounded-full" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#D92B8A] via-[#E03A6A] to-[#E63956] rounded-full" />
                 )}
               </button>
             );

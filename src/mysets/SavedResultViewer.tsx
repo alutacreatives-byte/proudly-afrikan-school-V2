@@ -65,16 +65,16 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
       text += `CONCEPTS & VOCABULARY:\n`;
       studySet.concepts.forEach((c, idx) => {
         text += `\n${idx + 1}. ${c.title}\n`;
-        text += `Definition: ${c.definition}\n`;
+        text += `Explanation: ${c.explanation}\n`;
         if (c.whyItMatters) text += `Why it matters: ${c.whyItMatters}\n`;
-        if (c.examples && c.examples.length) text += `Examples: ${c.examples.join(', ')}\n`;
+        if (c.keyFacts && c.keyFacts.length) text += `Key Facts: ${c.keyFacts.join(', ')}\n`;
       });
     } else if (quiz && quiz.questions) {
       text += `QUIZ QUESTIONS:\n`;
       quiz.questions.forEach((q, idx) => {
         text += `\nQuestion ${idx + 1}: ${q.question}\n`;
         q.options.forEach((opt, oIdx) => {
-          text += `  [${String.fromCharCode(65 + oIdx)}] ${opt} ${(opt === q.correctAnswer || (q as any).correctAnswer === oIdx || (q as any).correctIndex === oIdx) ? '✓' : ''}\n`;
+          text += `  [${String.fromCharCode(65 + oIdx)}] ${opt} ${Number(oIdx) === Number(q.correctAnswer) ? '✓' : ''}\n`;
         });
         if (q.explanation) text += `Explanation: ${q.explanation}\n`;
       });
@@ -306,7 +306,7 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
                       </div>
 
                       <p className="text-xs sm:text-sm text-stone-700 leading-relaxed font-sans pl-8">
-                        {concept.definition}
+                        {concept.explanation}
                       </p>
 
                       {concept.whyItMatters && (
@@ -316,9 +316,9 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
                         </div>
                       )}
 
-                      {concept.examples && concept.examples.length > 0 && (
+                      {concept.keyFacts && concept.keyFacts.length > 0 && (
                         <div className="pl-8 pt-1 flex flex-wrap gap-1.5">
-                          {concept.examples.map((ex, i) => (
+                          {concept.keyFacts.map((ex, i) => (
                             <span key={i} className="px-2 py-0.5 bg-[#FAF7F0] text-stone-600 text-[11px] rounded-md font-mono">
                               {ex}
                             </span>
@@ -371,7 +371,7 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
                 {(quiz.questions || []).map((q, qIdx) => {
                   const selected = userAnswers[qIdx];
                   const hasAnswered = selected !== undefined;
-                  const isCorrect = (q.options && q.options[selected] === q.correctAnswer) || (q as any).correctAnswer === selected || (q as any).correctIndex === selected;
+                  const isCorrect = Number(selected) === Number(q.correctAnswer);
 
                   return (
                     <div 
@@ -391,7 +391,7 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pl-0 sm:pl-9">
                         {(q.options || []).map((opt, optIdx) => {
-                          const isOptionCorrect = opt === q.correctAnswer || (q as any).correctAnswer === optIdx || (q as any).correctIndex === optIdx;
+                          const isOptionCorrect = Number(optIdx) === Number(q.correctAnswer);
                           const isOptionSelected = selected === optIdx;
 
                           let btnStyle = "bg-[#FAF7F0] border-stone-200 text-stone-800 hover:border-orange-300";

@@ -3,6 +3,7 @@ import {
   Type,
   ClipboardCopy,
   FileUp,
+  Camera,
   ArrowRight,
   AlertCircle,
   FileText,
@@ -19,6 +20,7 @@ import {
   SubjectCategory,
 } from '../types';
 import { extractTextFromFile } from '../utils/pdfExtractor';
+import { CameraCaptureModal } from '../../study/components/CameraCaptureModal';
 
 interface QuizBuilderProps {
   creationMethod: CreationMethod;
@@ -128,6 +130,52 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
     }
   };
 
+  // Camera & Photo Capture state (CAPTURE IT)
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
+  const [capturedImagePreview, setCapturedImagePreview] = useState<string | null>(null);
+  const [capturedFileName, setCapturedFileName] = useState<string>('');
+  const [capturedText, setCapturedText] = useState<string>('');
+  const [isParsingCapture, setIsParsingCapture] = useState(false);
+  const cameraFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoCaptured = async (photoBlob: Blob, photoDataUrl: string, fileName: string) => {
+    setIsCameraModalOpen(false);
+    setCapturedImagePreview(photoDataUrl);
+    setCapturedFileName(fileName);
+    setIsParsingCapture(true);
+    setValidationError(null);
+
+    if (!topicInput) {
+      setTopicInput(fileName.replace(/\.[^/.]+$/, '').replace(/study-capture-/i, 'Photographed Notes ').replace(/[-_]/g, ' '));
+    }
+
+    try {
+      const file = new File([photoBlob], fileName, { type: photoBlob.type || 'image/jpeg' });
+      const parsed = await extractTextFromFile(file);
+      if (parsed && parsed.text) {
+        setCapturedText(parsed.text);
+      } else {
+        setCapturedText('Captured study material from camera. Ready for quiz generation.');
+      }
+    } catch (err: any) {
+      console.warn('OCR transcription notice:', err);
+      setCapturedText('Captured study material. Ready for quiz generation.');
+    } finally {
+      setIsParsingCapture(false);
+    }
+  };
+
+  const handleCameraFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = (event.target?.result as string) || '';
+      handlePhotoCaptured(file, dataUrl, file.name);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleGenerateClick = () => {
     setValidationError(null);
 
@@ -147,6 +195,11 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
         setValidationError('Please upload a PDF or document before generating.');
         return;
       }
+    } else if (creationMethod === 'capture') {
+      if (!capturedText.trim() && !capturedImagePreview) {
+        setValidationError('Please photograph or upload study material before generating.');
+        return;
+      }
     }
 
     const settings: QuizSettings = {
@@ -160,9 +213,9 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
     onGenerateQuiz({
       creationMethod,
       topic: topicInput,
-      text: textInput,
-      fileName: uploadedFile?.name || '',
-      fileText: uploadedFile?.text || '',
+      text: creationMethod === 'capture' ? capturedText : textInput,
+      fileName: creationMethod === 'capture' ? capturedFileName : (uploadedFile?.name || ''),
+      fileText: creationMethod === 'capture' ? capturedText : (uploadedFile?.text || ''),
       settings,
     });
   };
@@ -207,13 +260,13 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
         {/* Left Column: Knowledge Source Tabs & Inputs (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
           {/* Method Selectors / Rounded Pill Tabs */}
-          <div className="flex bg-[#FAF7F2] p-1.5 rounded-2xl border border-[#E0D8C5] shadow-xs gap-1.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 bg-[#FAF7F2] p-1.5 rounded-2xl border border-[#E0D8C5] shadow-xs gap-1.5">
             <button
               onClick={() => {
                 onMethodChange('topic');
                 setValidationError(null);
               }}
-              className={`flex-1 py-3 px-3 rounded-xl font-display font-black text-xs sm:text-sm uppercase tracking-tight flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`py-3 px-3 rounded-xl font-display font-black text-xs sm:text-sm uppercase tracking-tight flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 creationMethod === 'topic'
                   ? 'bg-[#E05A2B] text-white shadow-sm scale-101'
                   : 'bg-transparent text-[#292929] hover:bg-white'
@@ -228,7 +281,7 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
                 onMethodChange('text');
                 setValidationError(null);
               }}
-              className={`flex-1 py-3 px-3 rounded-xl font-display font-black text-xs sm:text-sm uppercase tracking-tight flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`py-3 px-3 rounded-xl font-display font-black text-xs sm:text-sm uppercase tracking-tight flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 creationMethod === 'text'
                   ? 'bg-[#E05A2B] text-white shadow-sm scale-101'
                   : 'bg-transparent text-[#292929] hover:bg-white'
@@ -243,7 +296,7 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
                 onMethodChange('pdf');
                 setValidationError(null);
               }}
-              className={`flex-1 py-3 px-3 rounded-xl font-display font-black text-xs sm:text-sm uppercase tracking-tight flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`py-3 px-3 rounded-xl font-display font-black text-xs sm:text-sm uppercase tracking-tight flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 creationMethod === 'pdf'
                   ? 'bg-[#E05A2B] text-white shadow-sm scale-101'
                   : 'bg-transparent text-[#292929] hover:bg-white'
@@ -251,6 +304,21 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
             >
               <FileUp className="w-4 h-4" />
               <span>3. PDF</span>
+            </button>
+
+            <button
+              onClick={() => {
+                onMethodChange('capture');
+                setValidationError(null);
+              }}
+              className={`py-3 px-3 rounded-xl font-display font-black text-xs sm:text-sm uppercase tracking-tight flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                creationMethod === 'capture'
+                  ? 'bg-[#E05A2B] text-white shadow-sm scale-101'
+                  : 'bg-transparent text-[#292929] hover:bg-white'
+              }`}
+            >
+              <Camera className="w-4 h-4" />
+              <span>4. CAPTURE</span>
             </button>
           </div>
 
@@ -434,6 +502,112 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
                 <div className="text-xs font-mono-code text-[#5E5950] pt-2 border-t border-[#292929]/10">
                   <span>Questions are strictly generated from the extracted text without outside hallucinations.</span>
                 </div>
+              </div>
+            )}
+
+            {/* METHOD 4: CAPTURE */}
+            {creationMethod === 'capture' && (
+              <div className="space-y-4 flex-1 flex flex-col justify-between">
+                <input
+                  type="file"
+                  ref={cameraFileInputRef}
+                  onChange={handleCameraFileUpload}
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                />
+
+                {capturedImagePreview ? (
+                  <div className="p-4 sm:p-5 bg-orange-50/50 border border-orange-200 rounded-2xl space-y-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-14 h-14 rounded-xl overflow-hidden border border-orange-200 bg-white shadow-xs shrink-0">
+                          <img src={capturedImagePreview} alt="Captured study material" className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-display font-black text-xs sm:text-sm uppercase text-[#161616]">
+                              Photographed Study Material
+                            </span>
+                            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold uppercase rounded-full">
+                              Captured
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-stone-500 font-mono mt-0.5">
+                            {capturedFileName || 'study-photo.jpg'} &bull; Ready for quiz generation
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsCameraModalOpen(true)}
+                        className="px-3 py-2 bg-white hover:bg-stone-100 border border-stone-300 rounded-xl text-xs font-mono font-bold text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                      >
+                        <Camera className="w-3.5 h-3.5 text-[#E05A2B]" />
+                        <span>Retake Photo</span>
+                      </button>
+                    </div>
+
+                    <div className="space-y-1.5 pt-2 border-t border-orange-100">
+                      <label className="font-mono-code text-xs font-bold uppercase tracking-wider text-[#292929]">
+                        Extracted Content / Notes (Editable)
+                      </label>
+                      <textarea
+                        rows={4}
+                        value={capturedText}
+                        onChange={(e) => setCapturedText(e.target.value)}
+                        placeholder="Extracted textbook, notes, equations, diagrams, or worksheet text..."
+                        className="w-full bg-white border border-stone-200 rounded-xl p-3 font-mono-code text-xs text-[#292929] focus:outline-none focus:ring-2 focus:ring-[#E05A2B]"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => setIsCameraModalOpen(true)}
+                    className="border-2 border-dashed border-[#E0D8C5] hover:border-[#E05A2B] bg-[#FAF7F2] hover:bg-orange-50/30 rounded-2xl p-6 text-center space-y-3 cursor-pointer transition-all"
+                  >
+                    <div className="w-12 h-12 mx-auto rounded-full bg-white border border-[#E0D8C5] shadow-xs flex items-center justify-center text-[#E05A2B]">
+                      {isParsingCapture ? <Loader2 className="w-6 h-6 animate-spin" /> : <Camera className="w-6 h-6" />}
+                    </div>
+                    <div>
+                      <div className="font-display font-black text-sm sm:text-base uppercase text-[#292929]">
+                        {isParsingCapture ? 'Analyzing & Transcribing Photo...' : 'CAPTURE IT • PHOTOGRAPH STUDY MATERIAL'}
+                      </div>
+                      <p className="font-mono-code text-xs text-[#5E5950] mt-1">
+                        Photograph homework, textbook pages, handwritten work, equations, diagrams, or worksheets.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsCameraModalOpen(true);
+                        }}
+                        className="px-4 py-2 bg-[#E05A2B] hover:bg-[#c94d21] text-white font-display text-xs font-black uppercase tracking-wider rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Camera className="w-3.5 h-3.5" />
+                        <span>Open Device Camera</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          cameraFileInputRef.current?.click();
+                        }}
+                        className="px-4 py-2 bg-white hover:bg-stone-100 border border-[#E0D8C5] rounded-xl text-xs font-mono font-bold text-stone-800 flex items-center gap-1.5 cursor-pointer shadow-xs"
+                      >
+                        <FileUp className="w-3.5 h-3.5 text-stone-600" />
+                        <span>Upload Photo File</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+                <CameraCaptureModal
+                  isOpen={isCameraModalOpen}
+                  onClose={() => setIsCameraModalOpen(false)}
+                  onPhotoCaptured={handlePhotoCaptured}
+                />
               </div>
             )}
 

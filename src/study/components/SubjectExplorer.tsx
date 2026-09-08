@@ -25,7 +25,7 @@ import {
   setBelongsToBroadArea, 
   setMatchesSubSubject 
 } from '../data/subjectCategories';
-import { saveSearchResultToMySets } from '../../mysets/savedSearchService';
+import { saveSearchResult } from '../../mysets/savedSearchService';
 
 interface SubjectExplorerProps {
   studySets: StudySet[];

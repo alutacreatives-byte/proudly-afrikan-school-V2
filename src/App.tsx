@@ -64,9 +64,37 @@ function AppContent() {
     } catch (e) {}
   }, []);
 
+  const [tabHistory, setTabHistory] = useState<MainNavTab[]>(['STUDY']);
+
   const handleSelectTab = (tab: MainNavTab) => {
+    setTabHistory((prev) => {
+      if (prev[prev.length - 1] === tab) return prev;
+      return [...prev, tab];
+    });
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleGoHome = () => {
+    setSelectedStudySet(null);
+    setStudyInitialView('home');
+    setSelectedQuiz(null);
+    setSelectedBuildResource(null);
+    setActiveTab('STUDY');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackFromStudy = () => {
+    if (tabHistory.length > 1) {
+      const nextHistory = [...tabHistory];
+      nextHistory.pop();
+      const prevTab = nextHistory[nextHistory.length - 1];
+      setTabHistory(nextHistory);
+      setActiveTab(prevTab);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (typeof window !== 'undefined' && window.history.length > 1) {
+      window.history.back();
+    }
   };
 
   // Launch handlers from My Sets or Planner
@@ -109,6 +137,8 @@ function AppContent() {
             initialSet={selectedStudySet}
             initialView={studyInitialView}
             onNavigateToTab={handleSelectTab}
+            onGoHome={handleGoHome}
+            onBackToPreviousPage={handleBackFromStudy}
             onOpenGlobalTutor={() => {
               setTutorMode('tutor');
               setIsTutorOpen(true);
@@ -190,11 +220,10 @@ interface ErrorBoundaryState {
   hasError: boolean;
 }
 
-class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  public override state: ErrorBoundaryState = { hasError: false };
-
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
+    this.state = { hasError: false };
   }
 
   static getDerivedStateFromError(): ErrorBoundaryState {

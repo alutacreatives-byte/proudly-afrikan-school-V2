@@ -1,4 +1,4 @@
-export type CreationMethod = 'topic' | 'text' | 'pdf';
+export type CreationMethod = 'topic' | 'text' | 'pdf' | 'capture';
 
 export type QuestionType = 'multiple_choice' | 'true_false' | 'mixed';
 
