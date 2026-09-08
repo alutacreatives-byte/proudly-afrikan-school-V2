@@ -50,8 +50,8 @@ export const BuildFaqSection: React.FC = () => {
           return (
             <div
               key={idx}
-              className={`bg-white rounded-[1.75rem] border transition-all overflow-hidden shadow-[0_12px_30px_rgba(0,0,0,0.04)] ${
-                isOpen ? 'border-[#E63956] ring-2 ring-[#E63956]/15' : 'border-stone-200 hover:border-stone-300'
+              className={`card-3d-elevated transition-all overflow-hidden ${
+                isOpen ? 'border-[#E63956] ring-2 ring-[#E63956]/15' : 'hover:border-stone-300'
               }`}
             >
               <button

@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { PdfQuizResult, StudyToolInput } from '../../types';
 import { generateStudyTool } from '../../services/aiService';
-import { SourceMaterialUpload } from '../../../build/components/SourceMaterialUpload';
+
 import { saveResourceToStorage } from '../../../build/utils/storage';
 import { useAuthCredit } from '../../../context/AuthCreditContext';
 
@@ -235,22 +235,7 @@ export const PdfQuizGenerator: React.FC<PdfQuizGeneratorProps> = ({
               </h2>
             </div>
 
-            <div>
-              <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
-                Upload Document (PDF / DOCX / TXT) *
-              </label>
-              <SourceMaterialUpload
-                currentFileName={sourceFileName}
-                onTextExtracted={(text, name) => {
-                  setSourceMaterial(text);
-                  setSourceFileName(name);
-                }}
-                onClear={() => {
-                  setSourceMaterial('');
-                  setSourceFileName('');
-                }}
-              />
-            </div>
+
 
             <div>
               <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">

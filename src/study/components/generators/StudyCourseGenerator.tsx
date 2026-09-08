@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { CourseResult, StudyToolInput } from '../../types';
 import { generateStudyTool } from '../../services/aiService';
-import { SourceMaterialUpload } from '../../../build/components/SourceMaterialUpload';
+
 import { saveResourceToStorage } from '../../../build/utils/storage';
 import { useAuthCredit } from '../../../context/AuthCreditContext';
 
@@ -258,22 +258,7 @@ export const StudyCourseGenerator: React.FC<StudyCourseGeneratorProps> = ({
               </select>
             </div>
 
-            <div>
-              <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
-                Optional Source Material (PDF / DOC / Notes)
-              </label>
-              <SourceMaterialUpload
-                currentFileName={sourceFileName}
-                onTextExtracted={(text, name) => {
-                  setSourceMaterial(text);
-                  setSourceFileName(name);
-                }}
-                onClear={() => {
-                  setSourceMaterial('');
-                  setSourceFileName('');
-                }}
-              />
-            </div>
+
 
             {error && (
               <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-mono">

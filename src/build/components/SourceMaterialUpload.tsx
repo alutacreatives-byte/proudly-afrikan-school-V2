@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { FileUp, FileText, X, Upload, Camera, CheckCircle2 } from 'lucide-react';
+import { Upload, FileText, X, Camera, CheckCircle2 } from 'lucide-react';
 import { CameraCaptureModal } from '../../study/components/CameraCaptureModal';
 
 export interface SourceMaterialUploadProps {
@@ -57,7 +57,7 @@ export const SourceMaterialUpload: React.FC<SourceMaterialUploadProps> = ({
         type: 'image/jpeg',
       });
     }
-    if (onSourceTextChange) {
+    if (onSourceTextChange && onSourceTextChange) {
       onSourceTextChange(sourceText ? `${sourceText}\n\n${extractedText}` : extractedText);
     }
     if (onTextExtracted) onTextExtracted(extractedText, 'Camera Capture');
@@ -86,7 +86,7 @@ export const SourceMaterialUpload: React.FC<SourceMaterialUploadProps> = ({
           <button
             type="button"
             onClick={onClear}
-            className="text-stone-500 hover:text-stone-900 p-1"
+            className="text-stone-500 hover:text-stone-900 p-1 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -105,7 +105,7 @@ export const SourceMaterialUpload: React.FC<SourceMaterialUploadProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('text')}
-            className={`px-3 py-1 rounded-md text-xs font-mono font-bold transition-all ${
+            className={`px-3 py-1 rounded-md text-xs font-mono font-bold transition-all cursor-pointer ${
               activeTab === 'text' ? 'bg-[#18181B] text-white shadow-xs' : 'text-stone-600 hover:text-stone-900'
             }`}
           >
@@ -114,7 +114,7 @@ export const SourceMaterialUpload: React.FC<SourceMaterialUploadProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('file')}
-            className={`px-3 py-1 rounded-md text-xs font-mono font-bold transition-all ${
+            className={`px-3 py-1 rounded-md text-xs font-mono font-bold transition-all cursor-pointer ${
               activeTab === 'file' ? 'bg-[#18181B] text-white shadow-xs' : 'text-stone-600 hover:text-stone-900'
             }`}
           >
@@ -126,7 +126,7 @@ export const SourceMaterialUpload: React.FC<SourceMaterialUploadProps> = ({
               setActiveTab('camera');
               setIsCameraOpen(true);
             }}
-            className={`px-3 py-1 rounded-md text-xs font-mono font-bold transition-all flex items-center gap-1 ${
+            className={`px-3 py-1 rounded-md text-xs font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
               activeTab === 'camera' ? 'bg-[#E63956] text-white shadow-xs' : 'text-stone-600 hover:text-stone-900'
             }`}
           >
@@ -163,7 +163,7 @@ export const SourceMaterialUpload: React.FC<SourceMaterialUploadProps> = ({
                 <button
                   type="button"
                   onClick={() => onSourceFileChange(null)}
-                  className="text-emerald-700 hover:text-emerald-900 p-1"
+                  className="text-emerald-700 hover:text-emerald-900 p-1 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>

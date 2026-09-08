@@ -3,8 +3,8 @@ import { BuildHome } from './components/BuildHome';
 import { BuildToolType, SavedResource } from './types';
 import { generateBuildResource } from './services/buildService';
 import { saveResourceToStorage, getSavedResources } from './utils/storage';
-import { SourceMaterialUpload } from './components/SourceMaterialUpload';
-import { ArrowLeft, Sparkles, Printer, Copy, Bookmark, Check, Loader2, Download } from 'lucide-react';
+
+import { ArrowLeft, Sparkles, Copy, Bookmark, Check, Loader2 } from 'lucide-react';
 
 interface BuildAppProps {
   initialResource?: SavedResource | null;
@@ -14,10 +14,6 @@ interface BuildAppProps {
 export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
   const [selectedTool, setSelectedTool] = useState<BuildToolType | null>(initialResource ? initialResource.toolType : null);
   const [activeResource, setActiveResource] = useState<SavedResource | null>(initialResource || null);
-  const [prefillTopic, setPrefillTopic] = useState<string>('');
-  const [prefillCategory, setPrefillCategory] = useState<string>('');
-
-  // Form states for workbench
   const [topic, setTopic] = useState<string>(initialResource ? initialResource.topic || '' : '');
   const [subject, setSubject] = useState<string>(initialResource ? initialResource.subject || 'African Studies' : 'African Studies');
   const [gradeLevel, setGradeLevel] = useState<string>('Senior Secondary / High School (Grades 9-12)');
@@ -33,6 +29,16 @@ export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
     setActiveResource(null);
     if (topicVal) setTopic(topicVal);
     if (categoryVal) setSubject(categoryVal);
+
+    // Requirement: When selecting a tool, smooth scroll to the menu/workbench
+    setTimeout(() => {
+      const workbenchEl = document.getElementById('build-workbench');
+      if (workbenchEl) {
+        workbenchEl.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 50);
   };
 
   const handleGenerate = async (e: React.FormEvent) => {
@@ -61,6 +67,16 @@ export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
 
       const savedRes = saveResourceToStorage(newRes);
       setActiveResource(savedRes);
+
+      // Requirement: After completing the menu/generation, smooth scroll to the top of the result
+      setTimeout(() => {
+        const resultEl = document.getElementById('build-result-top');
+        if (resultEl) {
+          resultEl.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }, 50);
     } catch (err) {
       console.error('Generation failed:', err);
     } finally {
@@ -85,11 +101,14 @@ export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
   // If viewing a generated resource or result
   if (activeResource) {
     return (
-      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
+      <div id="build-result-top" className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
         <div className="flex items-center justify-between border-b border-stone-200 pb-4">
           <button
-            onClick={() => setActiveResource(null)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-[#E63956] text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs"
+            onClick={() => {
+              setActiveResource(null);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-[#E63956] text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4 text-[#E63956]" />
             Back to Generators
@@ -97,14 +116,14 @@ export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
           <div className="flex items-center gap-3">
             <button
               onClick={handleCopy}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-stone-400 text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-stone-400 text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
             >
               {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-stone-600" />}
               {copied ? 'Copied' : 'Copy JSON'}
             </button>
             <button
               onClick={handleSaveAgain}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#E63956] hover:bg-[#d02e48] text-white font-mono text-xs font-bold uppercase transition-all shadow-xs"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#E63956] hover:bg-[#d02e48] text-white font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
             >
               {saved ? <Check className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
               {saved ? 'Saved!' : 'Save to My Sets'}
@@ -113,7 +132,7 @@ export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
         </div>
 
         {/* Resource Display Card */}
-        <div className="bg-white rounded-[2rem] border border-stone-200 p-8 shadow-[0_16px_40px_rgba(0,0,0,0.06)] space-y-6">
+        <div className="card-3d-elevated p-8 space-y-6">
           <div className="border-b border-stone-100 pb-4">
             <span className="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-[#E63956]/10 text-[#E63956]">
               {activeResource.toolType.toUpperCase()} RESOURCE
@@ -139,11 +158,14 @@ export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
   // If a tool is selected, show the workbench form
   if (selectedTool) {
     return (
-      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
+      <div id="build-workbench" className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
         <div className="flex items-center justify-between border-b border-stone-200 pb-4">
           <button
-            onClick={() => setSelectedTool(null)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-[#E63956] text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs"
+            onClick={() => {
+              setSelectedTool(null);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-[#E63956] text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4 text-[#E63956]" />
             All Generators
@@ -153,7 +175,7 @@ export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
           </span>
         </div>
 
-        <form onSubmit={handleGenerate} className="bg-white rounded-[2rem] border border-stone-200 p-8 shadow-[0_16px_40px_rgba(0,0,0,0.06)] space-y-6">
+        <form onSubmit={handleGenerate} className="card-3d-elevated p-8 space-y-6">
           <div>
             <h2 className="font-display font-black text-2xl sm:text-3xl text-[#161616] uppercase tracking-tight mb-2">
               Configure {selectedTool.toUpperCase()} Generator
@@ -209,25 +231,23 @@ export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
             </select>
           </div>
 
-          <SourceMaterialUpload
-            sourceText={sourceText}
-            onSourceTextChange={setSourceText}
-            sourceFile={sourceFile}
-            onSourceFileChange={setSourceFile}
-          />
+
 
           <div className="pt-4 border-t border-stone-100 flex items-center justify-end gap-4">
             <button
               type="button"
-              onClick={() => setSelectedTool(null)}
-              className="px-6 py-3 rounded-xl border border-stone-200 text-stone-700 font-display font-bold uppercase tracking-wider text-xs hover:bg-stone-50 transition-all"
+              onClick={() => {
+                setSelectedTool(null);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="px-6 py-3 rounded-xl border border-stone-200 text-stone-700 font-display font-bold uppercase tracking-wider text-xs hover:bg-stone-50 transition-all cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isGenerating || !topic.trim()}
-              className="px-8 py-3.5 rounded-xl bg-[#E63956] hover:bg-[#d02e48] text-white font-display font-bold uppercase tracking-wider text-sm shadow-[0_10px_25px_rgba(230,57,86,0.35)] transition-all flex items-center gap-2 disabled:opacity-50"
+              className="btn-3d-tactile px-8 py-3.5 font-display font-bold uppercase tracking-wider text-sm flex items-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {isGenerating ? (
                 <>

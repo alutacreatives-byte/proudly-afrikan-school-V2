@@ -4,9 +4,9 @@ export async function generateBuildResource(toolType: BuildToolType, params: Bui
   let endpoint = '/api/generate/exam';
   if (toolType === 'exam') endpoint = '/api/generate/exam';
   else if (toolType === 'worksheet') endpoint = '/api/generate/worksheet';
-  else if (toolType === 'lesson') endpoint = '/api/generate/lesson';
-  else if (toolType === 'course') endpoint = '/api/generate/course';
-  else if (toolType === 'mindmap') endpoint = '/api/generate/mindmap';
+  else if (toolType === 'lesson' || toolType === 'lesson-plan') endpoint = '/api/generate/lesson';
+  else if (toolType === 'course' || toolType === 'course-builder') endpoint = '/api/generate/course';
+  else if (toolType === 'mindmap' || toolType === 'mind-map') endpoint = '/api/generate/mindmap';
   else if (toolType === 'presentation') endpoint = '/api/generate/presentation';
 
   const sourceMaterial = [
@@ -83,21 +83,6 @@ function getFallbackResource(toolType: BuildToolType, params: BuildInputParams) 
               ],
               correctAnswer: 'A) Catalyzing regional trade and cultural exchange',
               markingGuidance: 'Award 4 marks for selecting option A.'
-            },
-            {
-              id: 'q2',
-              questionNumber: 2,
-              type: 'multiple-choice',
-              prompt: `Which factor most directly influenced the evolution of ${topic}?`,
-              marks: 4,
-              options: [
-                'A) Geographic connectivity and resource availability',
-                'B) Complete geographic isolation',
-                'C) Absence of leadership structures',
-                'D) Strict prohibition of innovation'
-              ],
-              correctAnswer: 'A) Geographic connectivity and resource availability',
-              markingGuidance: 'Award 4 marks for selecting option A.'
             }
           ]
         }
@@ -106,7 +91,6 @@ function getFallbackResource(toolType: BuildToolType, params: BuildInputParams) 
     };
   }
 
-  // Generic fallback for other types
   return {
     id: `${toolType}-${Date.now()}`,
     title: `${topic} - ${toolType.toUpperCase()} Resource`,
