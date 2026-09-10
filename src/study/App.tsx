@@ -8,6 +8,7 @@ import {
   StudyQuizResult,
   EssayGraderResult,
   PdfQuizResult,
+  TutorChatResult,
   PresentationResult,
   CourseResult,
   LearningPathResult
@@ -16,7 +17,7 @@ import { StudyHome } from './components/StudyHome';
 import { StudyGuideGenerator } from './components/generators/StudyGuideGenerator';
 import { FlashcardGenerator } from './components/generators/FlashcardGenerator';
 import { EssayGraderGenerator } from './components/generators/EssayGraderGenerator';
-import { PdfQuizGenerator } from './components/generators/PdfQuizGenerator';
+import { TutorChatGenerator } from './components/generators/TutorChatGenerator';
 import { StudyPresentationGenerator } from './components/generators/StudyPresentationGenerator';
 import { StudyCourseGenerator } from './components/generators/StudyCourseGenerator';
 import { StudyLearningPathGenerator } from './components/generators/StudyLearningPathGenerator';
@@ -292,13 +293,13 @@ export default function StudyApp({
       );
     }
 
-    // 5. PDF & Document Quiz (Tool 04)
+    // 5. Tutor Chat (Tool 05)
     if (activeTool === 'pdf-quiz') {
       return (
-        <PdfQuizGenerator
+        <TutorChatGenerator
           onBack={handleBack}
           onSaved={refreshSavedCount}
-          existingResource={activeResource as PdfQuizResult}
+          existingResource={activeResource as TutorChatResult}
         />
       );
     }

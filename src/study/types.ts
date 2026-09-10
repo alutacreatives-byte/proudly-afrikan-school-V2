@@ -385,14 +385,32 @@ export interface EssayGraderResult {
   createdAt?: string;
 }
 
+export interface TutorChatMessage {
+  id: string;
+  sender: 'user' | 'tutor';
+  text: string;
+  timestamp: string;
+}
+
+export interface TutorChatResult {
+  id?: string;
+  title: string;
+  documentName?: string;
+  sourceSnippet?: string;
+  messages: TutorChatMessage[];
+  toolType?: 'pdf-quiz' | 'tutor-chat';
+  createdAt?: string;
+}
+
 export interface PdfQuizResult {
   id?: string;
   title: string;
   documentName?: string;
   sourceSnippet?: string;
   capturedPhotoUrl?: string;
-  questions: QuizQuestion[];
-  toolType?: 'pdf-quiz';
+  questions?: QuizQuestion[];
+  messages?: TutorChatMessage[];
+  toolType?: 'pdf-quiz' | 'tutor-chat';
   createdAt?: string;
 }
 

@@ -684,19 +684,34 @@ Return a JSON object:
     }
   });
 
-  // AI Tutor Chat / Homework Help
+  // Tutor Chat / Homework Help
   app.post('/api/ai-tutor', async (req, res) => {
-    const { messages, currentConcept, studySetTitle, mode = 'tutor' } = req.body;
+    const { messages, currentConcept, studySetTitle, mode = 'tutor', base64File, mimeType, fileName } = req.body;
 
-    const systemInstruction = `You are the Proudly Afrikan AI Socratic Tutor and Homework Guide.
-You are helping a student master concepts in "${studySetTitle || 'General Curriculum'}".
-Current Focus Concept: "${currentConcept || 'General Study'}".
-Mode: ${mode === 'homework' ? 'Homework Solver & Explainer (Provide step-by-step walkthroughs, checking each step)' : 'Socratic Tutor (Guide the student with hints and insightful questions)'}.
+    const systemInstruction = `You are the Proudly Afrikan Socratic Mentor and Study Guide.
+You are helping a student master concepts in "${studySetTitle || fileName || 'Uploaded Document'}".
+Current Focus Concept: "${currentConcept || fileName || 'Study Material'}".
+Mode: ${mode === 'homework' ? 'Homework Solver & Explainer (Provide step-by-step walkthroughs, checking each step)' : 'Socratic Mentor (Guide the student with hints and insightful questions based directly on the attached document)'}.
 
-Respond in clean, friendly Markdown with bold terms and clear step formatting.`;
+Respond in clean, friendly Markdown with bold terms and clear step formatting. Base all answers strictly on the attached document content.`;
+
+    const parts: any[] = [];
+    if (base64File && typeof base64File === 'string') {
+      parts.push({
+        inlineData: {
+          mimeType: mimeType || 'application/pdf',
+          data: base64File,
+        }
+      });
+    }
+
+    const chatHistoryText = (messages || []).map((m: any) => `${m.role === 'user' ? 'Student' : 'Mentor'}: ${m.text}`).join('\n\n');
+    parts.push({
+      text: `${systemInstruction}\n\nAttached Document: ${fileName || 'Document'}\n\nChat History:\n${chatHistoryText}`
+    });
 
     const contents = [
-      { role: 'user', parts: [{ text: `${systemInstruction}\n\nChat History:\n${JSON.stringify(messages || [])}` }] }
+      { role: 'user', parts }
     ];
 
     try {
@@ -707,7 +722,7 @@ Respond in clean, friendly Markdown with bold terms and clear step formatting.`;
     } catch (err: any) {
       return res.json({
         success: true,
-        response: `Here is a structured breakdown for **${currentConcept || 'this topic'}**:\n\n1. **Core Definition**: Focus on the fundamental mechanism.\n2. **Key Relationship**: Notice how inputs directly determine the observed outcomes.\n3. **Practice Application**: Test your understanding by predicting what happens if one variable changes.\n\n*What specific part of this question would you like to explore next?*`
+        response: `Based on **${fileName || studySetTitle || 'the uploaded document'}**, let's examine this further:\n\n1. **Core Concept**: Review the primary definitions and key arguments presented in the text.\n2. **Analysis**: How does the author connect the supporting evidence to the main conclusion?\n3. **Discussion**: What specific question or section would you like to explore next?`
       });
     }
   });
