@@ -14,13 +14,49 @@ try {
 export async function extractTextFromFile(file: File): Promise<{ text: string; pageCount?: number }> {
   const fileName = file.name.toLowerCase();
 
-  // If plain text / markdown / csv / doc txt
-  if (fileName.endsWith('.txt') || fileName.endsWith('.md') || fileName.endsWith('.csv') || file.type.startsWith('text/')) {
+  // If plain text / markdown / csv
+  if (fileName.endsWith('.txt') || fileName.endsWith('.md') || fileName.endsWith('.csv') || (file.type.startsWith('text/') && !file.type.includes('html'))) {
     const text = await file.text();
-    return { text };
+    return { text: text.trim() };
   }
 
-  // If PDF file
+  // For doc, docx, pdf, or other document formats, use server-side parser (/api/parse-document)
+  try {
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const res = (reader.result as string) || '';
+        resolve(res.replace(/^data:[^;]+;base64,/, '').trim());
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const response = await fetch('/api/parse-document', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileName: file.name,
+        base64,
+        fileType: file.type || 'application/octet-stream',
+        mimeType: file.type || 'application/octet-stream',
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data && typeof data.text === 'string' && data.text.trim()) {
+        const cleanText = data.text.replace(/--- Page \d+ ---/g, '').trim();
+        if (cleanText.length > 0 && !cleanText.includes('\uFFFD')) {
+          return { text: cleanText, pageCount: data.pageCount || 1 };
+        }
+      }
+    }
+  } catch (parseErr) {
+    console.warn('Server parse-document error:', parseErr);
+  }
+
+  // Client-side PDF fallback if server parse failed
   if (fileName.endsWith('.pdf') || file.type === 'application/pdf') {
     try {
       const arrayBuffer = await file.arrayBuffer();
@@ -28,8 +64,6 @@ export async function extractTextFromFile(file: File): Promise<{ text: string; p
       const pdf = await loadingTask.promise;
       const totalPages = pdf.numPages;
       let fullText = '';
-
-      // Extract up to 25 pages
       const pagesToExtract = Math.min(totalPages, 25);
       for (let pageNum = 1; pageNum <= pagesToExtract; pageNum++) {
         const page = await pdf.getPage(pageNum);
@@ -37,65 +71,16 @@ export async function extractTextFromFile(file: File): Promise<{ text: string; p
         const pageItems = textContent.items
           .map((item: any) => ('str' in item ? item.str : ''))
           .join(' ');
-        fullText += `--- Page ${pageNum} ---\n${pageItems}\n\n`;
+        fullText += `${pageItems}\n\n`;
       }
-
       const cleanText = fullText.trim();
-      if (!cleanText || cleanText.length < 20) {
-        throw new Error('Could not extract readable text from this PDF (it may contain only scanned images).');
+      if (cleanText.length > 0 && !cleanText.includes('\uFFFD')) {
+        return { text: cleanText, pageCount: totalPages };
       }
-
-      return {
-        text: cleanText,
-        pageCount: totalPages,
-      };
-    } catch (err: any) {
-      console.warn('PDF extraction issue:', err);
-      // If pdfjs fails, try basic fallback
-      throw new Error(err.message || 'Unable to parse text from the PDF file. Please ensure it is not password-protected or purely scanned images.');
+    } catch (pdfErr: any) {
+      console.warn('PDF client fallback error:', pdfErr);
     }
   }
 
-  // If image / photo file (OCR via Gemini endpoint)
-  if (file.type.startsWith('image/') || /\.(jpe?g|png|webp|heic|bmp|gif)$/i.test(fileName)) {
-    try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const res = (reader.result as string) || '';
-          resolve(res.replace(/^data:[^;]+;base64,/, '').trim());
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
-      const response = await fetch('/api/parse-document', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: file.name,
-          base64,
-          fileType: file.type || 'image/jpeg',
-          mimeType: file.type || 'image/jpeg',
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data && typeof data.text === 'string' && data.text.trim()) {
-          return { text: data.text.trim(), pageCount: 1 };
-        }
-      }
-    } catch (ocrErr) {
-      console.warn('Image OCR extraction fallback:', ocrErr);
-    }
-  }
-
-  // Fallback for other file types
-  try {
-    const text = await file.text();
-    return { text };
-  } catch {
-    throw new Error(`Unsupported file type: ${file.name}. Please upload a PDF, image, or text document.`);
-  }
+  throw new Error(`Unable to extract readable text from ${file.name}. Please ensure the document is not password-protected or corrupted, or paste the text directly.`);
 }

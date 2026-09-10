@@ -4,6 +4,13 @@ import { BuildToolType, SavedResource } from './types';
 import { generateBuildResource } from './services/buildService';
 import { saveResourceToStorage, getSavedResources } from './utils/storage';
 
+import { ExamViewer } from './components/viewers/ExamViewer';
+import { WorksheetViewer } from './components/viewers/WorksheetViewer';
+import { LessonPlanViewer } from './components/viewers/LessonPlanViewer';
+import { CourseViewer } from './components/viewers/CourseViewer';
+import { MindMapViewer } from './components/viewers/MindMapViewer';
+import { PresentationViewer } from './components/viewers/PresentationViewer';
+
 import { ArrowLeft, Sparkles, Copy, Bookmark, Check, Loader2 } from 'lucide-react';
 
 interface BuildAppProps {
@@ -17,8 +24,6 @@ export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
   const [topic, setTopic] = useState<string>(initialResource ? initialResource.topic || '' : '');
   const [subject, setSubject] = useState<string>(initialResource ? initialResource.subject || 'African Studies' : 'African Studies');
   const [gradeLevel, setGradeLevel] = useState<string>('Senior Secondary / High School (Grades 9-12)');
-  const [sourceText, setSourceText] = useState<string>('');
-  const [sourceFile, setSourceFile] = useState<{ name: string; content: string; type: string } | null>(null);
 
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
@@ -51,8 +56,6 @@ export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
         topic,
         subject,
         gradeLevel,
-        sourceText,
-        sourceFile,
       });
 
       const newRes: SavedResource = {
@@ -98,16 +101,38 @@ export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  // If viewing a generated resource or result
+  // If viewing a generated resource or result, render the appropriate viewer
   if (activeResource) {
+    const handleBack = () => {
+      setActiveResource(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    if (activeResource.toolType === 'exam') {
+      return <ExamViewer resource={activeResource} onBack={handleBack} />;
+    }
+    if (activeResource.toolType === 'worksheet') {
+      return <WorksheetViewer resource={activeResource} onBack={handleBack} />;
+    }
+    if (activeResource.toolType === 'lesson' || activeResource.toolType === 'lesson-plan') {
+      return <LessonPlanViewer resource={activeResource} onBack={handleBack} />;
+    }
+    if (activeResource.toolType === 'course' || activeResource.toolType === 'course-builder') {
+      return <CourseViewer resource={activeResource} onBack={handleBack} />;
+    }
+    if (activeResource.toolType === 'mindmap' || activeResource.toolType === 'mind-map') {
+      return <MindMapViewer resource={activeResource} onBack={handleBack} />;
+    }
+    if (activeResource.toolType === 'presentation') {
+      return <PresentationViewer resource={activeResource} onBack={handleBack} />;
+    }
+
+    // Default fallback viewer if toolType is generic/other
     return (
       <div id="build-result-top" className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
         <div className="flex items-center justify-between border-b border-stone-200 pb-4">
           <button
-            onClick={() => {
-              setActiveResource(null);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
+            onClick={handleBack}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-[#E63956] text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4 text-[#E63956]" />
@@ -131,7 +156,6 @@ export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
           </div>
         </div>
 
-        {/* Resource Display Card */}
         <div className="card-3d-elevated p-8 space-y-6">
           <div className="border-b border-stone-100 pb-4">
             <span className="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-[#E63956]/10 text-[#E63956]">
@@ -230,8 +254,6 @@ export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
               <option value="Undergraduate / Tertiary">Undergraduate / Tertiary</option>
             </select>
           </div>
-
-
 
           <div className="pt-4 border-t border-stone-100 flex items-center justify-end gap-4">
             <button

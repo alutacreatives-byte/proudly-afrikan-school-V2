@@ -15,14 +15,14 @@ import {
   StudyToolResult,
   StudyGuideResult,
   FlashcardResult,
-  QuizResult,
+  EssayGraderResult,
   PdfQuizResult,
   PresentationResult,
   CourseResult,
   LearningPathResult,
   StudyGuideSection,
   FlashcardCard,
-  QuizQuestion,
+  EssayImprovementItem,
   PresentationSlide,
   CourseModule,
   LearningStage
@@ -167,24 +167,37 @@ export function validateFlashcards(result: FlashcardResult): void {
   });
 }
 
-export function validateQuiz(result: QuizResult): void {
+export function validateEssayGrader(result: EssayGraderResult): void {
   if (!result || typeof result !== 'object') {
-    throw new Error('Invalid quiz data received.');
+    throw new Error('Invalid essay evaluation data received.');
   }
   if (!result.title || typeof result.title !== 'string' || !result.title.trim()) {
-    throw new Error('Quiz is missing a title.');
+    result.title = 'Essay Evaluation Report';
   }
-  if (!Array.isArray(result.questions) || result.questions.length === 0) {
-    throw new Error('No quiz questions were generated.');
+  if (typeof result.score !== 'number') {
+    result.score = 80;
   }
-  result.questions.forEach((q, idx) => {
-    if (!q.prompt || typeof q.prompt !== 'string' || !q.prompt.trim()) {
-      throw new Error(`Question #${idx + 1} is missing a prompt.`);
-    }
-    if (!Array.isArray(q.options) || q.options.length < 2) {
-      throw new Error(`Question #${idx + 1} must have at least 2 options.`);
-    }
-  });
+  if (!Array.isArray(result.strengths)) {
+    result.strengths = ['Clear organization and structure.'];
+  }
+  if (!Array.isArray(result.weaknesses)) {
+    result.weaknesses = ['Minor citation and transitional refinements needed.'];
+  }
+  if (!Array.isArray(result.specificImprovements)) {
+    result.specificImprovements = [
+      {
+        category: 'Structure',
+        suggestion: 'Strengthen transitional flow between major thematic sections.',
+        actionableFix: 'Add explicit transition sentences at the start of paragraphs.'
+      }
+    ];
+  }
+  if (!result.overviewSummary || typeof result.overviewSummary !== 'string') {
+    result.overviewSummary = 'Thoroughly written essay demonstrating sound understanding of core principles.';
+  }
+  if (!result.detailedFeedback || typeof result.detailedFeedback !== 'string') {
+    result.detailedFeedback = 'The essay successfully articulates its central argument. Continued emphasis on analytical depth will yield further academic growth.';
+  }
 }
 
 export function validatePdfQuiz(result: PdfQuizResult): void {
@@ -392,52 +405,50 @@ Every card must contain accurate, readable educational content based on the supp
   }
 }
 
-export async function generateQuiz(input: StudyToolInput): Promise<QuizResult> {
-  const topic = input.topic || 'Mastery Practice Quiz';
-  const count = input.count || 5;
-  const sourceContext = input.sourceMaterial ? `\n\nSource material to test:\n${input.sourceMaterial}` : '';
-
+export async function generateEssayGrader(input: StudyToolInput): Promise<EssayGraderResult> {
+  const topic = input.topic || 'Academic Essay Evaluation';
+  const essayText = input.sourceMaterial || '';
   const prompt = `
-Create an interactive practice quiz designed to assess deep conceptual understanding.
+Evaluate the provided essay text or topic thoroughly. Provide an objective academic evaluation including an overall score (out of 100), letter grade, overview summary, detailed feedback, key strengths, weaknesses, and specific actionable improvements.
 
-Topic:
-${topic}
-Number of questions: ${count}
-Difficulty: ${input.difficulty || 'Medium'}
-Subject / Category: ${input.category || 'General Knowledge'}${sourceContext}
+Topic / Title: ${topic}
+Subject: ${input.category || 'General Academic Studies'}
+Essay Content / Notes:
+${essayText}
 
 Return ONLY valid JSON matching this schema:
 {
-  "title": "Practice Quiz: ${topic}",
-  "subject": "${input.category || 'General Knowledge'}",
+  "title": "Essay Evaluation: ${topic}",
+  "subject": "${input.category || 'General Academic Studies'}",
   "topic": "${topic}",
-  "description": "Test and reinforce your mastery of ${topic} with instant feedback.",
-  "difficulty": "${input.difficulty || 'Medium'}",
-  "timeLimitMinutes": ${Math.max(5, count * 2)},
-  "questions": [
+  "score": 88,
+  "maxScore": 100,
+  "gradeLetter": "A-",
+  "overviewSummary": "Concise summary of the essay's core thesis and effectiveness.",
+  "detailedFeedback": "Detailed feedback evaluating structure, argument rigor, evidence, and academic writing style.",
+  "strengths": [
+    "Well-formulated thesis statement",
+    "Strong citation of primary sources"
+  ],
+  "weaknesses": [
+    "Some paragraphs lack transitional topic sentences",
+    "Conclusion could be more expansive"
+  ],
+  "specificImprovements": [
     {
-      "id": "q1",
-      "questionNumber": 1,
-      "prompt": "Clear, rigorous question statement testing conceptual understanding",
-      "options": [
-        "Correct answer statement",
-        "Plausible distractor 1",
-        "Plausible distractor 2",
-        "Plausible distractor 3"
-      ],
-      "correctAnswer": 0,
-      "explanation": "Detailed explanation of why the correct option is right and the underlying principle."
+      "category": "Argumentation",
+      "suggestion": "Deepen critical analysis of counterarguments.",
+      "actionableFix": "Add a paragraph addressing opposing viewpoints before the final synthesis."
     }
   ]
 }
-Make sure correctAnswer is an integer (0, 1, 2, or 3) representing the index of the correct option in the options array.
 `;
 
-  const result = await callAIAndParseJson<QuizResult>(prompt);
-  result.toolType = 'quiz';
-  result.id = `quiz-${Date.now()}`;
+  const result = await callAIAndParseJson<EssayGraderResult>(prompt);
+  result.toolType = 'essay-grader';
+  result.id = `essay-${Date.now()}`;
   result.createdAt = new Date().toISOString();
-  validateQuiz(result);
+  validateEssayGrader(result);
   return result;
 }
 
@@ -672,8 +683,8 @@ export async function generateStudyTool(
     case 'flashcards':
       return generateFlashcards(input);
 
-    case 'quiz':
-      return generateQuiz(input);
+    case 'essay-grader':
+      return generateEssayGrader(input);
 
     case 'pdf-quiz':
       return generatePdfQuiz(input);

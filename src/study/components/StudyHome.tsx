@@ -19,6 +19,7 @@ import {
   BookOpen,
   Layers,
   FileQuestion,
+  FileCheck2,
   Presentation,
   Compass,
   ArrowRight,
@@ -589,14 +590,14 @@ export const StudyHome: React.FC<StudyHomeProps> = ({
 
             <button
               type="button"
-              id="action-create-quiz"
-              onClick={() => handleLaunchTool('quiz')}
+              id="action-create-essay-grader"
+              onClick={() => handleLaunchTool('essay-grader')}
               className="p-3 bg-stone-50 hover:bg-stone-900 hover:text-white border border-stone-200 rounded-2xl text-left transition-all group cursor-pointer flex flex-col justify-between min-h-[90px]"
             >
-              <FileQuestion className="w-4 h-4 text-[#D92B8A] mb-2" />
+              <FileCheck2 className="w-4 h-4 text-[#D92B8A] mb-2" />
               <div>
-                <span className="font-display font-black text-xs uppercase block">Practice Quiz</span>
-                <span className="text-[10px] font-mono text-stone-500 group-hover:text-stone-300">Exam testing</span>
+                <span className="font-display font-black text-xs uppercase block">Essay Grader</span>
+                <span className="text-[10px] font-mono text-stone-500 group-hover:text-stone-300">Detailed feedback</span>
               </div>
             </button>
 

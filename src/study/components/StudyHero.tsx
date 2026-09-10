@@ -15,7 +15,7 @@ export const StudyHero: React.FC<StudyHeroProps> = ({
   const inspirationTopics: { label: string; topic: string; category: string; tool: StudyToolType }[] = [
     { label: '👑 Kingdom of Kush & Meroë', topic: 'The Kingdom of Kush & Iron Metallurgy at Meroë', category: 'AFRICAN HISTORY', tool: 'study-guide' },
     { label: '🌍 Great Rift Valley Ecosystems', topic: 'The Great Rift Valley Geography, Tectonics & Biodiversity', category: 'GEOGRAPHY & ENVIRONMENT', tool: 'flashcards' },
-    { label: '📚 African Oral Epics & Sundiata', topic: 'The Epic of Sundiata & West African Griot Traditions', category: 'LITERATURE & ARTS', tool: 'quiz' },
+    { label: '📚 African Oral Epics & Sundiata', topic: 'The Epic of Sundiata & West African Griot Traditions', category: 'LITERATURE & ARTS', tool: 'essay-grader' },
     { label: '⚙️ Renewable Energy in Africa', topic: 'Solar Innovation & Geothermal Microgrids across Africa', category: 'SCIENCES & STEM', tool: 'presentation' },
     { label: '🏛️ Swahili Maritime City-States', topic: 'Swahili Coast Trade Networks, Kilwa Kisiwani & Coral Architecture', category: 'AFRICAN HISTORY', tool: 'study-guide' },
     { label: '🌾 Indigenous Agriculture & Crops', topic: 'Indigenous African Crops: Teff, Sorghum, Millet & Climate Resilience', category: 'SCIENCES & STEM', tool: 'learning-path' },

@@ -6,6 +6,7 @@ import {
   StudyGuideResult,
   FlashcardsResult,
   StudyQuizResult,
+  EssayGraderResult,
   PdfQuizResult,
   PresentationResult,
   CourseResult,
@@ -14,7 +15,7 @@ import {
 import { StudyHome } from './components/StudyHome';
 import { StudyGuideGenerator } from './components/generators/StudyGuideGenerator';
 import { FlashcardGenerator } from './components/generators/FlashcardGenerator';
-import { StudyQuizGenerator } from './components/generators/StudyQuizGenerator';
+import { EssayGraderGenerator } from './components/generators/EssayGraderGenerator';
 import { PdfQuizGenerator } from './components/generators/PdfQuizGenerator';
 import { StudyPresentationGenerator } from './components/generators/StudyPresentationGenerator';
 import { StudyCourseGenerator } from './components/generators/StudyCourseGenerator';
@@ -280,13 +281,13 @@ export default function StudyApp({
       );
     }
 
-    // 4. Practice Quiz Generator (Tool 03)
-    if (activeTool === 'quiz') {
+    // 4. Essay Grader (Tool 03)
+    if (activeTool === 'essay-grader') {
       return (
-        <StudyQuizGenerator
+        <EssayGraderGenerator
           onBack={handleBack}
           onSaved={refreshSavedCount}
-          existingResource={activeResource as StudyQuizResult}
+          existingResource={activeResource as EssayGraderResult}
         />
       );
     }
