@@ -1,46 +1,64 @@
 import { SavedResource } from '../types';
 
-const STORAGE_KEY = 'proudly_afrikan_build_resources_v1';
+const STORAGE_KEY = 'proudly_afrikan_build_resources';
 
-export function getSavedResources(): SavedResource[] {
-  if (typeof window === 'undefined') return [];
+export const getSavedResources = (): SavedResource[] => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    return JSON.parse(raw);
-  } catch (e) {
-    console.error('Error reading saved build resources:', e);
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error('Failed to load build resources from localStorage:', error);
     return [];
   }
-}
+};
 
-export function saveResourceToStorage(resource: SavedResource): SavedResource {
-  if (typeof window === 'undefined') return resource;
+export const saveResourceToStorage = (resource: SavedResource): void => {
   try {
-    const existing = getSavedResources();
-    const idx = existing.findIndex((r) => r.id === resource.id);
+    const current = getSavedResources();
+    const existingIndex = current.findIndex((item) => item.id === resource.id);
+
     let updated: SavedResource[];
-    if (idx >= 0) {
-      updated = [...existing];
-      updated[idx] = resource;
+    if (existingIndex >= 0) {
+      updated = [...current];
+      updated[existingIndex] = {
+        ...resource,
+        createdAt: current[existingIndex].createdAt || new Date().toISOString(),
+      };
     } else {
-      updated = [resource, ...existing];
+      updated = [
+        {
+          ...resource,
+          createdAt: resource.createdAt || new Date().toISOString(),
+        },
+        ...current,
+      ];
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    return resource;
-  } catch (e) {
-    console.error('Error saving build resource:', e);
-    return resource;
-  }
-}
 
-export function deleteResourceFromStorage(id: string): void {
-  if (typeof window === 'undefined') return;
-  try {
-    const existing = getSavedResources();
-    const filtered = existing.filter((r) => r.id !== id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
-  } catch (e) {
-    console.error('Error deleting build resource:', e);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('build-resources-updated', { detail: updated }));
+    }
+  } catch (error) {
+    console.error('Failed to save build resource:', error);
   }
-}
+};
+
+export const deleteResourceFromStorage = (id: string): void => {
+  try {
+    const current = getSavedResources();
+    const updated = current.filter((item) => item.id !== id);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('build-resources-updated', { detail: updated }));
+    }
+  } catch (error) {
+    console.error('Failed to delete build resource:', error);
+  }
+};
+
+export const getSavedResourceById = (id: string): SavedResource | null => {
+  const all = getSavedResources();
+  return all.find((item) => item.id === id) || null;
+};

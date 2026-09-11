@@ -23,7 +23,6 @@ import {
   Presentation,
   Compass,
   ArrowDown,
-  ArrowUpRight,
   Bookmark,
   Type,
   ClipboardList,
@@ -516,7 +515,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <span className="font-display font-black text-xs uppercase tracking-wider text-stone-900 group-hover:text-[#D92B8A] transition-colors">
                   {gen.btnText}
                 </span>
-                <ArrowUpRight className="w-4 h-4 text-stone-400 group-hover:text-[#D92B8A] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
               </div>
             </div>
           ))}

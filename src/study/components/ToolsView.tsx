@@ -7,7 +7,6 @@ import {
   Type, 
   ClipboardList, 
   FileUp, 
-  ArrowUpRight, 
   BookOpen, 
   FileText, 
   FileSpreadsheet, 
@@ -81,11 +80,11 @@ export const ToolsView: React.FC<ToolsViewProps> = ({
     },
     {
       id: 'tutor',
-      title: 'AI TUTOR & HOMEWORK HELPER',
+      title: 'TUTOR & HOMEWORK HELPER',
       subtitle: 'STUDY TOOL',
       tag: 'STEP-BY-STEP GUIDANCE',
       description: 'Get immediate conversational explanations, step-by-step math reasoning, essay critique, and conceptual checks.',
-      btnText: 'OPEN AI TUTOR →',
+      btnText: 'OPEN TUTOR →',
       action: () => onOpenTutor ? onOpenTutor('tutor') : onNavigate('homework'),
       icon: GraduationCap,
     },
@@ -211,7 +210,6 @@ export const ToolsView: React.FC<ToolsViewProps> = ({
             </div>
             <div className="mt-5 pt-3 border-t border-stone-100 flex items-center justify-between font-mono text-xs font-bold uppercase text-stone-800 group-hover:text-[#D92B8A]">
               <span>START WITH TOPIC</span>
-              <ArrowUpRight className="w-4 h-4" />
             </div>
           </div>
 
@@ -236,7 +234,6 @@ export const ToolsView: React.FC<ToolsViewProps> = ({
             </div>
             <div className="mt-5 pt-3 border-t border-stone-100 flex items-center justify-between font-mono text-xs font-bold uppercase text-stone-800 group-hover:text-[#D92B8A]">
               <span>PASTE TEXT</span>
-              <ArrowUpRight className="w-4 h-4" />
             </div>
           </div>
 
@@ -261,7 +258,6 @@ export const ToolsView: React.FC<ToolsViewProps> = ({
             </div>
             <div className="mt-5 pt-3 border-t border-stone-100 flex items-center justify-between font-mono text-xs font-bold uppercase text-stone-800 group-hover:text-[#D92B8A]">
               <span>UPLOAD FILE</span>
-              <ArrowUpRight className="w-4 h-4" />
             </div>
           </div>
 
@@ -281,12 +277,11 @@ export const ToolsView: React.FC<ToolsViewProps> = ({
               </div>
               <h3 className="font-display font-black text-xl uppercase text-stone-900">CAPTURE IT</h3>
               <p className="text-sm text-stone-600 leading-relaxed font-normal">
-                Photograph homework, textbook pages, handwritten work, equations, diagrams, or worksheets for instant AI OCR.
+                Photograph homework, textbook pages, handwritten work, equations, diagrams, or worksheets for instant OCR.
               </p>
             </div>
             <div className="mt-5 pt-3 border-t border-stone-100 flex items-center justify-between font-mono text-xs font-bold uppercase text-stone-800 group-hover:text-[#D92B8A]">
               <span>CAPTURE PHOTO</span>
-              <ArrowUpRight className="w-4 h-4" />
             </div>
           </div>
         </div>
@@ -349,9 +344,6 @@ export const ToolsView: React.FC<ToolsViewProps> = ({
                   <span className="font-display text-xs font-black uppercase tracking-wider text-stone-900 group-hover:text-[#D92B8A] transition-colors">
                     {tool.btnText}
                   </span>
-                  <div className="w-6 h-6 rounded-full bg-[#18181B] text-white flex items-center justify-center group-hover:bg-[#D92B8A] transition-colors">
-                    <ArrowUpRight className="w-3 h-3" />
-                  </div>
                 </div>
               </div>
             );

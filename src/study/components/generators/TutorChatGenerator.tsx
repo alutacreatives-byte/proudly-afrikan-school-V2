@@ -6,7 +6,6 @@ import {
   Copy, 
   Bookmark, 
   Check, 
-  ArrowLeft,
   RotateCcw,
   Send,
   FileText,
@@ -96,7 +95,7 @@ export const TutorChatGenerator: React.FC<TutorChatGeneratorProps> = ({
       const initialGreeting: TutorChatMessage = {
         id: `msg_${Date.now()}`,
         sender: 'tutor',
-        text: `Hello! I have loaded **${file.name}**. I am ready to help you explore concepts, answer questions, and guide your study based directly on this document. What would you like to discuss first?`,
+        text: 'Hi.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
@@ -143,7 +142,7 @@ export const TutorChatGenerator: React.FC<TutorChatGeneratorProps> = ({
         body: JSON.stringify({
           messages: updatedMessages.map(m => ({ role: m.sender === 'user' ? 'user' : 'model', text: m.text })),
           studySetTitle: documentTitle || sourceFileName || 'Uploaded Document',
-          currentConcept: documentTitle || 'Study Material',
+          currentConcept: documentTitle || '',
           base64File: fileBase64,
           mimeType: fileMimeType,
           fileName: sourceFileName,
@@ -168,7 +167,7 @@ export const TutorChatGenerator: React.FC<TutorChatGeneratorProps> = ({
       const fallbackMsg: TutorChatMessage = {
         id: `msg_tutor_${Date.now()}`,
         sender: 'tutor',
-        text: `Based on **${sourceFileName || documentTitle || 'the uploaded document'}**, let's break this down:\n\n1. Review the core definitions and terms introduced in the text.\n2. Consider how the main argument connects supporting evidence.\n3. Try framing your question around a specific paragraph or section.\n\n*How else can I guide you through this material?*`,
+        text: `Based on **${sourceFileName || documentTitle || 'the uploaded document'}**, let's break this down:\n\n1. Review the core definitions and terms introduced in the text.\n2. Consider how the main argument connects supporting evidence.\n3. Try framing your question around a specific paragraph or section.\n\nHow else can I guide you through this material?`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages(prev => [...prev, fallbackMsg]);
@@ -231,28 +230,55 @@ export const TutorChatGenerator: React.FC<TutorChatGeneratorProps> = ({
 
   const isChatActive = messages.length > 0 && !!sourceFileName;
 
+  const renderFormattedMessage = (text: string) => {
+    // Parse markdown bold (**text**) so asterisks are removed and text is rendered bold
+    // Also ensure uploaded filename is rendered bold without asterisks
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    return (
+      <span>
+        {parts.map((part, i) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            const inner = part.slice(2, -2);
+            return (
+              <strong key={i} className="font-bold">
+                {inner}
+              </strong>
+            );
+          }
+          if (sourceFileName && part.includes(sourceFileName)) {
+            const subParts = part.split(sourceFileName);
+            return (
+              <React.Fragment key={i}>
+                {subParts.map((sub, j) => (
+                  <React.Fragment key={j}>
+                    {sub}
+                    {j < subParts.length - 1 && (
+                      <strong className="font-bold">{sourceFileName}</strong>
+                    )}
+                  </React.Fragment>
+                ))}
+              </React.Fragment>
+            );
+          }
+          return part;
+        })}
+      </span>
+    );
+  };
+
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-28 sm:pb-36 mb-16 sm:mb-20 space-y-8">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-stone-200">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="p-2.5 rounded-full bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 transition-colors cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold text-[#E63956] uppercase tracking-wider">
-                STUDY TOOL 05
-              </span>
-            </div>
-            <h1 className="font-display font-black text-2xl sm:text-3xl text-[#161616] uppercase tracking-tight">
-              TUTOR CHAT
-            </h1>
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs font-bold text-[#E63956] uppercase tracking-wider">
+              STUDY TOOL 05
+            </span>
           </div>
+          <h1 className="font-display font-black text-2xl sm:text-3xl text-[#161616] uppercase tracking-tight">
+            TUTOR CHAT
+          </h1>
         </div>
 
         {isChatActive && (
@@ -438,7 +464,7 @@ export const TutorChatGenerator: React.FC<TutorChatGeneratorProps> = ({
                         </span>
                       </div>
                       <div className="whitespace-pre-wrap font-normal">
-                        {m.text}
+                        {renderFormattedMessage(m.text)}
                       </div>
                     </div>
                   </div>

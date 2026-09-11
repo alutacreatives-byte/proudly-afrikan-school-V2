@@ -311,7 +311,7 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
     // If custom generated concepts are already active (from user's typed topic, notes, or doc)
     if (customGeneratedConcepts && customGeneratedConcepts.length > 0) {
       const activeConcepts = customGeneratedConcepts.slice(0, targetCount);
-      const activeTitle = customTitle || (inputMethod === 'paste' ? 'Custom Study Notes' : inputMethod === 'upload' ? (uploadedDoc?.name || 'Custom Document') : inputMethod === 'capture' ? (capturedFileName || 'Captured Study Material') : typedTopic);
+      const activeTitle = customTitle || (inputMethod === 'paste' ? 'Custom Study Notes' : inputMethod === 'upload' ? (uploadedDoc?.name || 'Custom Document') : inputMethod === 'capture' ? (capturedFileName || '') : typedTopic);
       
       const conceptsWithReasons = activeConcepts.map((c, idx) => ({
         concept: c,
@@ -538,7 +538,7 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
       }
     } else if (inputMethod === 'capture') {
       contentToStudy = capturedText.trim() || 'Photographed study material';
-      topicToStudy = customTitle.trim() || capturedFileName || 'Captured Study Material';
+      topicToStudy = customTitle.trim() || capturedFileName || '';
       if (!capturedImage && !capturedText) {
         setCameraPhotoError('Please photograph your study material first.');
         return;

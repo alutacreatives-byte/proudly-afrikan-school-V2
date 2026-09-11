@@ -158,7 +158,9 @@ function AppContent() {
           <BuildApp
             key={selectedBuildResource ? `build-${selectedBuildResource.id}` : 'build-main'}
             initialResource={selectedBuildResource}
+            onNavigateToTab={handleSelectTab}
             onGoHome={() => handleSelectTab('STUDY')}
+            onBackToPreviousPage={handleBackFromStudy}
           />
         )}
 

@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
-import { SavedResource } from '../../types';
-import { ArrowLeft, Printer, Copy, Bookmark, Check, GraduationCap, Layers, ChevronDown, ChevronUp } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Printer, 
+  Copy, 
+  Check, 
+  Bookmark, 
+  Calendar, 
+  BookOpen, 
+  GraduationCap, 
+  CheckCircle 
+} from 'lucide-react';
+import { CourseData, SavedResource } from '../../types';
 import { saveResourceToStorage } from '../../utils/storage';
 
 interface CourseViewerProps {
@@ -9,13 +19,21 @@ interface CourseViewerProps {
 }
 
 export const CourseViewer: React.FC<CourseViewerProps> = ({ resource, onBack }) => {
-  const content = resource.content || {};
-  const [copied, setCopied] = useState<boolean>(false);
-  const [saved, setSaved] = useState<boolean>(false);
-  const [expandedModules, setExpandedModules] = useState<Record<number, boolean>>({ 0: true });
+  const [copied, setCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const course: CourseData = resource.data;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(JSON.stringify(content, null, 2));
+    let text = `${course.title}\nSubject: ${course.subject} | Grade: ${course.gradeLevel}\nTotal Duration: ${course.totalWeeks} Weeks\n\n`;
+    text += `DESCRIPTION:\n${course.description}\n\n`;
+    text += `LEARNING OUTCOMES:\n${(course.learningOutcomes || []).map((o) => `• ${o}`).join('\n')}\n\n`;
+    (course.modules || []).forEach((m) => {
+      text += `=== ${m.title} (${m.durationWeeks} Weeks) ===\n${m.description}\n`;
+      text += `Topics: ${m.coreTopics.join(', ')}\nAssessments: ${m.assessments.join(', ')}\n\n`;
+    });
+
+    navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -23,125 +41,177 @@ export const CourseViewer: React.FC<CourseViewerProps> = ({ resource, onBack }) 
   const handleSave = () => {
     saveResourceToStorage(resource);
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  };
-
-  const toggleModule = (idx: number) => {
-    setExpandedModules(prev => ({ ...prev, [idx]: !prev[idx] }));
+    setTimeout(() => setSaved(false), 2500);
   };
 
   return (
-    <div id="build-result-top" className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in print:p-0">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-stone-200 pb-4 print:hidden">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6 animate-fade-in">
+      {/* Action Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-stone-200">
         <button
+          type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-[#E63956] text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
+          className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-2 transition-colors cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4 text-[#E63956]" />
-          Back to Generators
+          <ArrowLeft className="w-4 h-4" />
+          Back to Build
         </button>
-        <div className="flex items-center gap-2.5 flex-wrap">
+
+        <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-stone-400 text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
-          >
-            <Printer className="w-4 h-4 text-stone-600" />
-            Print
-          </button>
-          <button
+            type="button"
             onClick={handleCopy}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-stone-400 text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-stone-600" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
             {copied ? 'Copied' : 'Copy'}
           </button>
+
           <button
-            onClick={handleSave}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#E63956] hover:bg-[#d02e48] text-white font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
+            type="button"
+            onClick={() => window.print()}
+            className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            {saved ? <Check className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
-            {saved ? 'Saved!' : 'Save'}
+            <Printer className="w-3.5 h-3.5" />
+            Print
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSave}
+            className="px-4 py-2 rounded-xl bg-[#161616] hover:bg-black text-white font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+          >
+            <Bookmark className="w-3.5 h-3.5 text-[#E63956]" />
+            {saved ? 'Saved!' : 'Save to My Sets'}
           </button>
         </div>
       </div>
 
-      <div className="card-3d-elevated p-8 sm:p-12 space-y-8 bg-white print:shadow-none print:border-none">
-        <div className="border-b-2 border-stone-900 pb-6 space-y-2">
-          <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#E63956]">
-            ACADEMIC COURSE SYLLABUS • {content.subject || resource.subject}
+      {/* Main Course Syllabus Sheet */}
+      <div className="bg-white rounded-3xl border border-stone-200/90 p-6 sm:p-10 shadow-sm space-y-8 print:shadow-none print:border-none print:p-0">
+        {/* Header */}
+        <div className="pb-6 border-b border-stone-200 space-y-3">
+          <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#E63956]">
+            COURSE SYLLABUS • {course.curriculumStandard || 'CAPS ALIGNED'}
           </span>
-          <h1 className="font-display font-black text-2xl sm:text-4xl uppercase tracking-tight text-[#161616]">
-            {content.title || resource.title}
+          <h1 className="font-display font-black text-2xl sm:text-3xl text-stone-900 uppercase tracking-tight">
+            {course.title || resource.title}
           </h1>
-          {content.overview && (
-            <p className="text-sm text-stone-700 font-normal pt-2 leading-relaxed">
-              {content.overview}
+          <div className="flex items-center gap-4 sm:gap-6 font-mono text-xs text-stone-600 font-semibold flex-wrap">
+            <span>SUBJECT: {course.subject || resource.subject}</span>
+            <span>•</span>
+            <span>AUDIENCE: {course.gradeLevel || resource.gradeLevel}</span>
+            <span>•</span>
+            <span className="text-emerald-700 font-bold">DURATION: {course.totalWeeks || 8} WEEKS</span>
+          </div>
+          {course.description && (
+            <p className="font-mono text-xs text-stone-700 pt-2 leading-relaxed">
+              {course.description}
             </p>
           )}
         </div>
 
-        {/* Modules */}
-        <div className="space-y-6">
-          <h3 className="font-display font-black text-xl uppercase tracking-tight text-stone-900 flex items-center gap-2">
-            <GraduationCap className="w-5 h-5 text-[#E63956]" />
-            Course Modules & Weekly Syllabus
-          </h3>
-          <div className="space-y-4">
-            {content.modules && Array.isArray(content.modules) ? (
-              content.modules.map((mod: any, mIdx: number) => {
-                const isOpen = expandedModules[mIdx];
-                return (
-                  <div key={mIdx} className="rounded-2xl bg-white border border-stone-200 shadow-xs overflow-hidden">
-                    <button
-                      onClick={() => toggleModule(mIdx)}
-                      className="w-full text-left p-6 flex items-center justify-between gap-4 bg-stone-50/50 hover:bg-stone-50 cursor-pointer"
-                    >
-                      <div className="flex items-center gap-4">
-                        <span className="w-8 h-8 rounded-full bg-[#18181B] text-[#E63956] font-mono text-xs font-bold flex items-center justify-center shrink-0">
-                          {mIdx + 1}
-                        </span>
-                        <div>
-                          <h4 className="font-display font-black text-base text-stone-900">
-                            {mod.title || `Module ${mIdx + 1}`}
-                          </h4>
-                          <p className="text-xs text-stone-500 font-mono">
-                            {mod.summary || mod.description || 'Module overview'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="w-7 h-7 rounded-full bg-stone-200 flex items-center justify-center text-stone-700 shrink-0">
-                        {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                      </div>
-                    </button>
+        {/* Learning Outcomes */}
+        {course.learningOutcomes && course.learningOutcomes.length > 0 && (
+          <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
+            <h3 className="font-mono text-xs font-bold uppercase text-stone-900 tracking-wider flex items-center gap-2">
+              <GraduationCap className="w-4 h-4 text-[#E63956]" />
+              Core Curriculum Learning Outcomes
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {course.learningOutcomes.map((out, idx) => (
+                <div key={idx} className="flex items-start gap-2 font-mono text-xs text-stone-700">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
+                  <span>{out}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-                    {isOpen && (
-                      <div className="p-6 border-t border-stone-100 space-y-4 text-xs sm:text-sm text-stone-700 font-medium">
-                        {mod.keyTopics && Array.isArray(mod.keyTopics) && (
-                          <div className="space-y-2">
-                            <span className="font-mono text-xs font-bold uppercase text-[#E63956]">Key Topics:</span>
-                            <ul className="list-disc list-inside space-y-1">
-                              {mod.keyTopics.map((t: string, tIdx: number) => (
-                                <li key={tIdx}>{t}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {mod.activities && (
-                          <div className="p-4 rounded-xl bg-pink-50/40 border border-pink-200/60">
-                            <span className="font-mono text-xs font-bold uppercase text-stone-800">Learning Activities:</span>
-                            <p className="mt-1 text-stone-700">{mod.activities}</p>
-                          </div>
-                        )}
-                      </div>
+        {/* Modules Breakdown */}
+        <div className="space-y-6">
+          <h3 className="font-display font-black text-xl text-stone-900 uppercase">
+            Curriculum Modules & Schedule
+          </h3>
+
+          <div className="space-y-5">
+            {(course.modules || []).map((mod, mIdx) => (
+              <div 
+                key={mod.id || mIdx}
+                className="p-6 rounded-2xl border border-stone-200/90 bg-stone-50/30 space-y-4"
+              >
+                <div className="flex items-start justify-between gap-4 flex-wrap pb-3 border-b border-stone-200">
+                  <div>
+                    <span className="font-mono text-xs font-bold text-[#E63956] uppercase block">
+                      MODULE {mod.moduleNumber || mIdx + 1}
+                    </span>
+                    <h4 className="font-display font-black text-base sm:text-lg text-stone-900 uppercase">
+                      {mod.title}
+                    </h4>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-semibold px-3 py-1 rounded-full bg-white border border-stone-200 text-stone-700">
+                      {mod.durationWeeks} Weeks
+                    </span>
+                    {mod.capsAlignment && (
+                      <span className="font-mono text-xs font-semibold px-3 py-1 rounded-full bg-pink-50 border border-pink-200 text-[#E63956]">
+                        {mod.capsAlignment}
+                      </span>
                     )}
                   </div>
-                );
-              })
-            ) : (
-              <pre className="text-xs font-mono">{JSON.stringify(content, null, 2)}</pre>
-            )}
+                </div>
+
+                <p className="font-mono text-xs text-stone-700 leading-relaxed">
+                  {mod.description}
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs pt-1">
+                  {/* Core Topics */}
+                  <div className="p-3.5 rounded-xl bg-white border border-stone-200 space-y-1.5">
+                    <span className="font-bold text-stone-900 uppercase text-[11px] block">
+                      Core Lecture Topics
+                    </span>
+                    <ul className="list-disc list-inside space-y-1 text-stone-600">
+                      {mod.coreTopics.map((t, i) => (
+                        <li key={i}>{t}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Assessments */}
+                  <div className="p-3.5 rounded-xl bg-white border border-stone-200 space-y-1.5">
+                    <span className="font-bold text-stone-900 uppercase text-[11px] block">
+                      Milestones & Assessments
+                    </span>
+                    <ul className="list-disc list-inside space-y-1 text-stone-600">
+                      {mod.assessments.map((a, i) => (
+                        <li key={i}>{a}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
+
+        {/* Grading Scheme */}
+        {course.gradingStructure && course.gradingStructure.length > 0 && (
+          <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200 font-mono text-xs space-y-2">
+            <h4 className="font-bold uppercase text-stone-900 tracking-wider">
+              Grading & Evaluation Distribution
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-stone-700">
+              {course.gradingStructure.map((g, i) => (
+                <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-white border border-stone-200">
+                  <span>{g.item}</span>
+                  <span className="font-bold text-[#E63956]">{g.percentage}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

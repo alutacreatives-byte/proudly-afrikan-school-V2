@@ -294,7 +294,7 @@ Return a valid JSON object matching this schema:
 });
 
 // 3. Lesson Plan Generator Endpoint
-app.post('/api/generate/lesson-plan', async (req, res) => {
+app.post(['/api/generate/lesson-plan', '/api/generate/lesson'], async (req, res) => {
   const {
     subject,
     topic,
@@ -717,7 +717,7 @@ Return a valid JSON object matching this schema:
 });
 
   // 9. Mind Map Generator Endpoint
-  app.post(['/api/generate-mind-map', '/api/generate/mind-map'], async (req, res) => {
+  app.post(['/api/generate-mind-map', '/api/generate/mind-map', '/api/generate/mindmap'], async (req, res) => {
     const {
       topic = '',
       subject = 'Sciences & STEM',

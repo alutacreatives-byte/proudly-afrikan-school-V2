@@ -294,7 +294,7 @@ export const StudyHome: React.FC<StudyHomeProps> = ({
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="font-display font-black text-sm sm:text-base uppercase text-stone-900">
-                          {topicInput || 'Photographed Study Material'}
+                          {topicInput || ''}
                         </span>
                         <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold uppercase rounded-full">
                           Captured

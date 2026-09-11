@@ -149,26 +149,15 @@ export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProp
     <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8 ${isFullscreen ? 'fixed inset-0 z-50 bg-[#161616] p-8 max-w-none overflow-y-auto' : ''}`}>
       {/* Top Header */}
       <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b ${isFullscreen ? 'border-stone-800' : 'border-stone-200'}`}>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className={`p-2.5 rounded-full border transition-colors cursor-pointer ${
-              isFullscreen ? 'bg-stone-900 border-stone-800 text-white hover:bg-stone-800' : 'bg-white hover:bg-stone-100 border-stone-200 text-stone-700'
-            }`}
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold text-[#E63956] uppercase tracking-wider">
-                STUDY TOOL 06
-              </span>
-            </div>
-            <h1 className={`font-display font-black text-2xl sm:text-3xl uppercase tracking-tight ${isFullscreen ? 'text-white' : 'text-[#161616]'}`}>
-              PRESENTATION SLIDE GENERATOR
-            </h1>
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs font-bold text-[#E63956] uppercase tracking-wider">
+              STUDY TOOL 06
+            </span>
           </div>
+          <h1 className={`font-display font-black text-2xl sm:text-3xl uppercase tracking-tight ${isFullscreen ? 'text-white' : 'text-[#161616]'}`}>
+            PRESENTATION SLIDE GENERATOR
+          </h1>
         </div>
 
         {presentation && Array.isArray(presentation.slides) && presentation.slides.length > 0 && (
@@ -337,42 +326,43 @@ export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProp
               </div>
 
               {/* Slide Stage Container */}
-              <div className={`w-full aspect-16/10 rounded-[2.5rem] p-8 sm:p-12 border-2 flex flex-col justify-between transition-all duration-300 ${
+              <div className={`w-full min-h-[420px] sm:min-h-[480px] rounded-[2.5rem] p-8 sm:p-14 border-2 flex flex-col justify-between transition-all duration-300 ${
                 isFullscreen
-                  ? 'bg-stone-900 border-stone-800 text-white shadow-[0_20px_60px_rgba(0,0,0,0.4)]'
+                  ? 'bg-stone-900 border-stone-800 text-white shadow-[0_20px_60px_rgba(0,0,0,0.5)]'
                   : 'bg-white border-stone-200/90 shadow-[0_15px_40px_rgba(0,0,0,0.06)] text-[#161616]'
               }`}>
                 {/* Slide Header */}
-                <div className="space-y-2">
-                  <span className="text-xs font-mono font-bold text-[#E63956] uppercase tracking-widest">
-                    SECTION {activeSlideIndex + 1}
-                  </span>
-                  <h3 className="font-display font-black text-2xl sm:text-4xl uppercase tracking-tight leading-tight">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#E63956]" />
+                    <span className="text-xs font-mono font-bold text-[#E63956] uppercase tracking-widest">
+                      PART {activeSlideIndex + 1} OF {presentation.slides.length}
+                    </span>
+                  </div>
+                  <h3 className="font-display font-black text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight leading-tight">
                     {currentSlide.title}
                   </h3>
                 </div>
 
                 {/* Bullets */}
-                <div className="space-y-4 my-auto py-4">
+                <div className="space-y-5 my-auto py-6">
                   {currentSlide.bullets.map((bullet, bIdx) => (
-                    <div key={bIdx} className="flex items-start gap-3">
-                      <span className="w-2 h-2 rounded-full bg-[#E63956] mt-2.5 shrink-0" />
-                      <p className={`text-base sm:text-xl font-normal leading-relaxed ${isFullscreen ? 'text-stone-200' : 'text-stone-700'}`}>
+                    <div key={bIdx} className="flex items-start gap-4">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#E63956] mt-2 shrink-0" />
+                      <p className={`text-base sm:text-xl lg:text-2xl font-normal leading-relaxed ${isFullscreen ? 'text-stone-200' : 'text-stone-800'}`}>
                         {bullet}
                       </p>
                     </div>
                   ))}
                 </div>
 
-                {/* Visual Cue */}
-                {currentSlide.visualCue && (
-                  <div className={`p-3 rounded-xl border text-xs font-mono flex items-center gap-2 ${
-                    isFullscreen ? 'bg-stone-800/80 border-stone-700 text-stone-300' : 'bg-stone-50 border-stone-200 text-stone-600'
-                  }`}>
-                    <span className="font-bold text-[#E63956]">🖼️ Visual Prompt:</span>
-                    <span>{currentSlide.visualCue}</span>
-                  </div>
-                )}
+                {/* Slide Footer Info */}
+                <div className={`pt-4 border-t flex items-center justify-between text-xs font-mono font-medium ${
+                  isFullscreen ? 'border-stone-800 text-stone-500' : 'border-stone-100 text-stone-400'
+                }`}>
+                  <span>{presentation.title}</span>
+                  <span>{activeSlideIndex + 1} / {presentation.slides.length}</span>
+                </div>
               </div>
 
               {/* Navigation Controls */}

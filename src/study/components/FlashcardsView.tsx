@@ -187,44 +187,40 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       <div
         id="interactive-flashcard"
         onClick={handleFlip}
-        className={`bg-white border border-stone-200/90 rounded-3xl shadow-xl min-h-[380px] sm:min-h-[440px] p-6 sm:p-10 flex flex-col justify-between cursor-pointer transition-all select-none relative ${
+        className={`bg-[#D92B8A] border-2 border-[#C02479] text-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(217,43,138,0.3)] min-h-[380px] sm:min-h-[440px] p-6 sm:p-10 flex flex-col justify-between cursor-pointer transition-all select-none relative hover:brightness-105 ${
           isFlipped 
-            ? 'ring-2 ring-[#D92B8A]/40' 
-            : 'hover:border-stone-300'
+            ? 'ring-4 ring-white/30' 
+            : ''
         }`}
       >
         {/* Card Top Pill & Mode Tag */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <span className={`px-3 py-1 text-xs font-mono font-bold uppercase rounded-full border ${
-                isFlipped 
-                  ? 'bg-[#D92B8A] text-white border-[#D92B8A]' 
-                  : 'bg-stone-900 text-white border-stone-900'
-              }`}>
+              <span className="px-3 py-1 text-xs font-mono font-bold uppercase rounded-full bg-white/20 text-white border border-white/30 backdrop-blur-xs">
                 {isFlipped ? 'Answer / Summary' : 'Question'}
               </span>
 
-              <span className="text-xs font-mono font-bold uppercase text-stone-600 bg-stone-100 px-2.5 py-0.5 rounded-full border border-stone-200">
+              <span className="text-xs font-mono font-bold uppercase text-white bg-white/20 px-2.5 py-0.5 rounded-full border border-white/30">
                 {currentConcept.difficulty}
               </span>
             </div>
 
             {currentRating && (
-              <span className="px-3 py-1 bg-pink-50 border border-pink-200 rounded-full text-xs font-mono font-bold uppercase text-[#D92B8A]">
+              <span className="px-3 py-1 bg-white text-[#D92B8A] rounded-full text-xs font-mono font-bold uppercase shadow-sm">
                 Rated: {currentRating.replace(/_/g, ' ')}
               </span>
             )}
           </div>
 
-          <h3 className="font-display font-bold text-xs sm:text-sm uppercase tracking-wider text-stone-500 mb-3">
+          <h3 className="font-mono text-xs uppercase tracking-wider text-white/80 mb-3 font-bold">
             {currentConcept.title}
           </h3>
 
           {/* Card Content: Question or Answer */}
           {!isFlipped ? (
             <div className="space-y-4 pt-2 sm:pt-4">
-              <p className="font-display font-black text-2xl sm:text-3xl lg:text-4xl text-stone-900 leading-tight">
+              <p className="font-display font-black text-2xl sm:text-4xl lg:text-5xl text-white leading-tight">
                 {currentConcept.flashcardQuestion}
               </p>
 
@@ -236,7 +232,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
                         e.stopPropagation();
                         setShowHint(true);
                       }}
-                      className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-stone-500 hover:text-[#D92B8A] underline transition-colors"
+                      className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-white/80 hover:text-white underline transition-colors"
                     >
                       <Lightbulb className="w-3.5 h-3.5" />
                       <span>Show Hint</span>
@@ -244,9 +240,9 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
                   ) : (
                     <div 
                       onClick={(e) => e.stopPropagation()}
-                      className="p-4 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-medium text-stone-800 shadow-sm animate-fadeIn leading-relaxed"
+                      className="p-4 bg-black/25 border border-white/20 rounded-2xl text-sm font-medium text-white shadow-sm animate-fadeIn leading-relaxed backdrop-blur-xs"
                     >
-                      <span className="font-mono font-bold text-[#D92B8A] mr-1.5">HINT:</span>
+                      <span className="font-mono font-bold text-pink-200 mr-1.5">HINT:</span>
                       {currentConcept.flashcardHint}
                     </div>
                   )}
@@ -255,16 +251,16 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             </div>
           ) : (
             <div className="space-y-4 pt-2 sm:pt-4 animate-fadeIn">
-              <p className="font-display font-bold text-xl sm:text-2xl lg:text-3xl text-stone-900 leading-snug">
+              <p className="font-display font-black text-xl sm:text-3xl lg:text-4xl text-white leading-snug">
                 {currentConcept.flashcardAnswer}
               </p>
 
               {currentConcept.summary && currentConcept.summary !== currentConcept.flashcardAnswer && (
-                <div className="p-5 bg-stone-50 border border-stone-200 rounded-2xl mt-4 shadow-sm">
-                  <span className="font-mono text-xs font-bold text-[#D92B8A] uppercase block mb-1">
+                <div className="p-5 bg-black/25 border border-white/20 rounded-2xl mt-4 shadow-sm backdrop-blur-xs">
+                  <span className="font-mono text-xs font-bold text-pink-200 uppercase block mb-1">
                     Key Context
                   </span>
-                  <p className="text-sm sm:text-base text-stone-700 leading-relaxed font-medium">
+                  <p className="text-sm sm:text-base text-white/90 leading-relaxed font-medium">
                     {currentConcept.summary}
                   </p>
                 </div>
@@ -274,10 +270,10 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
         </div>
 
         {/* Bottom Prompts / Reveal Action */}
-        <div className="pt-6 border-t border-stone-200 flex items-center justify-between">
+        <div className="pt-6 border-t border-white/20 flex items-center justify-between">
           {!isFlipped ? (
             <div className="w-full flex items-center justify-between">
-              <span className="text-xs sm:text-sm font-mono text-stone-500 font-semibold">
+              <span className="text-xs sm:text-sm font-mono text-white/80 font-semibold">
                 Click or press Space to reveal
               </span>
               <button
@@ -286,14 +282,14 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
                   e.stopPropagation();
                   setIsFlipped(true);
                 }}
-                className="px-6 py-2.5 bg-[#D92B8A] hover:bg-[#c02479] text-white font-display text-xs sm:text-sm font-bold uppercase tracking-wider rounded-full shadow-md transition-all active:scale-95"
+                className="px-6 py-2.5 bg-white hover:bg-stone-100 text-[#D92B8A] font-display text-xs sm:text-sm font-black uppercase tracking-wider rounded-full shadow-md transition-all active:scale-95 cursor-pointer"
               >
                 Reveal Answer
               </button>
             </div>
           ) : (
             <div className="w-full space-y-3" onClick={(e) => e.stopPropagation()}>
-              <div className="text-center font-display text-xs sm:text-sm font-bold uppercase text-stone-800 tracking-wide">
+              <div className="text-center font-display text-xs sm:text-sm font-bold uppercase text-white tracking-wide">
                 How well did you know this?
               </div>
 
@@ -302,37 +298,37 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
                 <button
                   id="rating-did-not-know-btn"
                   onClick={() => handleRate('did_not_know')}
-                  className="py-3 px-2 bg-red-50/70 hover:bg-red-100/80 text-red-700 font-display text-xs font-bold uppercase rounded-2xl border border-red-200 shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all"
+                  className="py-3 px-2 bg-white/15 hover:bg-white/25 text-white font-display text-xs font-bold uppercase rounded-2xl border border-white/30 shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer backdrop-blur-xs"
                 >
                   <span>Did Not Know</span>
-                  <span className="font-mono text-xs text-red-500 font-medium">[1]</span>
+                  <span className="font-mono text-xs text-pink-200 font-medium">[1]</span>
                 </button>
 
                 <button
                   id="rating-almost-btn"
                   onClick={() => handleRate('almost')}
-                  className="py-3 px-2 bg-amber-50/70 hover:bg-amber-100/80 text-amber-700 font-display text-xs font-bold uppercase rounded-2xl border border-amber-200 shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all"
+                  className="py-3 px-2 bg-white/15 hover:bg-white/25 text-white font-display text-xs font-bold uppercase rounded-2xl border border-white/30 shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer backdrop-blur-xs"
                 >
                   <span>Almost</span>
-                  <span className="font-mono text-xs text-amber-500 font-medium">[2]</span>
+                  <span className="font-mono text-xs text-pink-200 font-medium">[2]</span>
                 </button>
 
                 <button
                   id="rating-knew-it-btn"
                   onClick={() => handleRate('knew_it')}
-                  className="py-3 px-2 bg-emerald-50/70 hover:bg-emerald-100/80 text-emerald-800 font-display text-xs font-bold uppercase rounded-2xl border border-emerald-200 shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all"
+                  className="py-3 px-2 bg-white/15 hover:bg-white/25 text-white font-display text-xs font-bold uppercase rounded-2xl border border-white/30 shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer backdrop-blur-xs"
                 >
                   <span>Knew It</span>
-                  <span className="font-mono text-xs text-emerald-600 font-medium">[3]</span>
+                  <span className="font-mono text-xs text-pink-200 font-medium">[3]</span>
                 </button>
 
                 <button
                   id="rating-easy-btn"
                   onClick={() => handleRate('easy')}
-                  className="py-3 px-2 bg-[#D92B8A] hover:bg-[#c02479] text-white font-display text-xs font-bold uppercase rounded-2xl shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all"
+                  className="py-3 px-2 bg-white hover:bg-stone-100 text-[#D92B8A] font-display text-xs font-black uppercase rounded-2xl shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer"
                 >
                   <span>Easy</span>
-                  <span className="font-mono text-xs text-pink-100 font-medium">[4]</span>
+                  <span className="font-mono text-xs text-[#D92B8A] font-medium">[4]</span>
                 </button>
               </div>
             </div>

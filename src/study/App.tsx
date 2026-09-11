@@ -108,8 +108,8 @@ export default function StudyApp({
     if (initialData) {
       nextResource = {
         id: `temp-${Date.now()}`,
-        title: prefillTopic || initialData.documentName || 'Study Material',
-        topic: prefillTopic || initialData.documentName || 'Study Material',
+        title: prefillTopic || initialData.documentName || '',
+        topic: prefillTopic || initialData.documentName || '',
         subject: prefillCategory || 'GENERAL STUDIES',
         sourceSnippet: initialData.sourceSnippet || '',
         documentName: initialData.documentName || '',

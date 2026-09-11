@@ -6,7 +6,6 @@ import {
   Copy, 
   Bookmark, 
   Check, 
-  ArrowLeft,
   CheckCircle2,
   Clock,
   Flag,
@@ -112,7 +111,7 @@ export const StudyLearningPathGenerator: React.FC<StudyLearningPathGeneratorProp
   const handleCopy = () => {
     if (!path) return;
     let text = `# ${path.title}\nTarget Goal: ${path.targetGoal || targetGoal}\nEstimated Duration: ${path.totalEstimatedWeeks || 8} Weeks\n\n`;
-    path.stages.forEach((st) => {
+    (path.stages || []).forEach((st) => {
       text += `## Stage ${st.stepNumber}: ${st.title} (~${st.estimatedHours || 15} hours)\n${st.description}\n`;
       if (st.skillsAcquired) text += 'Skills Acquired: ' + st.skillsAcquired.join(', ') + '\n';
       if (st.suggestedActivities) text += 'Activities:\n' + st.suggestedActivities.map((a) => `  - ${a}`).join('\n') + '\n';
@@ -139,24 +138,15 @@ export const StudyLearningPathGenerator: React.FC<StudyLearningPathGeneratorProp
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-stone-200">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="p-2.5 rounded-full bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 transition-colors cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold text-[#E63956] uppercase tracking-wider">
-                STUDY TOOL 01
-              </span>
-            </div>
-            <h1 className="font-display font-black text-2xl sm:text-3xl text-[#161616] uppercase tracking-tight">
-              LEARNING ROADMAP BUILDER
-            </h1>
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs font-bold text-[#E63956] uppercase tracking-wider">
+              STUDY TOOL 01
+            </span>
           </div>
+          <h1 className="font-display font-black text-2xl sm:text-3xl text-[#161616] uppercase tracking-tight">
+            LEARNING ROADMAP BUILDER
+          </h1>
         </div>
 
         {path && Array.isArray(path.stages) && path.stages.length > 0 && (
@@ -299,7 +289,7 @@ export const StudyLearningPathGenerator: React.FC<StudyLearningPathGeneratorProp
                 </h3>
 
                 <div className="space-y-6 relative before:absolute before:left-5 before:top-4 before:bottom-4 before:w-0.5 before:bg-stone-200">
-                  {path.stages.map((st, idx) => {
+                  {(path.stages || []).map((st, idx) => {
                     const isDone = Boolean(completedStages[idx]);
 
                     return (

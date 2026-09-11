@@ -6,7 +6,6 @@ import {
   Copy, 
   Bookmark, 
   Check, 
-  ArrowLeft,
   BookOpen,
   HelpCircle,
   Key,
@@ -69,7 +68,7 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
 
     try {
       const input: StudyToolInput = {
-        topic: topic.trim() || 'Comprehensive Study Material',
+        topic: topic.trim() || '',
         category,
         gradeLevel,
         sourceMaterial: sourceMaterial.trim() || undefined,
@@ -154,24 +153,15 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-stone-200">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="p-2.5 rounded-full bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 transition-colors cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold text-[#E63956] uppercase tracking-wider">
-                STUDY TOOL 02
-              </span>
-            </div>
-            <h1 className="font-display font-black text-2xl sm:text-3xl text-[#161616] uppercase tracking-tight">
-              STUDY GUIDE GENERATOR
-            </h1>
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs font-bold text-[#E63956] uppercase tracking-wider">
+              STUDY TOOL 02
+            </span>
           </div>
+          <h1 className="font-display font-black text-2xl sm:text-3xl text-[#161616] uppercase tracking-tight">
+            STUDY GUIDE GENERATOR
+          </h1>
         </div>
 
         {guide && Array.isArray(guide.sections) && guide.sections.length > 0 && (

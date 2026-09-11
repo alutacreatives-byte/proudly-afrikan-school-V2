@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
-import { SavedResource } from '../../types';
-import { ArrowLeft, Printer, Copy, Bookmark, Check, Clock, BookOpen, Target, CheckCircle2 } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Printer, 
+  Copy, 
+  Check, 
+  Bookmark, 
+  Clock, 
+  BookOpen, 
+  CheckCircle, 
+  Sparkles, 
+  Users 
+} from 'lucide-react';
+import { LessonPlanData, SavedResource } from '../../types';
 import { saveResourceToStorage } from '../../utils/storage';
 
 interface LessonPlanViewerProps {
@@ -9,12 +20,20 @@ interface LessonPlanViewerProps {
 }
 
 export const LessonPlanViewer: React.FC<LessonPlanViewerProps> = ({ resource, onBack }) => {
-  const content = resource.content || {};
-  const [copied, setCopied] = useState<boolean>(false);
-  const [saved, setSaved] = useState<boolean>(false);
+  const [copied, setCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const plan: LessonPlanData = resource.data;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(JSON.stringify(content, null, 2));
+    let text = `${plan.title}\nSubject: ${plan.subject} | Grade: ${plan.gradeLevel} | Duration: ${plan.durationMinutes} mins\n\n`;
+    text += `OBJECTIVES:\n${(plan.learningObjectives || []).map((o) => `• ${o}`).join('\n')}\n\n`;
+    text += `5E PEDAGOGICAL PHASES:\n`;
+    (plan.phases || []).forEach((p) => {
+      text += `\n[${p.phase} - ${p.durationMinutes} Mins]\nTeacher: ${p.teacherActivity}\nStudents: ${p.studentActivity}\nKey Questions: ${p.keyQuestions.join('; ')}\n`;
+    });
+
+    navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -22,112 +41,183 @@ export const LessonPlanViewer: React.FC<LessonPlanViewerProps> = ({ resource, on
   const handleSave = () => {
     saveResourceToStorage(resource);
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setTimeout(() => setSaved(false), 2500);
   };
 
   return (
-    <div id="build-result-top" className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in print:p-0">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-stone-200 pb-4 print:hidden">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6 animate-fade-in">
+      {/* Action Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-stone-200">
         <button
+          type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-[#E63956] text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
+          className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-2 transition-colors cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4 text-[#E63956]" />
-          Back to Generators
+          <ArrowLeft className="w-4 h-4" />
+          Back to Build
         </button>
-        <div className="flex items-center gap-2.5 flex-wrap">
+
+        <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-stone-400 text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
-          >
-            <Printer className="w-4 h-4 text-stone-600" />
-            Print
-          </button>
-          <button
+            type="button"
             onClick={handleCopy}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-stone-400 text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-stone-600" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
             {copied ? 'Copied' : 'Copy'}
           </button>
+
           <button
-            onClick={handleSave}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#E63956] hover:bg-[#d02e48] text-white font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
+            type="button"
+            onClick={() => window.print()}
+            className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            {saved ? <Check className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
-            {saved ? 'Saved!' : 'Save'}
+            <Printer className="w-3.5 h-3.5" />
+            Print
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSave}
+            className="px-4 py-2 rounded-xl bg-[#161616] hover:bg-black text-white font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+          >
+            <Bookmark className="w-3.5 h-3.5 text-[#E63956]" />
+            {saved ? 'Saved!' : 'Save to My Sets'}
           </button>
         </div>
       </div>
 
-      <div className="card-3d-elevated p-8 sm:p-12 space-y-8 bg-white print:shadow-none print:border-none">
-        <div className="border-b-2 border-stone-900 pb-6 space-y-2">
-          <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#E63956]">
-            PEDAGOGICAL LESSON PLAN • {content.subject || resource.subject}
+      {/* Main Lesson Plan Document */}
+      <div className="bg-white rounded-3xl border border-stone-200/90 p-6 sm:p-10 shadow-sm space-y-8 print:shadow-none print:border-none print:p-0">
+        {/* Header */}
+        <div className="pb-6 border-b border-stone-200 space-y-3">
+          <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#E63956]">
+            5E PEDAGOGICAL LESSON PLAN • CAPS ALIGNED
           </span>
-          <h1 className="font-display font-black text-2xl sm:text-4xl uppercase tracking-tight text-[#161616]">
-            {content.title || resource.title}
+          <h1 className="font-display font-black text-2xl sm:text-3xl text-stone-900 uppercase tracking-tight">
+            {plan.title || resource.title}
           </h1>
-          <p className="text-xs font-mono text-stone-500">
-            Grade Level: {content.gradeLevel || resource.gradeLevel} • Duration: {content.durationMinutes || 60} mins
-          </p>
+          <div className="flex items-center gap-4 sm:gap-6 font-mono text-xs text-stone-600 font-semibold flex-wrap">
+            <span>SUBJECT: {plan.subject || resource.subject}</span>
+            <span>•</span>
+            <span>GRADE: {plan.gradeLevel || resource.gradeLevel}</span>
+            <span>•</span>
+            <span className="text-[#E63956] font-bold">DURATION: {plan.durationMinutes || 60} MINS</span>
+          </div>
         </div>
 
-        {/* Objectives */}
-        {content.objectives && (
-          <div className="p-6 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
-            <h3 className="font-display font-black text-sm uppercase tracking-wider text-stone-900 flex items-center gap-2">
-              <Target className="w-4 h-4 text-[#E63956]" />
-              Learning Objectives (Bloom's Taxonomy)
+        {/* Objectives & Materials */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 font-mono text-xs">
+          <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2.5">
+            <h3 className="font-bold uppercase text-stone-900 tracking-wider flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-600" />
+              Specific Learning Objectives
             </h3>
-            <ul className="space-y-1.5">
-              {Array.isArray(content.objectives) ? (
-                content.objectives.map((obj: string, i: number) => (
-                  <li key={i} className="text-xs sm:text-sm text-stone-700 font-medium flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span>{obj}</span>
-                  </li>
-                ))
-              ) : (
-                <li className="text-xs sm:text-sm text-stone-700">{content.objectives}</li>
-              )}
+            <ul className="list-disc list-inside space-y-1.5 text-stone-700">
+              {(plan.learningObjectives || []).map((obj, i) => (
+                <li key={i}>{obj}</li>
+              ))}
             </ul>
           </div>
-        )}
 
-        {/* Timed Phases */}
+          <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2.5">
+            <h3 className="font-bold uppercase text-stone-900 tracking-wider flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-[#E63956]" />
+              Required Classroom Materials
+            </h3>
+            <ul className="list-disc list-inside space-y-1.5 text-stone-700">
+              {(plan.materialsAndResources || []).map((mat, i) => (
+                <li key={i}>{mat}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* 5E Phases */}
         <div className="space-y-6">
-          <h3 className="font-display font-black text-xl uppercase tracking-tight text-stone-900">
-            Timed Lesson Phases
+          <h3 className="font-display font-black text-xl text-stone-900 uppercase">
+            5E Pedagogical Phases Sequence
           </h3>
+
           <div className="space-y-4">
-            {content.timedPhases && Array.isArray(content.timedPhases) ? (
-              content.timedPhases.map((phase: any, pIdx: number) => (
-                <div key={pIdx} className="p-6 rounded-2xl bg-white border border-stone-200 shadow-xs space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-display font-black text-base text-stone-900">
-                      {phase.title || `Phase ${pIdx + 1}`}
-                    </h4>
-                    <span className="px-3 py-1 rounded-full font-mono text-xs font-bold bg-[#E63956]/10 text-[#E63956] flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      {phase.durationMinutes || 15} Mins
+            {(plan.phases || []).map((phase, pIdx) => {
+              const phaseColors: Record<string, string> = {
+                Engage: 'border-l-4 border-amber-500',
+                Explore: 'border-l-4 border-blue-500',
+                Explain: 'border-l-4 border-purple-500',
+                Elaborate: 'border-l-4 border-emerald-500',
+                Evaluate: 'border-l-4 border-rose-500',
+              };
+
+              return (
+                <div 
+                  key={pIdx}
+                  className={`p-6 rounded-2xl bg-stone-50/40 border border-stone-200/90 shadow-2xs space-y-4 ${phaseColors[phase.phase] || ''}`}
+                >
+                  <div className="flex items-center justify-between pb-2 border-b border-stone-200">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-white bg-[#161616] px-2.5 py-0.5 rounded-md uppercase">
+                        Phase {pIdx + 1}: {phase.phase}
+                      </span>
+                    </div>
+                    <span className="font-mono text-xs font-semibold text-stone-600">
+                      {phase.durationMinutes} Minutes
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                    <div className="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-1">
-                      <span className="font-mono text-[10px] uppercase font-bold text-stone-500">Teacher Actions</span>
-                      <p className="text-xs sm:text-sm text-stone-800 font-medium">{phase.teacherActions || phase.actions}</p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
+                    <div className="p-3.5 rounded-xl bg-white border border-stone-200 space-y-1">
+                      <span className="font-bold text-stone-900 uppercase text-[11px] block text-[#E63956]">
+                        Teacher Facilitation:
+                      </span>
+                      <p className="text-stone-700 leading-relaxed">{phase.teacherActivity}</p>
                     </div>
-                    <div className="p-4 rounded-xl bg-pink-50/50 border border-pink-200/80 space-y-1">
-                      <span className="font-mono text-[10px] uppercase font-bold text-stone-600">Student Activities</span>
-                      <p className="text-xs sm:text-sm text-stone-800 font-medium">{phase.studentActivities || phase.activities}</p>
+
+                    <div className="p-3.5 rounded-xl bg-white border border-stone-200 space-y-1">
+                      <span className="font-bold text-stone-900 uppercase text-[11px] block text-blue-600">
+                        Student Inquiry Action:
+                      </span>
+                      <p className="text-stone-700 leading-relaxed">{phase.studentActivity}</p>
                     </div>
                   </div>
+
+                  {phase.keyQuestions && phase.keyQuestions.length > 0 && (
+                    <div className="p-3 rounded-xl bg-amber-50/60 border border-amber-200/80 font-mono text-xs text-amber-900 space-y-1">
+                      <span className="font-bold uppercase text-[10px] text-amber-800 block">
+                        Essential Inquiry Questions:
+                      </span>
+                      <ul className="list-disc list-inside space-y-0.5">
+                        {phase.keyQuestions.map((q, qIndex) => (
+                          <li key={qIndex}>{q}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-              ))
-            ) : (
-              <pre className="text-xs font-mono">{JSON.stringify(content, null, 2)}</pre>
-            )}
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Differentiation & Assessment */}
+        <div className="p-6 rounded-2xl bg-stone-50 border border-stone-200 font-mono text-xs space-y-4">
+          <h4 className="font-bold uppercase text-stone-900 tracking-wider flex items-center gap-2">
+            <Users className="w-4 h-4 text-[#E63956]" />
+            Inclusive Differentiation Strategies
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-stone-700">
+            <div className="p-3 rounded-xl bg-white border border-stone-200 space-y-1">
+              <span className="font-bold text-amber-700 uppercase text-[10px] block">Support for Struggling</span>
+              <p>{plan.differentiationStrategies?.supportForStruggling}</p>
+            </div>
+            <div className="p-3 rounded-xl bg-white border border-stone-200 space-y-1">
+              <span className="font-bold text-blue-700 uppercase text-[10px] block">Extension for Advanced</span>
+              <p>{plan.differentiationStrategies?.extensionForAdvanced}</p>
+            </div>
+            <div className="p-3 rounded-xl bg-white border border-stone-200 space-y-1">
+              <span className="font-bold text-purple-700 uppercase text-[10px] block">Special Educational Needs</span>
+              <p>{plan.differentiationStrategies?.specialEducationalNeeds}</p>
+            </div>
           </div>
         </div>
       </div>

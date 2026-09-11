@@ -230,7 +230,7 @@ export const CreateSetModal: React.FC<CreateSetModalProps> = ({
 
     try {
       const effectiveNotesText = notesInput.trim() || (uploadedDocument && !isTextCorruptedOrUnreadable(uploadedDocument.text) ? uploadedDocument.text.trim() : '');
-      const effectiveTopic = topicInput.trim() || (uploadedDocument ? uploadedDocument.name.replace(/\.[^/.]+$/, '') : (effectiveNotesText.slice(0, 50) || 'Study Material'));
+      const effectiveTopic = topicInput.trim() || (uploadedDocument ? uploadedDocument.name.replace(/\.[^/.]+$/, '') : (effectiveNotesText.slice(0, 50) || ''));
 
       const result = await AIService.generateStudySet({
         topic: effectiveTopic,
@@ -619,7 +619,7 @@ export const CreateSetModal: React.FC<CreateSetModalProps> = ({
                       </div>
 
                       <div className="text-[11px] font-mono text-stone-400">
-                        Supports live webcam, mobile rear/front camera, and image uploads &bull; Instant AI OCR
+                        Supports live webcam, mobile rear/front camera, and image uploads &bull; Instant OCR
                       </div>
                     </div>
                   )}

@@ -1,85 +1,124 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { GlobalNavigationButtons } from '../components/GlobalNavigationButtons';
+import { BuildToolType, SavedResource, GeneratorFormData, ExamData } from './types';
+import { getSavedResources, deleteResourceFromStorage, saveResourceToStorage } from './utils/storage';
+import { buildService } from './services/buildService';
 import { BuildHome } from './components/BuildHome';
-import { BuildToolType, SavedResource } from './types';
-import { generateBuildResource } from './services/buildService';
-import { saveResourceToStorage, getSavedResources } from './utils/storage';
-
+import { BuildToolModal } from './components/menus/BuildToolModal';
 import { ExamViewer } from './components/viewers/ExamViewer';
 import { WorksheetViewer } from './components/viewers/WorksheetViewer';
-import { LessonPlanViewer } from './components/viewers/LessonPlanViewer';
 import { CourseViewer } from './components/viewers/CourseViewer';
+import { LessonPlanViewer } from './components/viewers/LessonPlanViewer';
 import { MindMapViewer } from './components/viewers/MindMapViewer';
 import { PresentationViewer } from './components/viewers/PresentationViewer';
+import { useAuthCredit } from '../context/AuthCreditContext';
 
-import { ArrowLeft, Sparkles, Copy, Bookmark, Check, Loader2 } from 'lucide-react';
-
-interface BuildAppProps {
+export interface BuildAppProps {
+  initialTool?: BuildToolType | null;
   initialResource?: SavedResource | null;
+  onNavigateToTab?: (tab: 'STUDY' | 'QUIZ' | 'BUILD' | 'MY SETS' | 'PLANNER') => void;
   onGoHome?: () => void;
+  onBackToPreviousPage?: () => void;
 }
 
-export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
-  const [selectedTool, setSelectedTool] = useState<BuildToolType | null>(initialResource ? initialResource.toolType : null);
-  const [activeResource, setActiveResource] = useState<SavedResource | null>(initialResource || null);
-  const [topic, setTopic] = useState<string>(initialResource ? initialResource.topic || '' : '');
-  const [subject, setSubject] = useState<string>(initialResource ? initialResource.subject || 'African Studies' : 'African Studies');
-  const [gradeLevel, setGradeLevel] = useState<string>('Senior Secondary / High School (Grades 9-12)');
+export default function BuildApp({
+  initialTool = null,
+  initialResource = null,
+  onNavigateToTab,
+  onGoHome,
+  onBackToPreviousPage,
+}: BuildAppProps = {}) {
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalTool, setModalTool] = useState<BuildToolType>('exam');
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [copied, setCopied] = useState<boolean>(false);
-  const [saved, setSaved] = useState<boolean>(false);
+  // Active viewed resource
+  const [activeResource, setActiveResource] = useState<SavedResource | null>(initialResource);
 
-  const handleSelectTool = (toolId: BuildToolType, topicVal?: string, categoryVal?: string) => {
-    setSelectedTool(toolId);
-    setActiveResource(null);
-    if (topicVal) setTopic(topicVal);
-    if (categoryVal) setSubject(categoryVal);
+  // Saved resources list
+  const [savedResources, setSavedResources] = useState<SavedResource[]>(() => getSavedResources());
 
-    // Requirement: When selecting a tool, smooth scroll to the menu/workbench
-    setTimeout(() => {
-      const workbenchEl = document.getElementById('build-workbench');
-      if (workbenchEl) {
-        workbenchEl.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }, 50);
+  const { canAfford, consumeCredits, openAuthModal } = useAuthCredit();
+
+  // Sync if initialResource changes
+  useEffect(() => {
+    if (initialResource) {
+      setActiveResource(initialResource);
+    }
+  }, [initialResource]);
+
+  // Sync if initialTool changes
+  useEffect(() => {
+    if (initialTool) {
+      setModalTool(initialTool);
+      setIsModalOpen(true);
+    }
+  }, [initialTool]);
+
+  // Listen to storage updates
+  useEffect(() => {
+    const handleUpdate = () => {
+      setSavedResources(getSavedResources());
+    };
+    window.addEventListener('build-resources-updated', handleUpdate);
+    return () => window.removeEventListener('build-resources-updated', handleUpdate);
+  }, []);
+
+  // Scroll to top on navigation change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeResource]);
+
+  const handleSelectTool = (type: BuildToolType) => {
+    setModalTool(type);
+    setIsModalOpen(true);
   };
 
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!topic.trim() || !selectedTool) return;
+  const handleOpenSavedResource = (res: SavedResource) => {
+    setActiveResource(res);
+  };
 
-    setIsGenerating(true);
+  const handleDeleteSavedResource = (id: string) => {
+    deleteResourceFromStorage(id);
+    setSavedResources(getSavedResources());
+    if (activeResource?.id === id) {
+      setActiveResource(null);
+    }
+  };
+
+  const handleGenerate = async (formData: GeneratorFormData) => {
+    // Map generator type to AiActionType
+    const actionMap: Record<BuildToolType, 'EXAM' | 'WORKSHEET' | 'COURSE' | 'LESSON_PLAN' | 'MIND_MAP' | 'PRESENTATION'> = {
+      'exam': 'EXAM',
+      'worksheet': 'WORKSHEET',
+      'course': 'COURSE',
+      'lesson-plan': 'LESSON_PLAN',
+      'mind-map': 'MIND_MAP',
+      'presentation': 'PRESENTATION',
+    };
+    const actionType = actionMap[formData.generatorType] || 'EXAM';
+
+    // Check credits
+    if (!canAfford(actionType)) {
+      openAuthModal();
+      return;
+    }
+
     try {
-      const data = await generateBuildResource(selectedTool, {
-        topic,
-        subject,
-        gradeLevel,
-      });
+      setIsGenerating(true);
+      const generated = await buildService.generateResource(formData);
 
-      const newRes: SavedResource = {
-        id: data.id || `res-${Date.now()}`,
-        title: data.title || `${topic} - ${selectedTool.toUpperCase()}`,
-        toolType: selectedTool,
-        content: data,
-        createdAt: new Date().toISOString(),
-        subject,
-        gradeLevel,
-      };
+      // Deduct credit
+      await consumeCredits(actionType, `Generated ${formData.generatorType}: ${formData.topic}`);
 
-      const savedRes = saveResourceToStorage(newRes);
-      setActiveResource(savedRes);
+      // Save to storage
+      saveResourceToStorage(generated);
+      setSavedResources(getSavedResources());
 
-      // Requirement: After completing the menu/generation, smooth scroll to the top of the result
-      setTimeout(() => {
-        const resultEl = document.getElementById('build-result-top');
-        if (resultEl) {
-          resultEl.scrollIntoView({ behavior: 'smooth' });
-        } else {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-      }, 50);
+      // Close modal and display viewer
+      setIsModalOpen(false);
+      setActiveResource(generated);
     } catch (err) {
       console.error('Generation failed:', err);
     } finally {
@@ -87,213 +126,144 @@ export default function BuildApp({ initialResource, onGoHome }: BuildAppProps) {
     }
   };
 
-  const handleCopy = () => {
-    if (!activeResource) return;
-    navigator.clipboard.writeText(JSON.stringify(activeResource.content, null, 2));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleSaveAgain = () => {
-    if (!activeResource) return;
-    saveResourceToStorage(activeResource);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  };
-
-  // If viewing a generated resource or result, render the appropriate viewer
-  if (activeResource) {
-    const handleBack = () => {
+  const handleBack = () => {
+    if (activeResource) {
       setActiveResource(null);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+    } else if (onBackToPreviousPage) {
+      onBackToPreviousPage();
+    }
+  };
 
-    if (activeResource.toolType === 'exam') {
-      return <ExamViewer resource={activeResource} onBack={handleBack} />;
+  const handleHome = () => {
+    if (activeResource) {
+      setActiveResource(null);
     }
-    if (activeResource.toolType === 'worksheet') {
-      return <WorksheetViewer resource={activeResource} onBack={handleBack} />;
+    if (onGoHome) {
+      onGoHome();
     }
-    if (activeResource.toolType === 'lesson' || activeResource.toolType === 'lesson-plan') {
-      return <LessonPlanViewer resource={activeResource} onBack={handleBack} />;
+  };
+
+  const handleStartQuizFromExam = (_examData: ExamData) => {
+    if (onNavigateToTab) {
+      onNavigateToTab('QUIZ');
     }
-    if (activeResource.toolType === 'course' || activeResource.toolType === 'course-builder') {
-      return <CourseViewer resource={activeResource} onBack={handleBack} />;
-    }
-    if (activeResource.toolType === 'mindmap' || activeResource.toolType === 'mind-map') {
-      return <MindMapViewer resource={activeResource} onBack={handleBack} />;
-    }
-    if (activeResource.toolType === 'presentation') {
-      return <PresentationViewer resource={activeResource} onBack={handleBack} />;
+  };
+
+  // Render resource viewer based on toolType
+  const renderViewer = () => {
+    if (!activeResource) return null;
+
+    const type = activeResource.toolType;
+
+    if (type === 'exam') {
+      return (
+        <ExamViewer
+          resource={activeResource}
+          onBack={handleBack}
+          onStartQuiz={handleStartQuizFromExam}
+        />
+      );
     }
 
-    // Default fallback viewer if toolType is generic/other
+    if (type === 'worksheet') {
+      return (
+        <WorksheetViewer
+          resource={activeResource}
+          onBack={handleBack}
+        />
+      );
+    }
+
+    if (type === 'course' || type === 'course-builder') {
+      return (
+        <CourseViewer
+          resource={activeResource}
+          onBack={handleBack}
+        />
+      );
+    }
+
+    if (type === 'lesson-plan') {
+      return (
+        <LessonPlanViewer
+          resource={activeResource}
+          onBack={handleBack}
+        />
+      );
+    }
+
+    if (type === 'mind-map') {
+      return (
+        <MindMapViewer
+          resource={activeResource}
+          onBack={handleBack}
+        />
+      );
+    }
+
+    if (type === 'presentation') {
+      return (
+        <PresentationViewer
+          resource={activeResource}
+          onBack={handleBack}
+        />
+      );
+    }
+
+    // Default fallback to exam or worksheet viewer
     return (
-      <div id="build-result-top" className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
-        <div className="flex items-center justify-between border-b border-stone-200 pb-4">
-          <button
-            onClick={handleBack}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-[#E63956] text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4 text-[#E63956]" />
-            Back to Generators
-          </button>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleCopy}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-stone-400 text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
-            >
-              {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-stone-600" />}
-              {copied ? 'Copied' : 'Copy JSON'}
-            </button>
-            <button
-              onClick={handleSaveAgain}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#E63956] hover:bg-[#d02e48] text-white font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
-            >
-              {saved ? <Check className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
-              {saved ? 'Saved!' : 'Save to My Sets'}
-            </button>
-          </div>
-        </div>
-
-        <div className="card-3d-elevated p-8 space-y-6">
-          <div className="border-b border-stone-100 pb-4">
-            <span className="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-[#E63956]/10 text-[#E63956]">
-              {activeResource.toolType.toUpperCase()} RESOURCE
-            </span>
-            <h1 className="font-display font-black text-2xl sm:text-4xl text-[#161616] mt-2">
-              {activeResource.title}
-            </h1>
-            <p className="text-xs text-stone-500 font-mono mt-1">
-              Subject: {activeResource.subject} • Created: {new Date(activeResource.createdAt).toLocaleDateString()}
-            </p>
-          </div>
-
-          <div className="prose max-w-none text-stone-800 space-y-4">
-            <pre className="bg-stone-50 border border-stone-200 p-6 rounded-2xl text-xs sm:text-sm font-mono overflow-x-auto text-stone-800">
-              {JSON.stringify(activeResource.content, null, 2)}
-            </pre>
-          </div>
-        </div>
-      </div>
+      <ExamViewer
+        resource={activeResource}
+        onBack={handleBack}
+      />
     );
-  }
+  };
 
-  // If a tool is selected, show the workbench form
-  if (selectedTool) {
-    return (
-      <div id="build-workbench" className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
-        <div className="flex items-center justify-between border-b border-stone-200 pb-4">
-          <button
-            onClick={() => {
-              setSelectedTool(null);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-[#E63956] text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4 text-[#E63956]" />
-            All Generators
-          </button>
-          <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#E63956] bg-[#E63956]/10 px-3 py-1 rounded-full">
-            Workbench: {selectedTool.toUpperCase()}
-          </span>
-        </div>
-
-        <form onSubmit={handleGenerate} className="card-3d-elevated p-8 space-y-6">
-          <div>
-            <h2 className="font-display font-black text-2xl sm:text-3xl text-[#161616] uppercase tracking-tight mb-2">
-              Configure {selectedTool.toUpperCase()} Generator
-            </h2>
-            <p className="text-sm text-stone-600 font-mono">
-              Provide your topic and curriculum context below to generate AI-powered classroom materials.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="font-display font-bold text-xs uppercase tracking-wider text-stone-800">
-                Topic or Concept *
-              </label>
-              <input
-                type="text"
-                required
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder="e.g. Mansa Musa & Mali Empire Trade"
-                className="w-full rounded-xl border border-stone-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E63956]/30 focus:border-[#E63956] bg-stone-50/50 font-medium"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="font-display font-bold text-xs uppercase tracking-wider text-stone-800">
-                Subject Area *
-              </label>
-              <input
-                type="text"
-                required
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="e.g. African History & Economics"
-                className="w-full rounded-xl border border-stone-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E63956]/30 focus:border-[#E63956] bg-stone-50/50 font-medium"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="font-display font-bold text-xs uppercase tracking-wider text-stone-800">
-              Grade Level / Educational Standard
-            </label>
-            <select
-              value={gradeLevel}
-              onChange={(e) => setGradeLevel(e.target.value)}
-              className="w-full rounded-xl border border-stone-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E63956]/30 focus:border-[#E63956] bg-stone-50/50 font-medium"
-            >
-              <option value="Primary School / Grades 4-7">Primary School / Grades 4-7</option>
-              <option value="Junior Secondary / Grades 8-9">Junior Secondary / Grades 8-9</option>
-              <option value="Senior Secondary / High School (Grades 9-12)">Senior Secondary / High School (Grades 9-12)</option>
-              <option value="Undergraduate / Tertiary">Undergraduate / Tertiary</option>
-            </select>
-          </div>
-
-          <div className="pt-4 border-t border-stone-100 flex items-center justify-end gap-4">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedTool(null);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="px-6 py-3 rounded-xl border border-stone-200 text-stone-700 font-display font-bold uppercase tracking-wider text-xs hover:bg-stone-50 transition-all cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isGenerating || !topic.trim()}
-              className="btn-3d-tactile px-8 py-3.5 font-display font-bold uppercase tracking-wider text-sm flex items-center gap-2 disabled:opacity-50 cursor-pointer"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Generating with Gemini...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4" />
-                  Generate {selectedTool.toUpperCase()}
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    );
-  }
-
-  // Default: Build Home
   return (
-    <BuildHome
-      onSelectTool={handleSelectTool}
-      savedCount={getSavedResources().length}
-    />
+    <div className="w-full min-h-screen bg-[#FAF7F0] text-[#161616]">
+      {/* Top Navigation Header in BUILD: [Back] and [Home] - displayed when viewing a generated resource */}
+      {activeResource !== null && (
+        <div className="w-full bg-[#FAF7F0] border-b border-stone-200/80 sticky top-0 z-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between">
+            <GlobalNavigationButtons
+              onBack={handleBack}
+              onGoHome={handleHome}
+              backLabel="Back"
+              homeLabel="Home"
+            />
+
+            <div className="text-xs font-mono font-bold text-stone-500 uppercase tracking-wider hidden sm:block">
+              {`BUILD • ${String(activeResource.toolType).replace('-', ' ').toUpperCase()}`}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content: Viewer OR Home Grid */}
+      {activeResource ? (
+        renderViewer()
+      ) : (
+        <BuildHome
+          onSelectTool={handleSelectTool}
+          savedResources={savedResources}
+          onOpenResource={handleOpenSavedResource}
+          onDeleteResource={handleDeleteSavedResource}
+        />
+      )}
+
+      {/* The Unified Exact Tool Menu Modal matching the screenshots */}
+      <BuildToolModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          if (!isGenerating) {
+            setIsModalOpen(false);
+          }
+        }}
+        activeType={modalTool}
+        onSelectType={(newType) => setModalTool(newType)}
+        onGenerate={handleGenerate}
+        isGenerating={isGenerating}
+      />
+    </div>
   );
 }

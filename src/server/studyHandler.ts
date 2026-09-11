@@ -690,10 +690,10 @@ Return a JSON object:
 
     const systemInstruction = `You are the Proudly Afrikan Socratic Mentor and Study Guide.
 You are helping a student master concepts in "${studySetTitle || fileName || 'Uploaded Document'}".
-Current Focus Concept: "${currentConcept || fileName || 'Study Material'}".
+Current Focus Concept: "${currentConcept || fileName || ''}".
 Mode: ${mode === 'homework' ? 'Homework Solver & Explainer (Provide step-by-step walkthroughs, checking each step)' : 'Socratic Mentor (Guide the student with hints and insightful questions based directly on the attached document)'}.
 
-Respond in clean, friendly Markdown with bold terms and clear step formatting. Base all answers strictly on the attached document content.`;
+Respond in clean, friendly tone with clear step formatting. Base all answers strictly on the attached document content. When referencing the uploaded document by name, do not wrap the filename in markdown asterisks or symbols.`;
 
     const parts: any[] = [];
     if (base64File && typeof base64File === 'string') {
@@ -722,7 +722,7 @@ Respond in clean, friendly Markdown with bold terms and clear step formatting. B
     } catch (err: any) {
       return res.json({
         success: true,
-        response: `Based on **${fileName || studySetTitle || 'the uploaded document'}**, let's examine this further:\n\n1. **Core Concept**: Review the primary definitions and key arguments presented in the text.\n2. **Analysis**: How does the author connect the supporting evidence to the main conclusion?\n3. **Discussion**: What specific question or section would you like to explore next?`
+        response: `Based on ${fileName || studySetTitle || 'the uploaded document'}, let's examine this further:\n\n1. **Core Concept**: Review the primary definitions and key arguments presented in the text.\n2. **Analysis**: How does the author connect the supporting evidence to the main conclusion?\n3. **Discussion**: What specific question or section would you like to explore next?`
       });
     }
   });

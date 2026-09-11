@@ -112,7 +112,7 @@ export const StudyHero: React.FC<StudyHeroProps> = ({
                 PDF
               </div>
               <div className="font-mono text-[10px] sm:text-xs font-bold text-stone-600 uppercase tracking-wider">
-                DOCUMENT AI
+                DOCUMENT SUITE
               </div>
             </div>
 

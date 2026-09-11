@@ -1,6 +1,6 @@
 {
   "name": "Proudly Afrikan School",
   "description": "The unified African learning platform combining Study, Quiz, Build, My Sets, Planner, and Pricing into one seamless educational ecosystem.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": ["camera"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

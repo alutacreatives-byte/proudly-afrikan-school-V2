@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
-import { SavedResource } from '../../types';
-import { ArrowLeft, Printer, Copy, Bookmark, Check, Layers, BookOpen, CheckCircle } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Printer, 
+  Copy, 
+  Check, 
+  Bookmark, 
+  Eye, 
+  EyeOff, 
+  Clock, 
+  CheckCircle2 
+} from 'lucide-react';
+import { WorksheetData, SavedResource } from '../../types';
 import { saveResourceToStorage } from '../../utils/storage';
 
 interface WorksheetViewerProps {
@@ -9,13 +19,31 @@ interface WorksheetViewerProps {
 }
 
 export const WorksheetViewer: React.FC<WorksheetViewerProps> = ({ resource, onBack }) => {
-  const content = resource.content || {};
-  const [showAnswers, setShowAnswers] = useState<boolean>(false);
-  const [copied, setCopied] = useState<boolean>(false);
-  const [saved, setSaved] = useState<boolean>(false);
+  const [showAnswers, setShowAnswers] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const ws: WorksheetData = resource.data;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(JSON.stringify(content, null, 2));
+    let text = `${ws.title}\nSubject: ${ws.subject} | Grade: ${ws.gradeLevel}\n\nInstructions: ${ws.instructions}\n\n`;
+    (ws.sections || []).forEach((sec) => {
+      text += `=== ${sec.title} ===\n${sec.instructions}\n\n`;
+      sec.questions.forEach((q) => {
+        text += `Q${q.questionNumber}: ${q.prompt}\n`;
+        if (q.matchingPairs) {
+          q.matchingPairs.forEach((p) => {
+            text += `  • ${p.left}  <-->  ${p.right}\n`;
+          });
+        }
+        if (showAnswers) {
+          text += `Answer: ${q.correctAnswer}\nExplanation: ${q.explanation}\n`;
+        }
+        text += '\n';
+      });
+    });
+
+    navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -23,118 +51,169 @@ export const WorksheetViewer: React.FC<WorksheetViewerProps> = ({ resource, onBa
   const handleSave = () => {
     saveResourceToStorage(resource);
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setTimeout(() => setSaved(false), 2500);
   };
 
   return (
-    <div id="build-result-top" className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in print:p-0">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-stone-200 pb-4 print:hidden">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6 animate-fade-in">
+      {/* Action Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-stone-200">
         <button
+          type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-[#E63956] text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
+          className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-2 transition-colors cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4 text-[#E63956]" />
-          Back to Generators
+          <ArrowLeft className="w-4 h-4" />
+          Back to Build
         </button>
-        <div className="flex items-center gap-2.5 flex-wrap">
+
+        <div className="flex items-center gap-2 flex-wrap">
           <button
+            type="button"
             onClick={() => setShowAnswers(!showAnswers)}
-            className={`px-4 py-2 rounded-xl font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer ${
-              showAnswers ? 'bg-[#E63956] text-white' : 'bg-white border border-stone-200 text-stone-800 hover:border-stone-400'
+            className={`px-4 py-2 rounded-xl border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer ${
+              showAnswers
+                ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                : 'bg-white border-stone-200 hover:bg-stone-50 text-stone-800'
             }`}
           >
+            {showAnswers ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
             {showAnswers ? 'Hide Answer Key' : 'Show Answer Key'}
           </button>
+
           <button
-            onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-stone-400 text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
-          >
-            <Printer className="w-4 h-4 text-stone-600" />
-            Print
-          </button>
-          <button
+            type="button"
             onClick={handleCopy}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-stone-200 hover:border-stone-400 text-stone-800 font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-stone-600" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
             {copied ? 'Copied' : 'Copy'}
           </button>
+
           <button
-            onClick={handleSave}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#E63956] hover:bg-[#d02e48] text-white font-mono text-xs font-bold uppercase transition-all shadow-xs cursor-pointer"
+            type="button"
+            onClick={() => window.print()}
+            className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            {saved ? <Check className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
-            {saved ? 'Saved!' : 'Save'}
+            <Printer className="w-3.5 h-3.5" />
+            Print
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSave}
+            className="px-4 py-2 rounded-xl bg-[#161616] hover:bg-black text-white font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+          >
+            <Bookmark className="w-3.5 h-3.5 text-[#E63956]" />
+            {saved ? 'Saved!' : 'Save to My Sets'}
           </button>
         </div>
       </div>
 
-      <div className="card-3d-elevated p-8 sm:p-12 space-y-8 bg-white print:shadow-none print:border-none">
-        <div className="border-b-2 border-stone-900 pb-6 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#E63956]">
-              CLASSROOM WORKSHEET • {content.subject || resource.subject}
+      {/* Main Worksheet Sheet */}
+      <div className="bg-white rounded-3xl border border-stone-200/90 p-6 sm:p-10 shadow-sm space-y-8 print:shadow-none print:border-none print:p-0">
+        {/* Header */}
+        <div className="pb-6 border-b border-stone-200 space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#E63956]">
+              PRACTICE WORKSHEET • CAPS ALIGNED
             </span>
-            <span className="font-mono text-xs font-bold text-stone-500">
-              {content.gradeLevel || resource.gradeLevel}
-            </span>
+            <div className="flex items-center gap-1.5 font-mono text-xs text-stone-500">
+              <Clock className="w-3.5 h-3.5" />
+              <span>Est. Time: {ws.estimatedTimeMinutes || 45} mins</span>
+            </div>
           </div>
-          <h1 className="font-display font-black text-2xl sm:text-4xl uppercase tracking-tight text-[#161616]">
-            {content.title || resource.title}
+
+          <h1 className="font-display font-black text-2xl sm:text-3xl text-stone-900 uppercase tracking-tight">
+            {ws.title || resource.title}
           </h1>
-          {content.overview && (
-            <p className="text-sm text-stone-700 font-normal pt-2 leading-relaxed">
-              {content.overview}
+
+          <div className="flex items-center gap-4 font-mono text-xs text-stone-600 font-semibold flex-wrap">
+            <span>SUBJECT: {ws.subject || resource.subject}</span>
+            <span>•</span>
+            <span>GRADE: {ws.gradeLevel || resource.gradeLevel}</span>
+          </div>
+
+          {ws.instructions && (
+            <p className="font-mono text-xs text-stone-600 pt-2 border-t border-stone-100 italic">
+              Instructions: {ws.instructions}
             </p>
           )}
         </div>
 
-        {/* Student Header Line */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-stone-50 border border-stone-200 text-xs font-mono font-bold text-stone-700">
-          <div>STUDENT NAME: ___________________________</div>
-          <div>DATE: _________________ CLASS: _________</div>
-        </div>
-
-        {/* Sections / Exercises */}
+        {/* Sections */}
         <div className="space-y-8">
-          {content.sections && Array.isArray(content.sections) ? (
-            content.sections.map((sec: any, sIdx: number) => (
-              <div key={sec.id || sIdx} className="space-y-4 pt-4 border-t border-stone-200">
-                <h3 className="font-display font-black text-lg sm:text-xl uppercase tracking-tight text-stone-900">
-                  {sec.title || `Exercise ${sIdx + 1}`}
-                </h3>
-                {sec.instructions && (
-                  <p className="text-xs sm:text-sm font-mono text-stone-600 italic">
-                    {sec.instructions}
-                  </p>
-                )}
+          {(ws.sections || []).map((sec, sIdx) => (
+            <div key={sec.id || sIdx} className="space-y-4">
+              <div className="pb-2 border-b border-stone-200">
+                <h2 className="font-display font-black text-lg sm:text-xl text-stone-900 uppercase">
+                  {sec.title}
+                </h2>
+                <p className="font-mono text-xs text-stone-500 mt-0.5">{sec.instructions}</p>
+              </div>
 
-                <div className="space-y-4">
-                  {sec.exercises && Array.isArray(sec.exercises) && sec.exercises.map((ex: any, eIdx: number) => (
-                    <div key={ex.id || eIdx} className="p-5 rounded-2xl bg-stone-50/80 border border-stone-200 space-y-3">
-                      <div className="font-display font-bold text-stone-900 text-sm">
-                        Q{eIdx + 1}. {ex.prompt || ex.question}
+              <div className="space-y-5">
+                {(sec.questions || []).map((q, qIdx) => (
+                  <div 
+                    key={q.id || qIdx}
+                    className="p-5 rounded-2xl border border-stone-200/90 bg-stone-50/40 space-y-3"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-2 flex-1">
+                        <span className="font-mono text-xs font-bold text-stone-900 bg-white px-2 py-0.5 rounded-md border border-stone-200">
+                          EXERCISE {q.questionNumber || qIdx + 1}
+                        </span>
+                        <p className="font-mono text-sm text-stone-900 font-medium whitespace-pre-wrap">
+                          {q.prompt}
+                        </p>
                       </div>
-
-                      {/* Answer lines or blanks for student */}
-                      <div className="h-10 border-b border-dashed border-stone-300 w-full" />
-
-                      {showAnswers && ex.answer && (
-                        <div className="pt-2 text-xs font-mono font-bold text-[#E63956] flex items-center gap-1.5">
-                          <CheckCircle className="w-4 h-4" />
-                          Answer Solution: {ex.answer}
-                        </div>
+                      {q.marks && (
+                        <span className="font-mono text-xs font-bold text-[#E63956]">
+                          [{q.marks} Marks]
+                        </span>
                       )}
                     </div>
-                  ))}
-                </div>
+
+                    {/* Matching Exercise */}
+                    {q.matchingPairs && q.matchingPairs.length > 0 && (
+                      <div className="p-4 rounded-xl bg-white border border-stone-200 space-y-2 font-mono text-xs">
+                        <div className="grid grid-cols-2 gap-4 pb-2 border-b border-stone-100 font-bold text-stone-500 uppercase text-[11px]">
+                          <div>Column A (Concepts)</div>
+                          <div>Column B (Definitions / Roles)</div>
+                        </div>
+                        {q.matchingPairs.map((pair, pIdx) => (
+                          <div key={pIdx} className="grid grid-cols-2 gap-4 py-1 text-stone-800">
+                            <div className="font-semibold">{pair.left}</div>
+                            <div className="text-stone-600">{pair.right}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Answer Key */}
+                    {showAnswers && (
+                      <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 font-mono text-xs space-y-1.5 animate-fade-in">
+                        <div className="flex items-center gap-1.5 font-bold uppercase text-[11px] text-emerald-800">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          Solution & Rationale:
+                        </div>
+                        <p>
+                          <strong className="text-emerald-900">Answer: </strong>
+                          {q.correctAnswer}
+                        </p>
+                        {q.explanation && (
+                          <p className="text-emerald-800">
+                            <strong className="text-emerald-900">Explanation: </strong>
+                            {q.explanation}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))
-          ) : (
-            <div className="text-sm font-mono text-stone-600">
-              <pre>{JSON.stringify(content, null, 2)}</pre>
             </div>
-          )}
+          ))}
         </div>
       </div>
     </div>

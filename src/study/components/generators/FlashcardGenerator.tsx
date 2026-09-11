@@ -159,24 +159,15 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-stone-200">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="p-2.5 rounded-full bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 transition-colors cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold text-[#E63956] uppercase tracking-wider">
-                STUDY TOOL 03
-              </span>
-            </div>
-            <h1 className="font-display font-black text-2xl sm:text-3xl text-[#161616] uppercase tracking-tight">
-              FLASHCARD GENERATOR
-            </h1>
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs font-bold text-[#E63956] uppercase tracking-wider">
+              STUDY TOOL 03
+            </span>
           </div>
+          <h1 className="font-display font-black text-2xl sm:text-3xl text-[#161616] uppercase tracking-tight">
+            FLASHCARD GENERATOR
+          </h1>
         </div>
 
         {flashcards && Array.isArray(flashcards.cards) && flashcards.cards.length > 0 && (
@@ -321,29 +312,29 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               {/* Flip Card Container */}
               <div
                 onClick={() => setIsFlipped(!isFlipped)}
-                className="relative w-full min-h-[360px] sm:min-h-[400px] p-8 sm:p-12 rounded-[2.5rem] bg-white border-2 border-stone-200/90 hover:border-[#E63956]/60 shadow-[0_15px_40px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 select-none group"
+                className="relative w-full min-h-[380px] sm:min-h-[440px] p-8 sm:p-14 rounded-[2.5rem] bg-[#E63956] border-2 border-[#D32F4C] shadow-[0_20px_60px_rgba(230,57,86,0.3)] flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 select-none group text-white hover:brightness-105"
               >
-                <span className="absolute top-6 right-6 px-3 py-1 rounded-full bg-stone-100 text-stone-500 text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1 group-hover:bg-[#E63956] group-hover:text-white transition-colors">
-                  <RotateCw className="w-3 h-3" />
+                <span className="absolute top-6 right-6 px-3.5 py-1.5 rounded-full bg-white/20 backdrop-blur-xs text-white text-[11px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 border border-white/30 group-hover:bg-white group-hover:text-[#E63956] transition-colors">
+                  <RotateCw className="w-3.5 h-3.5" />
                   {isFlipped ? 'Answer (Click to flip)' : 'Question (Click to flip)'}
                 </span>
 
-                <div className="space-y-4 max-w-xl">
+                <div className="space-y-4 max-w-2xl px-2">
                   {!isFlipped ? (
                     <>
-                      <span className="text-xs font-mono font-bold text-[#E63956] uppercase tracking-wider block">
+                      <span className="text-xs font-mono font-bold text-white/80 uppercase tracking-widest block">
                         PROMPT / QUESTION
                       </span>
-                      <h3 className="font-display font-black text-xl sm:text-2xl text-[#161616] leading-snug">
+                      <h3 className="font-display font-black text-2xl sm:text-4xl lg:text-5xl text-white leading-tight">
                         {currentCard.front}
                       </h3>
                     </>
                   ) : (
                     <>
-                      <span className="text-xs font-mono font-bold text-emerald-600 uppercase tracking-wider block">
+                      <span className="text-xs font-mono font-bold text-white/80 uppercase tracking-widest block">
                         ANSWER / DEFINITION
                       </span>
-                      <p className="text-stone-800 text-base sm:text-lg font-medium leading-relaxed">
+                      <p className="text-white font-display font-black text-xl sm:text-3xl lg:text-4xl leading-relaxed">
                         {currentCard.back}
                       </p>
                     </>
@@ -353,7 +344,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                 {currentCard.hint && !isFlipped && (
                   <div className="absolute bottom-6 left-6 right-6">
                     {showHint ? (
-                      <p className="text-xs font-mono text-stone-500 bg-stone-50 p-2.5 rounded-xl border border-stone-200 max-w-md mx-auto">
+                      <p className="text-xs font-mono text-white bg-black/25 p-3 rounded-2xl border border-white/20 max-w-md mx-auto backdrop-blur-xs">
                         💡 Hint: {currentCard.hint}
                       </p>
                     ) : (
@@ -363,9 +354,9 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                           e.stopPropagation();
                           setShowHint(true);
                         }}
-                        className="text-[11px] font-mono font-bold text-stone-400 hover:text-stone-700 flex items-center justify-center gap-1 mx-auto"
+                        className="text-xs font-mono font-bold text-white/75 hover:text-white flex items-center justify-center gap-1.5 mx-auto bg-black/20 hover:bg-black/30 px-3 py-1 rounded-full border border-white/20 transition-all cursor-pointer"
                       >
-                        <Eye className="w-3 h-3" />
+                        <Eye className="w-3.5 h-3.5" />
                         Show Hint
                       </button>
                     )}
