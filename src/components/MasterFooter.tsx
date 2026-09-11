@@ -125,7 +125,7 @@ export const MasterFooter: React.FC<MasterFooterProps> = ({
                   onClick={() => handleNav('MY SETS')}
                   className="text-white hover:text-[#E63956] transition-colors cursor-pointer flex items-center gap-1.5 uppercase text-left"
                 >
-                  <span>→ MY SAVED SETS</span>
+                  <span>→ ARCHIVE</span>
                 </button>
               </li>
               <li>

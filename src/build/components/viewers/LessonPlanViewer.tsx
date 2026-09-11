@@ -30,7 +30,8 @@ export const LessonPlanViewer: React.FC<LessonPlanViewerProps> = ({ resource, on
     text += `OBJECTIVES:\n${(plan.learningObjectives || []).map((o) => `• ${o}`).join('\n')}\n\n`;
     text += `5E PEDAGOGICAL PHASES:\n`;
     (plan.phases || []).forEach((p) => {
-      text += `\n[${p.phase} - ${p.durationMinutes} Mins]\nTeacher: ${p.teacherActivity}\nStudents: ${p.studentActivity}\nKey Questions: ${p.keyQuestions.join('; ')}\n`;
+      const kq = Array.isArray(p.keyQuestions) ? p.keyQuestions.join('; ') : '';
+      text += `\n[${p.phase} - ${p.durationMinutes} Mins]\nTeacher: ${p.teacherActivity}\nStudents: ${p.studentActivity}\n${kq ? `Key Questions: ${kq}\n` : ''}`;
     });
 
     navigator.clipboard.writeText(text);

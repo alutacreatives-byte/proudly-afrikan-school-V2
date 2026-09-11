@@ -32,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'study', label: 'Study', icon: <BookOpen className="w-4 h-4" /> },
     { id: 'quiz', label: 'Quiz', icon: <HelpCircle className="w-4 h-4" /> },
     { id: 'build', label: 'Build', icon: <PlusCircle className="w-4 h-4" /> },
-    { id: 'mysets', label: 'My Sets', icon: <FolderKanban className="w-4 h-4" /> },
+    { id: 'mysets', label: 'Archive', icon: <FolderKanban className="w-4 h-4" /> },
     { id: 'planner', label: 'Planner', icon: <Calendar className="w-4 h-4" /> },
     { id: 'pricing', label: 'Pricing', icon: <Sparkles className="w-4 h-4" />, badge: 'Pro' },
   ];

@@ -46,7 +46,7 @@ export const PresentationViewer: React.FC<PresentationViewerProps> = ({ resource
     let text = `${pres.title}\nSubject: ${pres.subject}\n\n`;
     (pres.slides || []).forEach((s) => {
       text += `=== Slide ${s.slideNumber}: ${s.title} ===\n${s.subtitle ? `${s.subtitle}\n` : ''}`;
-      s.bulletPoints.forEach((b) => {
+      (s.bulletPoints || []).forEach((b) => {
         text += `• ${b}\n`;
       });
       if (s.speakingNotes) {
@@ -218,7 +218,7 @@ export const PresentationViewer: React.FC<PresentationViewerProps> = ({ resource
               )}
 
               <ul className="space-y-2.5 pt-2">
-                {currentSlide.bulletPoints.map((bullet, bIdx) => (
+                {(currentSlide.bulletPoints || []).map((bullet, bIdx) => (
                   <li key={bIdx} className="flex items-start gap-3 font-mono text-xs sm:text-sm text-stone-200">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#E63956] mt-2 shrink-0" />
                     <span>{bullet}</span>
