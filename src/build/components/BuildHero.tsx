@@ -51,7 +51,7 @@ export const BuildHero: React.FC<BuildHeroProps> = ({
               className="w-full sm:w-auto px-7 sm:px-8 py-4 clay-btn-crimson font-display text-xs sm:text-sm font-black uppercase tracking-wider flex items-center justify-center gap-2.5 cursor-pointer shadow-[0_6px_20px_rgba(230,57,86,0.4)]"
             >
               <Sparkles className="w-4 h-4" />
-              <span>EXPLORE STUDY TOOLS</span>
+              <span>EXPLORE BUILD TOOLS</span>
             </button>
 
             <button
