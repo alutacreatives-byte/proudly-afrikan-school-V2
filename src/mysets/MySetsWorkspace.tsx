@@ -311,7 +311,7 @@ export const MySetsWorkspace: React.FC<MySetsWorkspaceProps> = ({
     showToast('Exported PDF document.');
   };
 
-  // Open item - Opens the actual saved result in the working archive viewer
+  // Open item - Opens the previous generation results directly without showing the menu
   const handleOpenItem = (item: UnifiedItem) => {
     setViewingItem(item);
   };
