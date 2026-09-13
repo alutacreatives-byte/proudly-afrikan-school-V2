@@ -15,9 +15,11 @@ import {
 } from 'lucide-react';
 import { FlashcardResult, StudyToolInput } from '../../types';
 import { generateStudyTool } from '../../services/aiService';
-
+import { SourceMaterialUpload } from '../../../build/components/SourceMaterialUpload';
 import { saveResourceToStorage } from '../../../build/utils/storage';
 import { useAuthCredit } from '../../../context/AuthCreditContext';
+import { exportFlashcards } from '../../../utils/exportUtils';
+import { useScrollToResult } from '../../../utils/useScrollToResult';
 
 interface FlashcardGeneratorProps {
   onBack: () => void;
@@ -42,17 +44,15 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
 
   // Generation & Active Play State
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [flashcards, setFlashcards] = useState<FlashcardResult | null>(
-    existingResource && Array.isArray(existingResource.cards) && existingResource.cards.length > 0
-      ? existingResource
-      : null
-  );
+  const [flashcards, setFlashcards] = useState<FlashcardResult | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
   const [showHint, setShowHint] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const resultRef = useScrollToResult(flashcards, isGenerating);
 
   const handleGenerate = async () => {
     if (!topic.trim() && !sourceMaterial.trim()) {
@@ -142,15 +142,14 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleExportJson = () => {
+  const handleExportDoc = () => {
     if (!flashcards) return;
-    const blob = new Blob([JSON.stringify(flashcards, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${flashcards.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-flashcards.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    exportFlashcards(flashcards, 'doc');
+  };
+
+  const handleExportPdf = () => {
+    if (!flashcards) return;
+    exportFlashcards(flashcards, 'pdf');
   };
 
   const currentCard = flashcards?.cards?.[currentIndex];
@@ -190,11 +189,21 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
             </button>
             <button
               type="button"
-              onClick={handleExportJson}
+              onClick={handleExportDoc}
               className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Download Word Document (.doc)"
             >
-              <Download className="w-3.5 h-3.5" />
-              JSON
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              DOC
+            </button>
+            <button
+              type="button"
+              onClick={handleExportPdf}
+              className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Download PDF Document (.pdf)"
+            >
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              PDF
             </button>
             <button
               type="button"
@@ -216,10 +225,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         )}
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Form */}
-        <div className="lg:col-span-4 space-y-6">
+      {/* Main Layout: Menu directly ABOVE generation area */}
+      <div className="space-y-8">
+        {/* Form Menu Column */}
+        <div className="w-full space-y-6">
           <div className="p-6 rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] space-y-5">
             <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
               <Sparkles className="w-4 h-4 text-[#E63956]" />
@@ -275,7 +284,22 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               </select>
             </div>
 
-
+            <div>
+              <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
+                Optional Source Material (PDF / DOC / Notes)
+              </label>
+              <SourceMaterialUpload
+                currentFileName={sourceFileName}
+                onTextExtracted={(text, name) => {
+                  setSourceMaterial(text);
+                  setSourceFileName(name);
+                }}
+                onClear={() => {
+                  setSourceMaterial('');
+                  setSourceFileName('');
+                }}
+              />
+            </div>
 
             {error && (
               <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-mono">
@@ -295,8 +319,8 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           </div>
         </div>
 
-        {/* Right Active Flashcard Player */}
-        <div className="lg:col-span-8">
+        {/* Generated Result Area */}
+        <div ref={resultRef} className="w-full scroll-mt-24">
           {flashcards && currentCard && Array.isArray(flashcards.cards) && flashcards.cards.length > 0 ? (
             <div className="space-y-6">
               {/* Card Meta Bar */}
@@ -312,29 +336,29 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               {/* Flip Card Container */}
               <div
                 onClick={() => setIsFlipped(!isFlipped)}
-                className="relative w-full min-h-[380px] sm:min-h-[440px] p-8 sm:p-14 rounded-[2.5rem] bg-[#E63956] border-2 border-[#D32F4C] shadow-[0_20px_60px_rgba(230,57,86,0.3)] flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 select-none group text-white hover:brightness-105"
+                className="relative w-full min-h-[360px] sm:min-h-[400px] p-8 sm:p-12 rounded-[2.5rem] bg-white border-2 border-stone-200/90 hover:border-[#E63956]/60 shadow-[0_15px_40px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 select-none group"
               >
-                <span className="absolute top-6 right-6 px-3.5 py-1.5 rounded-full bg-white/20 backdrop-blur-xs text-white text-[11px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 border border-white/30 group-hover:bg-white group-hover:text-[#E63956] transition-colors">
-                  <RotateCw className="w-3.5 h-3.5" />
+                <span className="absolute top-6 right-6 px-3 py-1 rounded-full bg-stone-100 text-stone-500 text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1 group-hover:bg-[#E63956] group-hover:text-white transition-colors">
+                  <RotateCw className="w-3 h-3" />
                   {isFlipped ? 'Answer (Click to flip)' : 'Question (Click to flip)'}
                 </span>
 
-                <div className="space-y-4 max-w-2xl px-2">
+                <div className="space-y-4 max-w-xl">
                   {!isFlipped ? (
                     <>
-                      <span className="text-xs font-mono font-bold text-white/80 uppercase tracking-widest block">
+                      <span className="text-xs font-mono font-bold text-[#E63956] uppercase tracking-wider block">
                         PROMPT / QUESTION
                       </span>
-                      <h3 className="font-display font-black text-2xl sm:text-4xl lg:text-5xl text-white leading-tight">
+                      <h3 className="font-display font-black text-xl sm:text-2xl text-[#161616] leading-snug">
                         {currentCard.front}
                       </h3>
                     </>
                   ) : (
                     <>
-                      <span className="text-xs font-mono font-bold text-white/80 uppercase tracking-widest block">
+                      <span className="text-xs font-mono font-bold text-emerald-600 uppercase tracking-wider block">
                         ANSWER / DEFINITION
                       </span>
-                      <p className="text-white font-display font-black text-xl sm:text-3xl lg:text-4xl leading-relaxed">
+                      <p className="text-stone-800 text-base sm:text-lg font-medium leading-relaxed">
                         {currentCard.back}
                       </p>
                     </>
@@ -344,7 +368,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                 {currentCard.hint && !isFlipped && (
                   <div className="absolute bottom-6 left-6 right-6">
                     {showHint ? (
-                      <p className="text-xs font-mono text-white bg-black/25 p-3 rounded-2xl border border-white/20 max-w-md mx-auto backdrop-blur-xs">
+                      <p className="text-xs font-mono text-stone-500 bg-stone-50 p-2.5 rounded-xl border border-stone-200 max-w-md mx-auto">
                         💡 Hint: {currentCard.hint}
                       </p>
                     ) : (
@@ -354,9 +378,9 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                           e.stopPropagation();
                           setShowHint(true);
                         }}
-                        className="text-xs font-mono font-bold text-white/75 hover:text-white flex items-center justify-center gap-1.5 mx-auto bg-black/20 hover:bg-black/30 px-3 py-1 rounded-full border border-white/20 transition-all cursor-pointer"
+                        className="text-[11px] font-mono font-bold text-stone-400 hover:text-stone-700 flex items-center justify-center gap-1 mx-auto"
                       >
-                        <Eye className="w-3.5 h-3.5" />
+                        <Eye className="w-3 h-3" />
                         Show Hint
                       </button>
                     )}

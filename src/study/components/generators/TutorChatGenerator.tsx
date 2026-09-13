@@ -17,6 +17,7 @@ import {
 import { TutorChatResult, TutorChatMessage } from '../../types';
 import { saveResourceToStorage } from '../../../build/utils/storage';
 import { useAuthCredit } from '../../../context/AuthCreditContext';
+import { exportTutorChat } from '../../../utils/exportUtils';
 
 interface TutorChatGeneratorProps {
   onBack: () => void;
@@ -212,20 +213,34 @@ export const TutorChatGenerator: React.FC<TutorChatGeneratorProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleExportJson = () => {
-    const data = {
-      title: documentTitle || sourceFileName || 'Tutor Chat',
+  const handleExportDoc = () => {
+    if (messages.length === 0) return;
+    const sessionTitle = documentTitle || sourceFileName || 'Tutor Chat';
+    const resource: TutorChatResult = {
+      id: existingResource?.id || `tutorchat-${Date.now()}`,
+      title: sessionTitle,
       documentName: sourceFileName,
+      sourceSnippet: fileBase64 ? 'Document attached' : '',
       messages,
+      toolType: 'pdf-quiz',
       createdAt: new Date().toISOString(),
     };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `tutor-chat-${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    exportTutorChat(resource, 'doc');
+  };
+
+  const handleExportPdf = () => {
+    if (messages.length === 0) return;
+    const sessionTitle = documentTitle || sourceFileName || 'Tutor Chat';
+    const resource: TutorChatResult = {
+      id: existingResource?.id || `tutorchat-${Date.now()}`,
+      title: sessionTitle,
+      documentName: sourceFileName,
+      sourceSnippet: fileBase64 ? 'Document attached' : '',
+      messages,
+      toolType: 'pdf-quiz',
+      createdAt: new Date().toISOString(),
+    };
+    exportTutorChat(resource, 'pdf');
   };
 
   const isChatActive = messages.length > 0 && !!sourceFileName;
@@ -293,11 +308,21 @@ export const TutorChatGenerator: React.FC<TutorChatGeneratorProps> = ({
             </button>
             <button
               type="button"
-              onClick={handleExportJson}
+              onClick={handleExportDoc}
               className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Download Word Document (.doc)"
             >
-              <Download className="w-3.5 h-3.5" />
-              JSON
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              DOC
+            </button>
+            <button
+              type="button"
+              onClick={handleExportPdf}
+              className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Download PDF Document (.pdf)"
+            >
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              PDF
             </button>
             <button
               type="button"
@@ -379,9 +404,9 @@ export const TutorChatGenerator: React.FC<TutorChatGeneratorProps> = ({
         </div>
       ) : (
         /* Active Chat Interface */
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Document File Reference Sidebar */}
-          <div className="lg:col-span-4 space-y-4">
+        <div className="space-y-6 items-start">
+          {/* Document File Reference & Quick Prompts Menu */}
+          <div className="w-full space-y-4">
             <div className="p-6 rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] space-y-4">
               <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
                 <FileText className="w-4 h-4 text-[#E63956]" />
@@ -431,8 +456,8 @@ export const TutorChatGenerator: React.FC<TutorChatGeneratorProps> = ({
             </div>
           </div>
 
-          {/* Right Chat Feed */}
-          <div className="lg:col-span-8 flex flex-col h-[680px] rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] overflow-hidden">
+          {/* Chat Feed */}
+          <div className="w-full flex flex-col h-[680px] rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] overflow-hidden">
             {/* Chat Messages Container */}
             <div className="flex-1 p-6 overflow-y-auto space-y-6">
               {messages.map((m, idx) => {

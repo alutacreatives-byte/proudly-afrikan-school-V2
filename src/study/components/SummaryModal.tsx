@@ -37,7 +37,7 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({
   const [isCopied, setIsCopied] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
-  const activeTitle = concept?.title ? `${concept.title}` : (studySet?.title || '');
+  const activeTitle = concept?.title ? `${concept.title}` : (studySet?.title || 'Study Material');
 
   useEffect(() => {
     if (isOpen) {

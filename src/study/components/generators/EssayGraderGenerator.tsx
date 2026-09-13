@@ -20,6 +20,8 @@ import { generateStudyTool } from '../../services/aiService';
 import { saveResourceToStorage } from '../../../build/utils/storage';
 import { useAuthCredit } from '../../../context/AuthCreditContext';
 import { extractTextFromFile } from '../../../quiz/utils/pdfExtractor';
+import { exportEssayGrader } from '../../../utils/exportUtils';
+import { useScrollToResult } from '../../../utils/useScrollToResult';
 
 interface EssayGraderGeneratorProps {
   onBack: () => void;
@@ -51,6 +53,8 @@ export const EssayGraderGenerator: React.FC<EssayGraderGeneratorProps> = ({
   const [saved, setSaved] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const resultRef = useScrollToResult(result, isGenerating);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -139,15 +143,14 @@ export const EssayGraderGenerator: React.FC<EssayGraderGeneratorProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleExportJson = () => {
+  const handleExportDoc = () => {
     if (!result) return;
-    const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${result.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-evaluation.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    exportEssayGrader(result, 'doc');
+  };
+
+  const handleExportPdf = () => {
+    if (!result) return;
+    exportEssayGrader(result, 'pdf');
   };
 
   return (
@@ -177,11 +180,21 @@ export const EssayGraderGenerator: React.FC<EssayGraderGeneratorProps> = ({
             </button>
             <button
               type="button"
-              onClick={handleExportJson}
+              onClick={handleExportDoc}
               className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Download Word Document (.doc)"
             >
-              <Download className="w-3.5 h-3.5" />
-              JSON
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              DOC
+            </button>
+            <button
+              type="button"
+              onClick={handleExportPdf}
+              className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Download PDF Document (.pdf)"
+            >
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              PDF
             </button>
             <button
               type="button"
@@ -203,10 +216,10 @@ export const EssayGraderGenerator: React.FC<EssayGraderGeneratorProps> = ({
         )}
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Form */}
-        <div className="lg:col-span-4 space-y-6">
+      {/* Main Layout: Menu directly ABOVE generation area */}
+      <div className="space-y-8">
+        {/* Form Menu Column */}
+        <div className="w-full space-y-6">
           <div className="p-6 rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] space-y-5">
             <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
               <FileCheck2 className="w-4 h-4 text-[#E63956]" />
@@ -294,8 +307,8 @@ export const EssayGraderGenerator: React.FC<EssayGraderGeneratorProps> = ({
           </div>
         </div>
 
-        {/* Right Results Display */}
-        <div className="lg:col-span-8">
+        {/* Generated Result Area */}
+        <div ref={resultRef} className="w-full scroll-mt-24">
           {result ? (
             <div className="p-8 sm:p-10 rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] space-y-8">
               {/* Score & Header */}

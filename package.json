@@ -14,10 +14,6 @@
   "dependencies": {
     "@google/genai": "^2.4.0",
     "@tailwindcss/vite": "^4.1.14",
-    "@types/archiver": "^8.0.0",
-    "@types/canvas-confetti": "^1.9.0",
-    "@types/pdf-parse": "^1.1.5",
-    "@vitejs/plugin-react": "^5.0.4",
     "archiver": "^8.0.0",
     "canvas-confetti": "^1.9.4",
     "dotenv": "^17.2.3",
@@ -28,16 +24,18 @@
     "motion": "^12.23.24",
     "pdf-parse": "^2.4.5",
     "pdfjs-dist": "^6.2.108",
-    "pptxgenjs": "^4.0.1",
     "react": "^19.0.1",
-    "react-dom": "^19.0.1",
-    "vite": "^6.2.3"
+    "react-dom": "^19.0.1"
   },
   "devDependencies": {
+    "@types/archiver": "^8.0.0",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
+    "@types/pdf-parse": "^1.1.5",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
+    "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.25.0",
     "tailwindcss": "^4.1.14",

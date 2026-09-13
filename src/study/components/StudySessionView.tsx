@@ -384,9 +384,7 @@ ${differentiatedResult.content}
           </div>
         </div>
 
-        <div className="flex items-center justify-center pt-2">
-          <GlobalNavigationButtons onBack={onBack} onGoHome={onGoHome} />
-        </div>
+
       </div>
     );
   }
@@ -411,11 +409,13 @@ ${differentiatedResult.content}
         concept={currentConcept}
       />
 
-      {/* Top Header & Breadcrumb */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 pb-4">
-        <GlobalNavigationButtons onBack={onBack} onGoHome={onGoHome} />
 
-        {/* Top Study Tools Toolbar */}
+      {/* Top Header & Study Tools Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 pb-4">
+        <div className="flex items-center gap-2 font-mono text-xs font-bold text-stone-800 uppercase">
+          <span>STUDY SESSION</span>
+        </div>
+
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsTutorOpen(true)}

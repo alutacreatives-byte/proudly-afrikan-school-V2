@@ -142,10 +142,7 @@ export const SubjectExplorer: React.FC<SubjectExplorerProps> = ({
 
   return (
     <div className="space-y-8 pb-16 w-full max-w-full overflow-hidden">
-      {/* Global Navigation: BACK + HOME */}
-      <div className="flex items-center justify-between">
-        <GlobalNavigationButtons onBack={onBack} onGoHome={onGoHome} />
-      </div>
+
 
       {/* Top Editorial Header - Fully Responsive Layout */}
       <div className="border-b border-stone-200/90 pb-6 flex flex-col lg:flex-row lg:items-end justify-between gap-5 sm:gap-6">

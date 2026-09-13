@@ -14,9 +14,11 @@ import {
 } from 'lucide-react';
 import { LearningPathResult, StudyToolInput } from '../../types';
 import { generateStudyTool } from '../../services/aiService';
-
+import { SourceMaterialUpload } from '../../../build/components/SourceMaterialUpload';
 import { saveResourceToStorage } from '../../../build/utils/storage';
 import { useAuthCredit } from '../../../context/AuthCreditContext';
+import { exportLearningPath } from '../../../utils/exportUtils';
+import { useScrollToResult } from '../../../utils/useScrollToResult';
 
 interface StudyLearningPathGeneratorProps {
   onBack: () => void;
@@ -41,15 +43,13 @@ export const StudyLearningPathGenerator: React.FC<StudyLearningPathGeneratorProp
 
   // Path Generation State
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [path, setPath] = useState<LearningPathResult | null>(
-    existingResource && Array.isArray(existingResource.stages) && existingResource.stages.length > 0
-      ? existingResource
-      : null
-  );
+  const [path, setPath] = useState<LearningPathResult | null>(null);
   const [completedStages, setCompletedStages] = useState<Record<number, boolean>>({});
   const [saved, setSaved] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const resultRef = useScrollToResult(path, isGenerating);
 
   const handleGenerate = async () => {
     if (!topic.trim() && !sourceMaterial.trim()) {
@@ -111,7 +111,7 @@ export const StudyLearningPathGenerator: React.FC<StudyLearningPathGeneratorProp
   const handleCopy = () => {
     if (!path) return;
     let text = `# ${path.title}\nTarget Goal: ${path.targetGoal || targetGoal}\nEstimated Duration: ${path.totalEstimatedWeeks || 8} Weeks\n\n`;
-    (path.stages || []).forEach((st) => {
+    path.stages.forEach((st) => {
       text += `## Stage ${st.stepNumber}: ${st.title} (~${st.estimatedHours || 15} hours)\n${st.description}\n`;
       if (st.skillsAcquired) text += 'Skills Acquired: ' + st.skillsAcquired.join(', ') + '\n';
       if (st.suggestedActivities) text += 'Activities:\n' + st.suggestedActivities.map((a) => `  - ${a}`).join('\n') + '\n';
@@ -123,15 +123,14 @@ export const StudyLearningPathGenerator: React.FC<StudyLearningPathGeneratorProp
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleExportJson = () => {
+  const handleExportDoc = () => {
     if (!path) return;
-    const blob = new Blob([JSON.stringify(path, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${path.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-path.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    exportLearningPath(path, 'doc');
+  };
+
+  const handleExportPdf = () => {
+    if (!path) return;
+    exportLearningPath(path, 'pdf');
   };
 
   return (
@@ -161,11 +160,21 @@ export const StudyLearningPathGenerator: React.FC<StudyLearningPathGeneratorProp
             </button>
             <button
               type="button"
-              onClick={handleExportJson}
+              onClick={handleExportDoc}
               className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Download Word Document (.doc)"
             >
-              <Download className="w-3.5 h-3.5" />
-              JSON
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              DOC
+            </button>
+            <button
+              type="button"
+              onClick={handleExportPdf}
+              className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Download PDF Document (.pdf)"
+            >
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              PDF
             </button>
             <button
               type="button"
@@ -187,10 +196,10 @@ export const StudyLearningPathGenerator: React.FC<StudyLearningPathGeneratorProp
         )}
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Form */}
-        <div className="lg:col-span-4 space-y-6">
+      {/* Main Layout: Menu directly ABOVE generation area */}
+      <div className="space-y-8">
+        {/* Form Menu Column */}
+        <div className="w-full space-y-6">
           <div className="p-6 rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] space-y-5">
             <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
               <Sparkles className="w-4 h-4 text-[#E63956]" />
@@ -240,7 +249,22 @@ export const StudyLearningPathGenerator: React.FC<StudyLearningPathGeneratorProp
               </select>
             </div>
 
-
+            <div>
+              <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
+                Optional Source Material (PDF / DOC / Notes)
+              </label>
+              <SourceMaterialUpload
+                currentFileName={sourceFileName}
+                onTextExtracted={(text, name) => {
+                  setSourceMaterial(text);
+                  setSourceFileName(name);
+                }}
+                onClear={() => {
+                  setSourceMaterial('');
+                  setSourceFileName('');
+                }}
+              />
+            </div>
 
             {error && (
               <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-mono">
@@ -260,8 +284,8 @@ export const StudyLearningPathGenerator: React.FC<StudyLearningPathGeneratorProp
           </div>
         </div>
 
-        {/* Right Active Roadmap Preview */}
-        <div className="lg:col-span-8">
+        {/* Generated Result Area */}
+        <div ref={resultRef} className="w-full scroll-mt-24">
           {path && Array.isArray(path.stages) && path.stages.length > 0 ? (
             <div className="p-8 sm:p-10 rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] space-y-8">
               {/* Header */}
@@ -289,7 +313,7 @@ export const StudyLearningPathGenerator: React.FC<StudyLearningPathGeneratorProp
                 </h3>
 
                 <div className="space-y-6 relative before:absolute before:left-5 before:top-4 before:bottom-4 before:w-0.5 before:bg-stone-200">
-                  {(path.stages || []).map((st, idx) => {
+                  {path.stages.map((st, idx) => {
                     const isDone = Boolean(completedStages[idx]);
 
                     return (

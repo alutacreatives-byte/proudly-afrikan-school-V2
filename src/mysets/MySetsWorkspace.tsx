@@ -23,6 +23,7 @@ import { Quiz } from '../quiz/types';
 import { SavedResource } from '../build/types';
 import { SavedResultViewer } from './SavedResultViewer';
 import { saveSearchResult } from './savedSearchService';
+import { exportUnifiedItem } from '../utils/exportUtils';
 
 export type ContentKind = 'all' | 'study-set' | 'quiz' | 'build' | 'search-result';
 
@@ -297,19 +298,17 @@ export const MySetsWorkspace: React.FC<MySetsWorkspaceProps> = ({
     loadAllContent();
   };
 
-  // Export JSON handler
-  const handleExportJson = (item: UnifiedItem, e: React.MouseEvent) => {
+  // Export DOC & PDF handlers
+  const handleExportDoc = (item: UnifiedItem, e: React.MouseEvent) => {
     e.stopPropagation();
-    const data = item.originalStudySet || item.originalQuiz || item.originalBuildResource;
-    if (!data) return;
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('Exported JSON file.');
+    exportUnifiedItem(item, 'doc');
+    showToast('Exported Word (.doc) document.');
+  };
+
+  const handleExportPdf = (item: UnifiedItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    exportUnifiedItem(item, 'pdf');
+    showToast('Exported PDF document.');
   };
 
   // Open item - Opens the actual saved result in the working archive viewer
@@ -368,7 +367,7 @@ export const MySetsWorkspace: React.FC<MySetsWorkspaceProps> = ({
               <span>UNIFIED KNOWLEDGE REPOSITORY</span>
             </div>
             <h1 className="text-2xl sm:text-4xl font-display font-black tracking-tight text-[#161616] uppercase">
-              MY SETS & SAVED RESOURCES
+              HISTORY & SAVED RESOURCES
             </h1>
             <p className="text-stone-700 text-xs sm:text-[13px] max-w-2xl font-normal leading-relaxed">
               Your central workspace containing all created study sets, active recall flashcards, interactive quizzes, and generated educational materials across Proudly Afrikan School.
@@ -616,11 +615,21 @@ export const MySetsWorkspace: React.FC<MySetsWorkspaceProps> = ({
                         </button>
                         <button
                           type="button"
-                          onClick={(e) => handleExportJson(item, e)}
-                          className="p-1.5 rounded-full bg-white border border-[#EAE3D6] hover:bg-stone-100 text-stone-600 hover:text-stone-900 transition-colors shadow-xs cursor-pointer"
-                          title="Export as JSON"
+                          onClick={(e) => handleExportDoc(item, e)}
+                          className="px-2 py-1 rounded-full bg-white border border-[#EAE3D6] hover:bg-stone-100 text-stone-700 transition-colors shadow-xs cursor-pointer font-mono text-[10px] font-bold uppercase flex items-center gap-1"
+                          title="Download Word Document (.doc)"
                         >
-                          <Download className="w-3.5 h-3.5" />
+                          <Download className="w-3 h-3 text-[#D92B8A]" />
+                          <span>DOC</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleExportPdf(item, e)}
+                          className="px-2 py-1 rounded-full bg-white border border-[#EAE3D6] hover:bg-stone-100 text-stone-700 transition-colors shadow-xs cursor-pointer font-mono text-[10px] font-bold uppercase flex items-center gap-1"
+                          title="Download PDF Document (.pdf)"
+                        >
+                          <Download className="w-3 h-3 text-[#D92B8A]" />
+                          <span>PDF</span>
                         </button>
                         <button
                           type="button"

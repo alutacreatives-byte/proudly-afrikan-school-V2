@@ -619,7 +619,7 @@ export const CreateSetModal: React.FC<CreateSetModalProps> = ({
                       </div>
 
                       <div className="text-[11px] font-mono text-stone-400">
-                        Supports live webcam, mobile rear/front camera, and image uploads &bull; Instant OCR
+                        Supports live webcam, mobile rear/front camera, and image uploads &bull; Instant AI OCR
                       </div>
                     </div>
                   )}

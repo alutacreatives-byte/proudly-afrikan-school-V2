@@ -4,13 +4,13 @@ import {
   Search, 
   Trash2, 
   ArrowRight, 
-  FileText, 
-  Layers, 
-  CheckSquare, 
-  FileCheck2, 
-  Presentation, 
-  GraduationCap, 
-  GitBranch, 
+  FileText,
+  Layers,
+  CheckSquare,
+  FileCheck2,
+  Presentation,
+  GraduationCap,
+  GitBranch,
   Download
 } from 'lucide-react';
 import { StudyToolType } from '../types';
@@ -40,7 +40,9 @@ export const StudyMyResources: React.FC<StudyMyResourcesProps> = ({
       case 'study-guide': return <FileText className="w-4 h-4 text-[#E63956]" />;
       case 'flashcards': return <Layers className="w-4 h-4 text-emerald-600" />;
       case 'quiz': return <CheckSquare className="w-4 h-4 text-sky-600" />;
+      case 'essay-grader': return <FileCheck2 className="w-4 h-4 text-amber-600" />;
       case 'pdf-quiz': return <FileCheck2 className="w-4 h-4 text-purple-600" />;
+      case 'tutor-chat': return <FileText className="w-4 h-4 text-purple-600" />;
       case 'presentation': return <Presentation className="w-4 h-4 text-amber-600" />;
       case 'course': return <GraduationCap className="w-4 h-4 text-indigo-600" />;
       case 'learning-path': return <GitBranch className="w-4 h-4 text-teal-600" />;
@@ -90,8 +92,9 @@ export const StudyMyResources: React.FC<StudyMyResourcesProps> = ({
           { id: 'all', label: 'All Resources' },
           { id: 'study-guide', label: 'Study Guides' },
           { id: 'flashcards', label: 'Flashcards' },
+          { id: 'essay-grader', label: 'Essay Evaluations' },
           { id: 'quiz', label: 'Quizzes' },
-          { id: 'pdf-quiz', label: 'PDF Quizzes' },
+          { id: 'pdf-quiz', label: 'Tutor Chats / Docs' },
           { id: 'presentation', label: 'Presentations' },
           { id: 'course', label: 'Courses' },
           { id: 'learning-path', label: 'Roadmaps' },

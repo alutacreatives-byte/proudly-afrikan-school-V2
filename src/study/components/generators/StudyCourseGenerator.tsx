@@ -15,9 +15,11 @@ import {
 } from 'lucide-react';
 import { CourseResult, StudyToolInput } from '../../types';
 import { generateStudyTool } from '../../services/aiService';
-
+import { SourceMaterialUpload } from '../../../build/components/SourceMaterialUpload';
 import { saveResourceToStorage } from '../../../build/utils/storage';
 import { useAuthCredit } from '../../../context/AuthCreditContext';
+import { exportCourse } from '../../../utils/exportUtils';
+import { useScrollToResult } from '../../../utils/useScrollToResult';
 
 interface StudyCourseGeneratorProps {
   onBack: () => void;
@@ -41,15 +43,13 @@ export const StudyCourseGenerator: React.FC<StudyCourseGeneratorProps> = ({
 
   // Course generation state
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [course, setCourse] = useState<CourseResult | null>(
-    existingResource && Array.isArray(existingResource.modules) && existingResource.modules.length > 0
-      ? existingResource
-      : null
-  );
+  const [course, setCourse] = useState<CourseResult | null>(null);
   const [activeModuleIdx, setActiveModuleIdx] = useState<number>(0);
   const [saved, setSaved] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const resultRef = useScrollToResult(course, isGenerating);
 
   const handleGenerate = async () => {
     if (!topic.trim() && !sourceMaterial.trim()) {
@@ -125,15 +125,14 @@ export const StudyCourseGenerator: React.FC<StudyCourseGeneratorProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleExportJson = () => {
+  const handleExportDoc = () => {
     if (!course) return;
-    const blob = new Blob([JSON.stringify(course, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${course.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-course.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    exportCourse(course, 'doc');
+  };
+
+  const handleExportPdf = () => {
+    if (!course) return;
+    exportCourse(course, 'pdf');
   };
 
   return (
@@ -163,11 +162,21 @@ export const StudyCourseGenerator: React.FC<StudyCourseGeneratorProps> = ({
             </button>
             <button
               type="button"
-              onClick={handleExportJson}
+              onClick={handleExportDoc}
               className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Download Word Document (.doc)"
             >
-              <Download className="w-3.5 h-3.5" />
-              JSON
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              DOC
+            </button>
+            <button
+              type="button"
+              onClick={handleExportPdf}
+              className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Download PDF Document (.pdf)"
+            >
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              PDF
             </button>
             <button
               type="button"
@@ -189,10 +198,10 @@ export const StudyCourseGenerator: React.FC<StudyCourseGeneratorProps> = ({
         )}
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Form */}
-        <div className="lg:col-span-4 space-y-6">
+      {/* Main Layout: Menu directly ABOVE generation area */}
+      <div className="space-y-8">
+        {/* Form Menu Column */}
+        <div className="w-full space-y-6">
           <div className="p-6 rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] space-y-5">
             <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
               <Sparkles className="w-4 h-4 text-[#E63956]" />
@@ -248,7 +257,22 @@ export const StudyCourseGenerator: React.FC<StudyCourseGeneratorProps> = ({
               </select>
             </div>
 
-
+            <div>
+              <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
+                Optional Source Material (PDF / DOC / Notes)
+              </label>
+              <SourceMaterialUpload
+                currentFileName={sourceFileName}
+                onTextExtracted={(text, name) => {
+                  setSourceMaterial(text);
+                  setSourceFileName(name);
+                }}
+                onClear={() => {
+                  setSourceMaterial('');
+                  setSourceFileName('');
+                }}
+              />
+            </div>
 
             {error && (
               <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-mono">
@@ -268,8 +292,8 @@ export const StudyCourseGenerator: React.FC<StudyCourseGeneratorProps> = ({
           </div>
         </div>
 
-        {/* Right Active Course Syllabus Preview */}
-        <div className="lg:col-span-8">
+        {/* Generated Result Area */}
+        <div ref={resultRef} className="w-full scroll-mt-24">
           {course && Array.isArray(course.modules) && course.modules.length > 0 ? (
             <div className="p-8 sm:p-10 rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] space-y-8">
               {/* Header */}

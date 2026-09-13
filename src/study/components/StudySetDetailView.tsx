@@ -82,10 +82,7 @@ export const StudySetDetailView: React.FC<StudySetDetailViewProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-16">
-      {/* Global Navigation: BACK + HOME */}
-      <div className="flex items-center justify-between">
-        <GlobalNavigationButtons onBack={onBack} onGoHome={onGoHome} />
-      </div>
+
 
       {/* Hero Study Set Overview Card */}
       <div className="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-[0_12px_36px_rgba(0,0,0,0.06)]">

@@ -162,10 +162,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
   return (
     <div id="library-view-root" className="max-w-6xl mx-auto space-y-8 pb-20">
-      {/* Global Navigation: BACK + HOME */}
-      <div className="flex items-center justify-between">
-        <GlobalNavigationButtons onBack={onBack} onGoHome={onGoHome} />
-      </div>
+
 
       {/* Header Banner */}
       <section className="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-8 shadow-sm">

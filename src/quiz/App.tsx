@@ -36,7 +36,7 @@ export default function App({
 
   // Creation State
   const [creationMethod, setCreationMethod] = useState<CreationMethod>('topic');
-  const [topicInput, setTopicInput] = useState<string>('The Kingdom of Mali & Mansa Musa');
+  const [topicInput, setTopicInput] = useState<string>('');
   const [selectedSubject, setSelectedSubject] = useState<SubjectCategory>('History');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [globalError, setGlobalError] = useState<string | null>(null);

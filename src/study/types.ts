@@ -283,8 +283,10 @@ export interface StudySummary {
 export type StudyToolType = 
   | 'study-guide'
   | 'flashcards'
+  | 'quiz'
   | 'essay-grader'
   | 'pdf-quiz'
+  | 'tutor-chat'
   | 'presentation'
   | 'course'
   | 'learning-path';
@@ -356,6 +358,22 @@ export interface QuizQuestion {
   correctAnswer: number | string;
   explanation: string;
   category?: string;
+}
+
+export interface QuizResult {
+  id?: string;
+  title: string;
+  subject?: string;
+  topic?: string;
+  description?: string;
+  sourceSnippet?: string;
+  documentName?: string;
+  capturedPhotoUrl?: string;
+  difficulty?: string;
+  timeLimitMinutes?: number;
+  questions: QuizQuestion[];
+  toolType?: 'quiz';
+  createdAt?: string;
 }
 
 export interface EssayImprovementItem {
@@ -502,13 +520,15 @@ export interface LearningPathResult {
 }
 
 export type FlashcardsResult = FlashcardResult;
-export type StudyQuizResult = EssayGraderResult;
+export type StudyQuizResult = QuizResult;
 
 export type StudyToolResult = 
   | StudyGuideResult
   | FlashcardResult
+  | QuizResult
   | EssayGraderResult
   | PdfQuizResult
+  | TutorChatResult
   | PresentationResult
   | CourseResult
   | LearningPathResult;

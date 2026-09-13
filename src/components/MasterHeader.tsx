@@ -3,7 +3,7 @@ import {
   BookOpen, 
   GraduationCap, 
   Layers, 
-  FolderOpen, 
+  History, 
   Calendar, 
   Tag, 
   Zap, 
@@ -55,7 +55,7 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
     { id: 'STUDY', label: 'STUDY', icon: BookOpen },
     { id: 'QUIZ', label: 'QUIZ', icon: GraduationCap },
     { id: 'BUILD', label: 'BUILD', icon: Layers },
-    { id: 'MY SETS', label: 'ARCHIVE', icon: FolderOpen, badge: savedItemCount },
+    { id: 'MY SETS', label: 'HISTORY', icon: History, badge: savedItemCount },
     { id: 'PLANNER', label: 'PLANNER', icon: Calendar },
     { id: 'PRICING', label: 'PRICING', icon: Tag },
   ];

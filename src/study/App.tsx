@@ -264,6 +264,7 @@ export default function StudyApp({
     if (activeTool === 'study-guide') {
       return (
         <StudyGuideGenerator
+          key="gen-study-guide"
           onBack={handleBack}
           onSaved={refreshSavedCount}
           existingResource={activeResource as StudyGuideResult}
@@ -275,6 +276,7 @@ export default function StudyApp({
     if (activeTool === 'flashcards') {
       return (
         <FlashcardGenerator
+          key="gen-flashcards"
           onBack={handleBack}
           onSaved={refreshSavedCount}
           existingResource={activeResource as FlashcardsResult}
@@ -282,10 +284,11 @@ export default function StudyApp({
       );
     }
 
-    // 4. Essay Grader (Tool 03)
-    if (activeTool === 'essay-grader') {
+    // 4. Essay Grader (Tool 04 - replaced Practice Quiz Generator)
+    if (activeTool === 'essay-grader' || (activeTool as any) === 'quiz') {
       return (
         <EssayGraderGenerator
+          key="gen-essay-grader"
           onBack={handleBack}
           onSaved={refreshSavedCount}
           existingResource={activeResource as EssayGraderResult}
@@ -293,10 +296,11 @@ export default function StudyApp({
       );
     }
 
-    // 5. Tutor Chat (Tool 05)
-    if (activeTool === 'pdf-quiz') {
+    // 5. Tutor Chat (Tool 05 - replaced PDF & Document Quiz)
+    if (activeTool === 'pdf-quiz' || (activeTool as any) === 'tutor-chat') {
       return (
         <TutorChatGenerator
+          key="gen-tutor-chat"
           onBack={handleBack}
           onSaved={refreshSavedCount}
           existingResource={activeResource as TutorChatResult}
@@ -308,6 +312,7 @@ export default function StudyApp({
     if (activeTool === 'presentation') {
       return (
         <StudyPresentationGenerator
+          key="gen-presentation"
           onBack={handleBack}
           onSaved={refreshSavedCount}
           existingResource={activeResource as PresentationResult}
@@ -319,6 +324,7 @@ export default function StudyApp({
     if (activeTool === 'course') {
       return (
         <StudyCourseGenerator
+          key="gen-course"
           onBack={handleBack}
           onSaved={refreshSavedCount}
           existingResource={activeResource as CourseResult}
@@ -330,6 +336,7 @@ export default function StudyApp({
     if (activeTool === 'learning-path') {
       return (
         <StudyLearningPathGenerator
+          key="gen-learning-path"
           onBack={handleBack}
           onSaved={refreshSavedCount}
           existingResource={activeResource as LearningPathResult}

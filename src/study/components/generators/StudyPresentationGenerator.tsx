@@ -15,9 +15,11 @@ import {
 } from 'lucide-react';
 import { PresentationResult, StudyToolInput } from '../../types';
 import { generateStudyTool } from '../../services/aiService';
-
+import { SourceMaterialUpload } from '../../../build/components/SourceMaterialUpload';
 import { saveResourceToStorage } from '../../../build/utils/storage';
 import { useAuthCredit } from '../../../context/AuthCreditContext';
+import { exportPresentation } from '../../../utils/exportUtils';
+import { useScrollToResult } from '../../../utils/useScrollToResult';
 
 interface StudyPresentationGeneratorProps {
   onBack: () => void;
@@ -42,17 +44,15 @@ export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProp
 
   // Generation & Active Deck State
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [presentation, setPresentation] = useState<PresentationResult | null>(
-    existingResource && Array.isArray(existingResource.slides) && existingResource.slides.length > 0
-      ? existingResource
-      : null
-  );
+  const [presentation, setPresentation] = useState<PresentationResult | null>(null);
   const [activeSlideIndex, setActiveSlideIndex] = useState<number>(0);
   const [showSpeakerNotes, setShowSpeakerNotes] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const resultRef = useScrollToResult(presentation, isGenerating);
 
   const handleGenerate = async () => {
     if (!topic.trim() && !sourceMaterial.trim()) {
@@ -132,15 +132,14 @@ export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProp
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleExportJson = () => {
+  const handleExportDoc = () => {
     if (!presentation) return;
-    const blob = new Blob([JSON.stringify(presentation, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${presentation.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-slides.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    exportPresentation(presentation, 'doc');
+  };
+
+  const handleExportPdf = () => {
+    if (!presentation) return;
+    exportPresentation(presentation, 'pdf');
   };
 
   const currentSlide = presentation?.slides?.[activeSlideIndex];
@@ -184,13 +183,25 @@ export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProp
             </button>
             <button
               type="button"
-              onClick={handleExportJson}
+              onClick={handleExportDoc}
               className={`px-4 py-2 rounded-xl border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer ${
                 isFullscreen ? 'bg-stone-800 text-white border-stone-700' : 'bg-white border-stone-200 text-stone-800 hover:bg-stone-50'
               }`}
+              title="Download Word Document (.doc)"
             >
-              <Download className="w-3.5 h-3.5" />
-              JSON
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              DOC
+            </button>
+            <button
+              type="button"
+              onClick={handleExportPdf}
+              className={`px-4 py-2 rounded-xl border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer ${
+                isFullscreen ? 'bg-stone-800 text-white border-stone-700' : 'bg-white border-stone-200 text-stone-800 hover:bg-stone-50'
+              }`}
+              title="Download PDF Document (.pdf)"
+            >
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              PDF
             </button>
             <button
               type="button"
@@ -214,11 +225,11 @@ export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProp
         )}
       </div>
 
-      {/* Grid */}
-      <div className={`grid grid-cols-1 ${isFullscreen ? 'lg:grid-cols-1' : 'lg:grid-cols-12'} gap-8`}>
+      {/* Main Layout: Menu directly ABOVE generation area */}
+      <div className="space-y-8">
         {/* Left Form (Hidden in fullscreen) */}
         {!isFullscreen && (
-          <div className="lg:col-span-4 space-y-6">
+          <div className="w-full space-y-6">
             <div className="p-6 rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] space-y-5">
               <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
                 <Sparkles className="w-4 h-4 text-[#E63956]" />
@@ -290,7 +301,22 @@ export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProp
                 </select>
               </div>
 
-
+              <div>
+                <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
+                  Optional Source Material (PDF / DOC / Notes)
+                </label>
+                <SourceMaterialUpload
+                  currentFileName={sourceFileName}
+                  onTextExtracted={(text, name) => {
+                    setSourceMaterial(text);
+                    setSourceFileName(name);
+                  }}
+                  onClear={() => {
+                    setSourceMaterial('');
+                    setSourceFileName('');
+                  }}
+                />
+              </div>
 
               {error && (
                 <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-mono">
@@ -311,8 +337,8 @@ export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProp
           </div>
         )}
 
-        {/* Right Active Slide Stage */}
-        <div className={isFullscreen ? 'w-full max-w-5xl mx-auto' : 'lg:col-span-8'}>
+        {/* Generated Result Area */}
+        <div ref={resultRef} className={`w-full scroll-mt-24 ${isFullscreen ? 'max-w-5xl mx-auto' : ''}`}>
           {presentation && currentSlide && Array.isArray(presentation.slides) && presentation.slides.length > 0 ? (
             <div className="space-y-6">
               {/* Slide Meta Bar */}
@@ -326,43 +352,42 @@ export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProp
               </div>
 
               {/* Slide Stage Container */}
-              <div className={`w-full min-h-[420px] sm:min-h-[480px] rounded-[2.5rem] p-8 sm:p-14 border-2 flex flex-col justify-between transition-all duration-300 ${
+              <div className={`w-full aspect-16/10 rounded-[2.5rem] p-8 sm:p-12 border-2 flex flex-col justify-between transition-all duration-300 ${
                 isFullscreen
-                  ? 'bg-stone-900 border-stone-800 text-white shadow-[0_20px_60px_rgba(0,0,0,0.5)]'
+                  ? 'bg-stone-900 border-stone-800 text-white shadow-[0_20px_60px_rgba(0,0,0,0.4)]'
                   : 'bg-white border-stone-200/90 shadow-[0_15px_40px_rgba(0,0,0,0.06)] text-[#161616]'
               }`}>
                 {/* Slide Header */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#E63956]" />
-                    <span className="text-xs font-mono font-bold text-[#E63956] uppercase tracking-widest">
-                      PART {activeSlideIndex + 1} OF {presentation.slides.length}
-                    </span>
-                  </div>
-                  <h3 className="font-display font-black text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight leading-tight">
+                <div className="space-y-2">
+                  <span className="text-xs font-mono font-bold text-[#E63956] uppercase tracking-widest">
+                    SECTION {activeSlideIndex + 1}
+                  </span>
+                  <h3 className="font-display font-black text-2xl sm:text-4xl uppercase tracking-tight leading-tight">
                     {currentSlide.title}
                   </h3>
                 </div>
 
                 {/* Bullets */}
-                <div className="space-y-5 my-auto py-6">
+                <div className="space-y-4 my-auto py-4">
                   {currentSlide.bullets.map((bullet, bIdx) => (
-                    <div key={bIdx} className="flex items-start gap-4">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#E63956] mt-2 shrink-0" />
-                      <p className={`text-base sm:text-xl lg:text-2xl font-normal leading-relaxed ${isFullscreen ? 'text-stone-200' : 'text-stone-800'}`}>
+                    <div key={bIdx} className="flex items-start gap-3">
+                      <span className="w-2 h-2 rounded-full bg-[#E63956] mt-2.5 shrink-0" />
+                      <p className={`text-base sm:text-xl font-normal leading-relaxed ${isFullscreen ? 'text-stone-200' : 'text-stone-700'}`}>
                         {bullet}
                       </p>
                     </div>
                   ))}
                 </div>
 
-                {/* Slide Footer Info */}
-                <div className={`pt-4 border-t flex items-center justify-between text-xs font-mono font-medium ${
-                  isFullscreen ? 'border-stone-800 text-stone-500' : 'border-stone-100 text-stone-400'
-                }`}>
-                  <span>{presentation.title}</span>
-                  <span>{activeSlideIndex + 1} / {presentation.slides.length}</span>
-                </div>
+                {/* Visual Cue */}
+                {currentSlide.visualCue && (
+                  <div className={`p-3 rounded-xl border text-xs font-mono flex items-center gap-2 ${
+                    isFullscreen ? 'bg-stone-800/80 border-stone-700 text-stone-300' : 'bg-stone-50 border-stone-200 text-stone-600'
+                  }`}>
+                    <span className="font-bold text-[#E63956]">🖼️ Visual Prompt:</span>
+                    <span>{currentSlide.visualCue}</span>
+                  </div>
+                )}
               </div>
 
               {/* Navigation Controls */}

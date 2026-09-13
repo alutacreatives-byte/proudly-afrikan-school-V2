@@ -10,7 +10,8 @@ import {
   CalendarDays,
   FolderOpen,
   Download,
-  Sparkles
+  Sparkles,
+  ArrowUpRight
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -211,6 +212,7 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>NEW STUDY TOOL</span>
+              <ArrowUpRight className="w-3.5 h-3.5 stroke-[3]" />
             </button>
           </div>
 

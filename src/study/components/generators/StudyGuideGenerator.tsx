@@ -15,9 +15,11 @@ import {
 } from 'lucide-react';
 import { StudyGuideResult, StudyToolInput } from '../../types';
 import { generateStudyTool } from '../../services/aiService';
-
+import { SourceMaterialUpload } from '../../../build/components/SourceMaterialUpload';
 import { saveResourceToStorage } from '../../../build/utils/storage';
 import { useAuthCredit } from '../../../context/AuthCreditContext';
+import { exportStudyGuide } from '../../../utils/exportUtils';
+import { useScrollToResult } from '../../../utils/useScrollToResult';
 
 interface StudyGuideGeneratorProps {
   onBack: () => void;
@@ -41,15 +43,13 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
 
   // Output States
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [guide, setGuide] = useState<StudyGuideResult | null>(
-    existingResource && Array.isArray(existingResource.sections) && existingResource.sections.length > 0
-      ? existingResource
-      : null
-  );
+  const [guide, setGuide] = useState<StudyGuideResult | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [revealedAnswers, setRevealedAnswers] = useState<Record<number, boolean>>({});
+
+  const resultRef = useScrollToResult(guide, isGenerating);
 
   const handleGenerate = async () => {
     if (!topic.trim() && !sourceMaterial.trim()) {
@@ -68,7 +68,7 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
 
     try {
       const input: StudyToolInput = {
-        topic: topic.trim() || '',
+        topic: topic.trim() || 'Comprehensive Study Material',
         category,
         gradeLevel,
         sourceMaterial: sourceMaterial.trim() || undefined,
@@ -134,15 +134,14 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
     window.print();
   };
 
-  const handleExportJson = () => {
+  const handleExportDoc = () => {
     if (!guide) return;
-    const blob = new Blob([JSON.stringify(guide, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${guide.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    exportStudyGuide(guide, 'doc');
+  };
+
+  const handleExportPdf = () => {
+    if (!guide) return;
+    exportStudyGuide(guide, 'pdf');
   };
 
   const toggleAnswer = (idx: number) => {
@@ -176,11 +175,21 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
             </button>
             <button
               type="button"
-              onClick={handleExportJson}
+              onClick={handleExportDoc}
               className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Download Word Document (.doc)"
             >
-              <Download className="w-3.5 h-3.5" />
-              JSON
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              DOC
+            </button>
+            <button
+              type="button"
+              onClick={handleExportPdf}
+              className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Download PDF Document (.pdf)"
+            >
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              PDF
             </button>
             <button
               type="button"
@@ -188,7 +197,7 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
               className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
-              Print / PDF
+              Print
             </button>
             <button
               type="button"
@@ -202,10 +211,10 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
         )}
       </div>
 
-      {/* Main Layout Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Form Column */}
-        <div className="lg:col-span-4 space-y-6">
+      {/* Main Layout: Menu directly ABOVE generation area */}
+      <div className="space-y-8">
+        {/* Form Menu Column */}
+        <div className="w-full space-y-6">
           <div className="p-6 rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] space-y-5">
             <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
               <Sparkles className="w-4 h-4 text-[#E63956]" />
@@ -261,7 +270,22 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
               </select>
             </div>
 
-
+            <div>
+              <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
+                Optional Source Material (PDF / DOC / Notes)
+              </label>
+              <SourceMaterialUpload
+                currentFileName={sourceFileName}
+                onTextExtracted={(text, name) => {
+                  setSourceMaterial(text);
+                  setSourceFileName(name);
+                }}
+                onClear={() => {
+                  setSourceMaterial('');
+                  setSourceFileName('');
+                }}
+              />
+            </div>
 
             {error && (
               <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-mono">
@@ -281,8 +305,8 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
           </div>
         </div>
 
-        {/* Right Preview Column */}
-        <div className="lg:col-span-8">
+        {/* Generated Result Area */}
+        <div ref={resultRef} className="w-full scroll-mt-24">
           {guide && Array.isArray(guide.sections) && guide.sections.length > 0 ? (
             <div className="p-8 sm:p-10 rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] space-y-8">
               {/* Header */}

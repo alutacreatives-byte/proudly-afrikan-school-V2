@@ -21,9 +21,11 @@ import {
   Search,
   Eye,
   RotateCcw,
-  Share2
+  Share2,
+  Download
 } from 'lucide-react';
 import { UnifiedItem } from './MySetsWorkspace';
+import { exportUnifiedItem } from '../utils/exportUtils';
 
 interface SavedResultViewerProps {
   item: UnifiedItem;
@@ -211,6 +213,24 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
             >
               <Printer className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">PRINT</span>
+            </button>
+
+            <button
+              onClick={() => exportUnifiedItem(item, 'doc')}
+              className="px-3.5 py-2 rounded-full bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+              title="Download Word Document (.doc)"
+            >
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              <span className="hidden sm:inline">DOC</span>
+            </button>
+
+            <button
+              onClick={() => exportUnifiedItem(item, 'pdf')}
+              className="px-3.5 py-2 rounded-full bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+              title="Download PDF Document (.pdf)"
+            >
+              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+              <span className="hidden sm:inline">PDF</span>
             </button>
 
             {onOpenInWorkbench && (

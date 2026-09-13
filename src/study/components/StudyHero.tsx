@@ -13,12 +13,12 @@ export const StudyHero: React.FC<StudyHeroProps> = ({
   onUploadPdfClick,
 }) => {
   const inspirationTopics: { label: string; topic: string; category: string; tool: StudyToolType }[] = [
-    { label: '👑 Kingdom of Kush & Meroë', topic: 'The Kingdom of Kush & Iron Metallurgy at Meroë', category: 'AFRICAN HISTORY', tool: 'study-guide' },
-    { label: '🌍 Great Rift Valley Ecosystems', topic: 'The Great Rift Valley Geography, Tectonics & Biodiversity', category: 'GEOGRAPHY & ENVIRONMENT', tool: 'flashcards' },
-    { label: '📚 African Oral Epics & Sundiata', topic: 'The Epic of Sundiata & West African Griot Traditions', category: 'LITERATURE & ARTS', tool: 'essay-grader' },
-    { label: '⚙️ Renewable Energy in Africa', topic: 'Solar Innovation & Geothermal Microgrids across Africa', category: 'SCIENCES & STEM', tool: 'presentation' },
-    { label: '🏛️ Swahili Maritime City-States', topic: 'Swahili Coast Trade Networks, Kilwa Kisiwani & Coral Architecture', category: 'AFRICAN HISTORY', tool: 'study-guide' },
-    { label: '🌾 Indigenous Agriculture & Crops', topic: 'Indigenous African Crops: Teff, Sorghum, Millet & Climate Resilience', category: 'SCIENCES & STEM', tool: 'learning-path' },
+    { label: '📜 Timbuktu Manuscripts & Astronomy', topic: 'Timbuktu Manuscripts & Medieval African Astronomy', category: 'HISTORY & SCIENCE', tool: 'study-guide' },
+    { label: '🏛️ Great Zimbabwe Architecture', topic: 'Great Zimbabwe Stone Architecture & Medieval Trade Networks', category: 'AFRICAN HISTORY', tool: 'flashcards' },
+    { label: '⛵ Swahili Maritime Navigation', topic: 'Swahili Maritime Navigation & Indian Ocean Commerce', category: 'GEOGRAPHY & TRADE', tool: 'quiz' },
+    { label: '🪙 Kingdom of Aksum Coinage', topic: 'Kingdom of Aksum Gold Coinage & Red Sea Metallurgy', category: 'ECONOMICS & HISTORY', tool: 'presentation' },
+    { label: '🌿 African Medicinal Botany', topic: 'African Medicinal Botany & Traditional Pharmacopeia', category: 'SCIENCES & HEALTH', tool: 'study-guide' },
+    { label: '🎵 West African Griot Traditions', topic: 'West African Griot Oral History Traditions & Genealogies', category: 'LITERATURE & ARTS', tool: 'learning-path' },
   ];
 
   return (
@@ -112,7 +112,7 @@ export const StudyHero: React.FC<StudyHeroProps> = ({
                 PDF
               </div>
               <div className="font-mono text-[10px] sm:text-xs font-bold text-stone-600 uppercase tracking-wider">
-                DOCUMENT SUITE
+                DOCUMENT AI
               </div>
             </div>
 

@@ -311,7 +311,7 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
     // If custom generated concepts are already active (from user's typed topic, notes, or doc)
     if (customGeneratedConcepts && customGeneratedConcepts.length > 0) {
       const activeConcepts = customGeneratedConcepts.slice(0, targetCount);
-      const activeTitle = customTitle || (inputMethod === 'paste' ? 'Custom Study Notes' : inputMethod === 'upload' ? (uploadedDoc?.name || 'Custom Document') : inputMethod === 'capture' ? (capturedFileName || '') : typedTopic);
+      const activeTitle = customTitle || (inputMethod === 'paste' ? 'Custom Study Notes' : inputMethod === 'upload' ? (uploadedDoc?.name || 'Custom Document') : inputMethod === 'capture' ? (capturedFileName || 'Captured Study Material') : typedTopic);
       
       const conceptsWithReasons = activeConcepts.map((c, idx) => ({
         concept: c,
@@ -538,7 +538,7 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
       }
     } else if (inputMethod === 'capture') {
       contentToStudy = capturedText.trim() || 'Photographed study material';
-      topicToStudy = customTitle.trim() || capturedFileName || '';
+      topicToStudy = customTitle.trim() || capturedFileName || 'Captured Study Material';
       if (!capturedImage && !capturedText) {
         setCameraPhotoError('Please photograph your study material first.');
         return;
@@ -614,13 +614,7 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
 
   return (
     <div id="study-plan-view-root" className="max-w-4xl mx-auto space-y-8 pb-16">
-      {/* Top Global Navigation: Always show both BACK and HOME */}
-      <div className="flex items-center justify-between">
-        <GlobalNavigationButtons onBack={onBack} onGoHome={onGoHome} />
-        <span className="font-mono text-xs font-bold text-stone-500 uppercase">
-          STUDY PLANNER
-        </span>
-      </div>
+
 
       {/* Header Banner */}
       <div className="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-8 shadow-sm space-y-3">

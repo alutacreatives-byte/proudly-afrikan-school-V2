@@ -84,10 +84,7 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
 
   return (
     <div id="review-view-root" className="max-w-5xl mx-auto space-y-8 pb-16">
-      {/* Global Navigation: BACK + HOME */}
-      <div className="flex items-center justify-between">
-        <GlobalNavigationButtons onBack={onBack} onGoHome={onGoHome} />
-      </div>
+
 
       {/* Top Header */}
       <div className="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">

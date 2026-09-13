@@ -8,12 +8,12 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onStartClick, onSelectSample }) => {
   const inspirationTopics = [
-    { label: '👑 Kingdom of Mali', topic: 'The Kingdom of Mali & Mansa Musa', category: 'History' },
-    { label: '🌍 Great Rift Valley', topic: 'The Great Rift Valley Geography & Ecology', category: 'Geography' },
-    { label: '📚 African Literature', topic: 'African Literature: Chinua Achebe & Things Fall Apart', category: 'Literature' },
-    { label: '⚙️ Solar In Africa', topic: 'Solar Energy Revolution & Geothermal Power in Africa', category: 'Science' },
-    { label: '🌱 Sustainable Agro', topic: 'Sustainable Agriculture & Indigenous Crops in Africa', category: 'Science' },
-    { label: '🔬 Nubian Pyramids', topic: 'The Kingdom of Kush & Nubian Pyramids at Meroë', category: 'History' },
+    { label: '📜 Timbuktu Manuscripts', topic: 'Timbuktu Manuscripts & Medieval African Astronomy', category: 'History' },
+    { label: '🏛️ Great Zimbabwe', topic: 'Great Zimbabwe Stone Architecture & Trade', category: 'Architecture' },
+    { label: '⛵ Swahili Navigation', topic: 'Swahili Maritime Navigation & Indian Ocean Commerce', category: 'Trade' },
+    { label: '🪙 Aksum Coinage', topic: 'Kingdom of Aksum Gold Coinage & Metallurgy', category: 'History' },
+    { label: '🌿 Medicinal Botany', topic: 'African Medicinal Botany & Traditional Pharmacopeia', category: 'Science' },
+    { label: '🎵 West African Griots', topic: 'West African Griot Oral History Traditions', category: 'Culture' },
   ];
 
   return (
