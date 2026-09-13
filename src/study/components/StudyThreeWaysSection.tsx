@@ -61,7 +61,7 @@ export const StudyThreeWaysSection: React.FC<StudyThreeWaysSectionProps> = ({
 
   const handleCardClick = (method: StudyCreationMethod) => {
     onSelectMethod(method);
-    const sectionEl = document.getElementById('study-input-workbench') || document.getElementById('study-generators-section');
+    const sectionEl = document.getElementById('study-generators-section');
     if (sectionEl) {
       sectionEl.scrollIntoView({ behavior: 'smooth' });
     }
