@@ -359,8 +359,8 @@ export const MySetsWorkspace: React.FC<MySetsWorkspaceProps> = ({
           </div>
         )}
 
-        {/* Header Banner matching My Sets and Saved Resources.jpeg */}
-        <div className="bg-[#FDFBF7] border border-[#EAE3D6] rounded-[32px] p-6 sm:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-6">
+        {/* Header Banner matching 3D soft UI */}
+        <div className="clay-card-3d p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1.5">
             <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider text-[#D92B8A]">
               <Zap className="w-3.5 h-3.5 fill-[#D92B8A]/20" />
@@ -374,24 +374,24 @@ export const MySetsWorkspace: React.FC<MySetsWorkspaceProps> = ({
             </p>
           </div>
 
-          {/* Quick Create Buttons matching reference capsules */}
+          {/* Quick Create Buttons styled as tactile pills */}
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <button
               onClick={onNavigateToStudy}
-              className="bg-[#2C3844] hover:bg-[#374554] active:scale-95 text-[#9CB3C9] hover:text-white rounded-full px-5 py-2.5 font-mono font-bold text-xs uppercase tracking-wider shadow-sm transition-all cursor-pointer flex items-center gap-1"
+              className="clay-btn-dark px-5 py-2.5 font-mono font-bold text-xs uppercase tracking-wider cursor-pointer flex items-center gap-1 shadow-sm"
             >
               <span>+ STUDY SET</span>
             </button>
             <button
               onClick={onNavigateToQuiz}
-              className="bg-[#1A0B14] hover:bg-[#2A1020] active:scale-95 text-[#F48FB1] hover:text-white border border-[#D92B8A]/50 rounded-full px-5 py-2.5 font-mono font-bold text-xs uppercase tracking-wider shadow-[0_4px_18px_rgba(217,43,138,0.4)] transition-all cursor-pointer flex items-center gap-1"
+              className="clay-btn-crimson px-5 py-2.5 font-mono font-bold text-xs uppercase tracking-wider cursor-pointer flex items-center gap-1 shadow-md"
             >
               <span>+ QUIZ</span>
             </button>
             {onNavigateToBuild && (
               <button
                 onClick={onNavigateToBuild}
-                className="bg-[#F2ECE1] hover:bg-[#EAE2D4] active:scale-95 text-[#161616] border border-[#E3D9C9] rounded-full px-5 py-2.5 font-mono font-bold text-xs uppercase tracking-wider shadow-xs transition-all cursor-pointer flex items-center gap-1"
+                className="clay-pill-3d px-5 py-2.5 font-mono font-bold text-xs uppercase tracking-wider text-[#161616] cursor-pointer flex items-center gap-1 shadow-xs"
               >
                 <span>+ BUILD RESOURCE</span>
               </button>
@@ -399,28 +399,28 @@ export const MySetsWorkspace: React.FC<MySetsWorkspaceProps> = ({
           </div>
         </div>
 
-        {/* Stats Strip matching reference */}
+        {/* Stats Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-white border border-[#EAE3D6] p-5 rounded-[24px] shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
+          <div className="clay-card-3d p-5">
             <div className="text-[11px] font-mono font-bold text-stone-500 uppercase tracking-wider">TOTAL RESOURCES</div>
             <div className="text-3xl font-display font-black text-[#161616] mt-1">{unifiedItems.length}</div>
           </div>
-          <div className="bg-white border border-[#EAE3D6] p-5 rounded-[24px] shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
+          <div className="clay-card-3d p-5">
             <div className="text-[11px] font-mono font-bold text-stone-500 uppercase tracking-wider">STUDY SETS</div>
             <div className="text-3xl font-display font-black text-[#161616] mt-1">{studySets.length}</div>
           </div>
-          <div className="bg-white border border-[#EAE3D6] p-5 rounded-[24px] shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
+          <div className="clay-card-3d p-5">
             <div className="text-[11px] font-mono font-bold text-stone-500 uppercase tracking-wider">QUIZZES</div>
             <div className="text-3xl font-display font-black text-[#161616] mt-1">{quizzes.length}</div>
           </div>
-          <div className="bg-white border border-[#EAE3D6] p-5 rounded-[24px] shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
+          <div className="clay-card-3d p-5">
             <div className="text-[11px] font-mono font-bold text-stone-500 uppercase tracking-wider">BUILDS</div>
             <div className="text-3xl font-display font-black text-[#161616] mt-1">{buildResources.length}</div>
           </div>
         </div>
 
-        {/* Filter & Search Bar matching reference */}
-        <div className="bg-white border border-[#EAE3D6] rounded-[28px] sm:rounded-[32px] p-5 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.02)] space-y-4">
+        {/* Filter & Search Bar */}
+        <div className="clay-card-3d p-5 sm:p-6 space-y-4">
           {/* Top Row: Search Input on Left, Dropdowns on Right */}
           <div className="flex flex-col sm:flex-row items-center gap-3 justify-between">
             <div className="relative w-full sm:max-w-md">
@@ -565,7 +565,7 @@ export const MySetsWorkspace: React.FC<MySetsWorkspaceProps> = ({
                 <div
                   key={item.id}
                   onClick={() => handleOpenItem(item)}
-                  className="bg-[#FDFBF7] border border-[#EAE3D6] rounded-[28px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all flex flex-col justify-between cursor-pointer group"
+                  className="clay-card-3d-interactive p-6 flex flex-col justify-between cursor-pointer group"
                 >
                   <div className="space-y-3">
                     {/* Top Row: Category Pill & Counter */}

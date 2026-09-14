@@ -194,7 +194,7 @@ export const CentralPlannerView: React.FC<CentralPlannerViewProps> = ({
       <div className="max-w-6xl mx-auto space-y-8">
 
         {/* Header Hero */}
-        <div className="bg-[#FDFBF7] border border-[#EAE3D6] rounded-[32px] p-6 sm:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="clay-card-3d p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider text-[#D92B8A]">
               <Zap className="w-3.5 h-3.5 fill-[#D92B8A]/20" />
@@ -213,8 +213,8 @@ export const CentralPlannerView: React.FC<CentralPlannerViewProps> = ({
               onClick={() => setActiveTab('plan')}
               className={`px-5 py-3 rounded-full font-mono font-bold text-xs uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === 'plan'
-                  ? 'bg-[#161616] text-white shadow-md'
-                  : 'bg-white border border-stone-300 text-stone-700 hover:bg-stone-100'
+                  ? 'clay-btn-dark shadow-md'
+                  : 'clay-pill-3d text-stone-700 hover:bg-stone-100'
               }`}
             >
               + Create New Plan
@@ -223,7 +223,7 @@ export const CentralPlannerView: React.FC<CentralPlannerViewProps> = ({
         </div>
 
         {/* Workflow Navigation Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-white border border-[#EAE3D6] p-2 rounded-2xl shadow-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 clay-card-3d p-2">
           <button
             onClick={() => setActiveTab('plan')}
             className={`py-3 px-4 rounded-xl font-mono text-xs font-bold uppercase flex items-center justify-center gap-2 transition-all cursor-pointer ${

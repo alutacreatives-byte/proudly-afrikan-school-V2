@@ -62,8 +62,8 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-50 select-none bg-[#FAF7F0] px-3 sm:px-6 lg:px-8 py-3 transition-all">
-      {/* Outer Floating Pill Capsule Bar matching A2.png visual style */}
-      <div className="w-full max-w-7xl mx-auto bg-white border border-[#EAE5DC] rounded-full shadow-[0_10px_35px_rgba(0,0,0,0.06),0_2px_6px_rgba(0,0,0,0.02)] px-3.5 sm:px-6 lg:px-7 py-2.5 sm:py-3 flex items-center justify-between gap-3 sm:gap-6">
+      {/* Outer Floating Pill Capsule Bar matching BUILD 3D soft UI style */}
+      <div className="w-full max-w-7xl mx-auto clay-navbar px-3.5 sm:px-6 lg:px-7 py-2.5 sm:py-3 flex items-center justify-between gap-3 sm:gap-6">
         
         {/* Left: Brand Emblem & Typography */}
         <div
@@ -71,7 +71,7 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
           className="flex items-center gap-3 sm:gap-3.5 cursor-pointer group shrink-0"
         >
           {/* Logo Emblem Box: Vibrant Crimson Rounded Squircle */}
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-r from-[#D92B8A] via-[#E03A6A] to-[#E63956] shadow-[0_4px_14px_rgba(230,57,86,0.35)] p-1.5 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-r from-[#D92B8A] via-[#E03A6A] to-[#E63956] shadow-[0_6px_16px_rgba(230,57,86,0.4)] p-1.5 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
             {!logoError ? (
               <img
                 src="https://sifisos.com/wp-content/uploads/2026/04/Proudly-Afrikan-Logo.png"
@@ -117,7 +117,7 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
                 <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#D92B8A]' : 'text-stone-400 group-hover:text-stone-700'}`} />
                 <span>{item.label}</span>
                 {item.badge !== undefined && (
-                  <span className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full transition-colors ${
+                  <span className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full transition-colors shadow-xs ${
                     isActive ? 'bg-[#161616] text-white' : 'bg-stone-100 text-stone-600 border border-stone-200'
                   }`}>
                     {item.badge}
@@ -133,12 +133,12 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
 
         {/* Right: Plan Button & Actions */}
         <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-          {/* Dynamic Plan Button styled as refined pill */}
+          {/* Dynamic Plan Button styled as 3D clay pill */}
           <button
             id="nav-plan-account-btn"
             onClick={openAccountModal}
             title={`${getPlanDisplayLabel(currentPlanTier)} - Click to view current plan and account settings`}
-            className="hidden sm:flex bg-white hover:bg-stone-50 text-[#161616] border border-stone-200 rounded-full px-3.5 sm:px-4 py-2 font-mono text-[11px] sm:text-xs font-bold tracking-wider uppercase shadow-xs items-center gap-1.5 cursor-pointer active:scale-95 transition-all whitespace-nowrap"
+            className="hidden sm:flex clay-pill-3d px-4 py-2 font-mono text-[11px] sm:text-xs font-bold tracking-wider uppercase items-center gap-1.5 cursor-pointer whitespace-nowrap text-[#161616]"
           >
             <span className="w-2 h-2 rounded-full bg-[#D92B8A] shrink-0"></span>
             <span className="font-display font-black text-xs text-[#161616]">{getPlanDisplayLabel(currentPlanTier)}</span>
@@ -158,7 +158,7 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
           {/* Mobile/Tablet menu toggle button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 rounded-full border border-stone-200 bg-white text-[#161616] shadow-xs hover:bg-stone-50 cursor-pointer shrink-0"
+            className="lg:hidden p-2 rounded-full clay-pill-3d text-[#161616] cursor-pointer shrink-0"
             aria-label="Toggle navigation menu"
           >
             {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}

@@ -57,13 +57,13 @@ export const AuthModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
       <div 
-        className="relative w-full max-w-md bg-[#FAF7F0] border-2 border-[#161616] rounded-3xl shadow-[6px_6px_0px_#161616] p-6 sm:p-8 overflow-hidden"
+        className="relative w-full max-w-md clay-card-3d p-6 sm:p-8 overflow-hidden shadow-2xl border border-stone-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Ribbon */}
-        <div className="flex items-center justify-between pb-4 border-b-2 border-[#161616] mb-6">
+        <div className="flex items-center justify-between pb-4 border-b border-stone-200 mb-6">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#161616] text-[#D92B8A] flex items-center justify-center font-display font-black text-xs border border-[#161616] shadow-[2px_2px_0px_#D92B8A]">
+            <div className="w-8 h-8 rounded-xl bg-[#161616] text-[#D92B8A] flex items-center justify-center font-display font-black text-xs shadow-md">
               PAS
             </div>
             <div>
@@ -77,7 +77,7 @@ export const AuthModal: React.FC = () => {
           </div>
           <button
             onClick={closeAuthModal}
-            className="p-1.5 rounded-xl border-2 border-[#161616] bg-white hover:bg-stone-100 text-[#161616] shadow-[2px_2px_0px_#161616] cursor-pointer transition-all"
+            className="p-1.5 rounded-xl clay-pill-3d bg-white hover:bg-stone-100 text-[#161616] cursor-pointer transition-all shadow-xs"
           >
             <X className="w-4 h-4" />
           </button>
@@ -85,12 +85,12 @@ export const AuthModal: React.FC = () => {
 
         {/* Free Credits Badge for Sign Up */}
         {mode === 'signup' && (
-          <div className="mb-5 p-3 rounded-2xl bg-[#FDF2F8] border-2 border-[#D92B8A] flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#D92B8A] text-white flex items-center justify-center shrink-0">
+          <div className="mb-5 p-3 rounded-2xl bg-[#FFF0F2] border border-[#FFCCD4] flex items-center gap-3 shadow-xs">
+            <div className="w-8 h-8 rounded-xl bg-[#E63956] text-white flex items-center justify-center shrink-0 shadow-sm">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-display font-black text-xs text-[#D92B8A] uppercase tracking-wider">
+              <p className="font-display font-black text-xs text-[#E63956] uppercase tracking-wider">
                 400 Free Credits Included
               </p>
               <p className="text-[11px] font-sans text-stone-700 font-medium">
@@ -105,7 +105,7 @@ export const AuthModal: React.FC = () => {
           type="button"
           onClick={handleGoogleAuth}
           disabled={isLoading}
-          className="w-full mb-4 py-3 px-4 rounded-2xl border-2 border-[#161616] bg-white hover:bg-stone-50 font-display font-black text-xs uppercase tracking-wider text-[#161616] flex items-center justify-center gap-3 shadow-[2.5px_2.5px_0px_#161616] hover:translate-x-[1px] hover:translate-y-[1px] cursor-pointer transition-all disabled:opacity-50"
+          className="w-full mb-4 py-3 px-4 rounded-2xl clay-pill-3d bg-white hover:bg-stone-50 font-display font-black text-xs uppercase tracking-wider text-[#161616] flex items-center justify-center gap-3 cursor-pointer transition-all disabled:opacity-50 shadow-sm"
         >
           <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
             <path
