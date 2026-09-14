@@ -14,6 +14,8 @@ export interface BuildToolItem {
   title: string;
   shortTitle: string;
   badge: string;
+  description: string;
+  actionLabel: string;
   icon: React.ComponentType<{ className?: string }>;
 }
 
@@ -24,6 +26,8 @@ export const BUILD_TOOLS_LIST: BuildToolItem[] = [
     title: 'Course Syllabus',
     shortTitle: 'Course',
     badge: 'Curriculum & Modules',
+    description: 'Generate comprehensive curriculum modules, week-by-week lesson plans, and foundational objectives for any subject.',
+    actionLabel: 'CREATE COURSE',
     icon: GraduationCap,
   },
   {
@@ -32,6 +36,8 @@ export const BUILD_TOOLS_LIST: BuildToolItem[] = [
     title: 'Exam & Quiz',
     shortTitle: 'Exam & Quiz',
     badge: 'Assessment & Testing',
+    description: 'Create rigorous examination papers complete with multiple-choice questions, structured answers, and grading rubrics.',
+    actionLabel: 'GENERATE EXAM',
     icon: FileQuestion,
   },
   {
@@ -40,6 +46,8 @@ export const BUILD_TOOLS_LIST: BuildToolItem[] = [
     title: 'Worksheet',
     shortTitle: 'Worksheet',
     badge: 'Practice & Drills',
+    description: 'Design interactive student practice worksheets, problem-solving drills, and step-by-step guided exercises.',
+    actionLabel: 'BUILD WORKSHEET',
     icon: FileSpreadsheet,
   },
   {
@@ -48,6 +56,8 @@ export const BUILD_TOOLS_LIST: BuildToolItem[] = [
     title: 'Mind Map',
     shortTitle: 'Mind Map',
     badge: 'Visual Hierarchy',
+    description: 'Map out conceptual frameworks and hierarchical topic relationships with structured nodes and explanatory notes.',
+    actionLabel: 'CREATE MIND MAP',
     icon: GitBranch,
   },
   {
@@ -56,6 +66,8 @@ export const BUILD_TOOLS_LIST: BuildToolItem[] = [
     title: 'Lesson Plan',
     shortTitle: 'Lesson Plan',
     badge: 'Teaching & Pedagogy',
+    description: "Build structured pedagogical lesson plans featuring Bloom's taxonomy objectives, timing phases, and exit tickets.",
+    actionLabel: 'BUILD LESSON PLAN',
     icon: BookOpenText,
   },
   {
@@ -64,6 +76,8 @@ export const BUILD_TOOLS_LIST: BuildToolItem[] = [
     title: 'Presentation',
     shortTitle: 'Slide Deck',
     badge: 'Slides & Lecture',
+    description: 'Generate structured slide decks with presenter notes, visual prompts, and interactive discussion starters.',
+    actionLabel: 'CREATE SLIDE DECK',
     icon: Presentation,
   },
 ];
