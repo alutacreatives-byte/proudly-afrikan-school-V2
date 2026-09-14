@@ -335,15 +335,15 @@ export const MySetsWorkspace: React.FC<MySetsWorkspaceProps> = ({
   const getPlatformIcon = (kind: ContentKind) => {
     switch (kind) {
       case 'study-set':
-        return <BookOpen className="w-3.5 h-3.5 text-[#D92B8A]" />;
+        return <BookOpen className="w-4.5 h-4.5 text-[#D92B8A]" />;
       case 'quiz':
-        return <GraduationCap className="w-3.5 h-3.5 text-[#E05A2B]" />;
+        return <GraduationCap className="w-4.5 h-4.5 text-[#E05A2B]" />;
       case 'build':
-        return <Layers className="w-3.5 h-3.5 text-[#E6425E]" />;
+        return <Layers className="w-4.5 h-4.5 text-[#E6425E]" />;
       case 'search-result':
-        return <Search className="w-3.5 h-3.5 text-[#16A34A]" />;
+        return <Search className="w-4.5 h-4.5 text-[#16A34A]" />;
       default:
-        return <Layers className="w-3.5 h-3.5 text-[#C92A45]" />;
+        return <Layers className="w-4.5 h-4.5 text-[#C92A45]" />;
     }
   };
 
@@ -570,12 +570,12 @@ export const MySetsWorkspace: React.FC<MySetsWorkspaceProps> = ({
                   <div className="space-y-3">
                     {/* Top Row: Category Pill & Counter */}
                     <div className="flex items-center justify-between gap-2">
-                      <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${getBadgeStyle(item.kind)} flex items-center gap-1.5`}>
+                      <span className={`text-xs font-mono font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border ${getBadgeStyle(item.kind)} flex items-center gap-1.5`}>
                         {getPlatformIcon(item.kind)}
                         <span>{item.kindLabel}</span>
                       </span>
 
-                      <span className="text-xs font-mono font-bold text-stone-500">
+                      <span className="text-sm font-mono font-bold text-stone-600">
                         {item.itemCountLabel}
                       </span>
                     </div>
@@ -586,15 +586,15 @@ export const MySetsWorkspace: React.FC<MySetsWorkspaceProps> = ({
                     </h3>
 
                     {/* Description */}
-                    <p className="font-grotesk text-xs sm:text-[13px] text-stone-600 line-clamp-3 leading-relaxed font-normal">
+                    <p className="font-grotesk text-sm sm:text-base text-stone-600 line-clamp-3 leading-relaxed font-normal">
                       {item.description}
                     </p>
                   </div>
 
                   {/* Footer Info & Actions */}
                   <div className="mt-5 pt-4 border-t border-[#EAE3D6] flex flex-col gap-3">
-                    <div className="flex items-center justify-between text-[11px] font-mono text-stone-500">
-                      <span className="truncate max-w-[160px] font-bold text-stone-700 uppercase">
+                    <div className="flex items-center justify-between text-xs font-mono text-stone-600">
+                      <span className="truncate max-w-[160px] font-bold text-stone-800 uppercase">
                         {item.categoryOrSubject}
                       </span>
                       <span>
@@ -604,47 +604,47 @@ export const MySetsWorkspace: React.FC<MySetsWorkspaceProps> = ({
 
                     <div className="flex items-center justify-between gap-2 pt-1">
                       {/* Action buttons */}
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={(e) => handleDuplicateItem(item, e)}
-                          className="p-1.5 rounded-full bg-white border border-[#EAE3D6] hover:bg-stone-100 text-stone-600 hover:text-stone-900 transition-colors shadow-xs cursor-pointer"
+                          className="p-2 rounded-full bg-white border border-[#EAE3D6] hover:bg-stone-100 text-stone-600 hover:text-stone-900 transition-colors shadow-xs cursor-pointer"
                           title="Duplicate Item"
                         >
-                          <Copy className="w-3.5 h-3.5" />
+                          <Copy className="w-4.5 h-4.5" />
                         </button>
                         <button
                           type="button"
                           onClick={(e) => handleExportDoc(item, e)}
-                          className="px-2 py-1 rounded-full bg-white border border-[#EAE3D6] hover:bg-stone-100 text-stone-700 transition-colors shadow-xs cursor-pointer font-mono text-[10px] font-bold uppercase flex items-center gap-1"
+                          className="px-2.5 py-1.5 rounded-full bg-white border border-[#EAE3D6] hover:bg-stone-100 text-stone-700 transition-colors shadow-xs cursor-pointer font-mono text-xs font-bold uppercase flex items-center gap-1"
                           title="Download Word Document (.doc)"
                         >
-                          <Download className="w-3 h-3 text-[#D92B8A]" />
+                          <Download className="w-4 h-4 text-[#D92B8A]" />
                           <span>DOC</span>
                         </button>
                         <button
                           type="button"
                           onClick={(e) => handleExportPdf(item, e)}
-                          className="px-2 py-1 rounded-full bg-white border border-[#EAE3D6] hover:bg-stone-100 text-stone-700 transition-colors shadow-xs cursor-pointer font-mono text-[10px] font-bold uppercase flex items-center gap-1"
+                          className="px-2.5 py-1.5 rounded-full bg-white border border-[#EAE3D6] hover:bg-stone-100 text-stone-700 transition-colors shadow-xs cursor-pointer font-mono text-xs font-bold uppercase flex items-center gap-1"
                           title="Download PDF Document (.pdf)"
                         >
-                          <Download className="w-3 h-3 text-[#D92B8A]" />
+                          <Download className="w-4 h-4 text-[#D92B8A]" />
                           <span>PDF</span>
                         </button>
                         <button
                           type="button"
                           onClick={(e) => handleDeleteItem(item, e)}
-                          className="p-1.5 rounded-full bg-white border border-[#EAE3D6] hover:bg-red-50 text-stone-400 hover:text-red-600 transition-colors shadow-xs cursor-pointer"
+                          className="p-2 rounded-full bg-white border border-[#EAE3D6] hover:bg-red-50 text-stone-400 hover:text-red-600 transition-colors shadow-xs cursor-pointer"
                           title="Delete Item"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4.5 h-4.5" />
                         </button>
                       </div>
 
                       {/* Primary Open Trigger */}
-                      <span className="text-xs font-mono font-bold text-[#161616] group-hover:text-[#D92B8A] flex items-center gap-1 uppercase tracking-wider">
+                      <span className="text-sm font-mono font-bold text-[#161616] group-hover:text-[#D92B8A] flex items-center gap-1.5 uppercase tracking-wider">
                         <span>OPEN</span>
-                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight className="w-4.5 h-4.5 group-hover:translate-x-1 transition-transform" />
                       </span>
                     </div>
                   </div>
