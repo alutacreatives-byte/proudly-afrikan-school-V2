@@ -73,11 +73,11 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
 
   return (
     <div className="w-full min-h-screen bg-[#FAF7F0] text-[#161616] pb-24">
-      {/* Top Hero Section matching Study page */}
-      <section className="pt-4 pb-12 border-b-2 border-[#161616] bg-white/60">
+      {/* Top Hero Section matching Build 3D soft UI style */}
+      <section className="pt-6 pb-12 bg-gradient-to-b from-[#FFFDF9] to-[#FAF7F0] border-b border-stone-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           {/* Edition Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white border-2 border-[#161616] rounded-full shadow-[2px_2px_0px_#161616] text-xs sm:text-sm font-mono font-bold tracking-wider uppercase text-stone-800">
+          <div className="inline-flex items-center gap-2 px-4 py-2 clay-pill-3d text-xs sm:text-sm font-mono font-bold tracking-wider uppercase text-stone-800 shadow-xs">
             <span className="w-2.5 h-2.5 rounded-full bg-[#D92B8A] inline-block animate-pulse"></span>
             <span>PROUDLY AFRIKAN EDUCATION • TRANSPARENT PRICING</span>
           </div>
@@ -97,8 +97,8 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
 
             {/* Current Balance Card */}
             <div className="lg:col-span-4 flex lg:justify-end">
-              <div className="w-full lg:w-auto bg-[#FAF8F5] border-2 border-[#161616] shadow-[4px_4px_0px_#161616] rounded-3xl p-5 sm:p-6 space-y-3">
-                <div className="flex items-center justify-between border-b-2 border-stone-200 pb-2.5 gap-4">
+              <div className="w-full lg:w-auto clay-card-3d p-6 space-y-4 shadow-xl">
+                <div className="flex items-center justify-between border-b border-stone-200 pb-3 gap-4">
                   <div className="flex items-center gap-2 font-display text-xs font-black uppercase tracking-wider text-[#161616]">
                     <Zap className="w-4 h-4 text-[#D92B8A]" />
                     <span>YOUR ACCOUNT</span>
@@ -119,7 +119,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
 
                 <button
                   onClick={openAccountModal}
-                  className="tactile-btn w-full py-2.5 px-4 rounded-2xl bg-[#161616] hover:bg-stone-800 text-white font-display text-xs font-black uppercase tracking-wider border-2 border-[#161616] shadow-[2px_2px_0px_#D92B8A] transition-all text-center cursor-pointer"
+                  className="clay-btn-dark w-full py-3 px-4 font-display text-xs font-black uppercase tracking-wider text-center cursor-pointer shadow-md"
                 >
                   Manage Account
                 </button>
@@ -133,25 +133,23 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 space-y-12">
         {/* Success Alert */}
         {successNotice && (
-          <div className="p-4 rounded-2xl bg-[#FAF7F0] border-2 border-[#161616] text-[#161616] font-sans text-sm font-bold flex items-center gap-3 shadow-[3px_3px_0px_#D92B8A] animate-in fade-in">
-            <Sparkles className="w-5 h-5 text-[#D92B8A] shrink-0" />
+          <div className="clay-card-3d p-4 bg-[#FFF0F2] border-[#FFCCD4] text-[#E63956] font-sans text-sm font-bold flex items-center gap-3 shadow-lg animate-in fade-in">
+            <Sparkles className="w-5 h-5 text-[#E63956] shrink-0" />
             <span>{successNotice}</span>
           </div>
         )}
 
-        {/* 4 Plans Grid - Matching exact soft-embossed card styling from Pricing.jpeg */}
+        {/* 4 Plans Grid - Upgraded to 3D Soft UI */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-7 items-stretch">
           {plansList.map((plan) => {
             const isCurrent = currentPlan === plan.id;
             const isPopular = plan.id === 'STUDENT';
 
-            // Distinct plan title colors matching reference
             const titleColor = 
               plan.id === 'FREE' ? '#E62E43' :
               plan.id === 'LEARNER' ? '#D96B27' :
               plan.id === 'STUDENT' ? '#D92B8A' : '#D33842';
 
-            // Distinct badge next to title
             const getBadge = () => {
               if (plan.id === 'FREE') {
                 return (
@@ -177,7 +175,6 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
               return null;
             };
 
-            // Custom features matching reference exact phrasing
             const getFeaturesList = () => {
               if (plan.id === 'FREE') {
                 return [
@@ -201,7 +198,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
                 return [
                   '4,000 AI credits per month',
                   'Monthly recurring subscription',
-                  'MOST POPULAR for South SA',
+                  'MOST POPULAR for South Africa',
                   'Deep study packs & multi-section exams',
                   'Rollover support & priority assistance',
                 ];
@@ -226,10 +223,10 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
               <div
                 key={plan.id}
                 onClick={() => !isCurrent && handlePlanClick(plan.id)}
-                className={`relative rounded-[32px] p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 cursor-pointer ${
+                className={`relative p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 cursor-pointer ${
                   isPopular 
-                    ? 'bg-[#FDFBF7] border-2 border-[#D92B8A] shadow-[0_0_30px_rgba(217,43,138,0.22),0_12px_35px_rgba(0,0,0,0.06)] hover:shadow-[0_0_40px_rgba(217,43,138,0.32),0_16px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1' 
-                    : 'bg-[#FDFBF7] border border-[#EAE3D6] shadow-[0_10px_30px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.07)] hover:-translate-y-1'
+                    ? 'clay-card-3d border-2 border-[#D92B8A] shadow-[0_16px_40px_rgba(217,43,138,0.25)]' 
+                    : 'clay-card-3d-interactive'
                 }`}
               >
                 {/* Popular Badge for Student */}
@@ -294,7 +291,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
                   </div>
                 </div>
 
-                {/* Bottom Action Button Group matching reference */}
+                {/* Bottom Action Button Group */}
                 <div className="mt-4 pt-2">
                   <div className="flex items-center gap-2">
                     <button
@@ -302,7 +299,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
                         e.stopPropagation();
                         if (!isCurrent) handlePlanClick(plan.id);
                       }}
-                      className="bg-[#F2ECE1] hover:bg-[#EAE2D4] active:scale-[0.98] rounded-full py-2.5 sm:py-3 px-4 flex-1 text-center font-display font-black text-xs sm:text-[13px] tracking-wider text-[#161616] uppercase shadow-[inset_1px_1px_2px_rgba(255,255,255,0.8),0_2px_6px_rgba(0,0,0,0.03)] border border-[#E3D9C9] transition-all cursor-pointer"
+                      className="clay-pill-3d py-2.5 sm:py-3 px-4 flex-1 text-center font-display font-black text-xs sm:text-[13px] tracking-wider text-[#161616] uppercase cursor-pointer shadow-sm"
                     >
                       <span>SELECT PLAN</span>
                     </button>
@@ -312,7 +309,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
                         e.stopPropagation();
                         if (!isCurrent) handlePlanClick(plan.id);
                       }}
-                      className="w-10 h-10 rounded-full bg-[#161616] hover:bg-stone-800 active:scale-95 text-white flex items-center justify-center shadow-md transition-all shrink-0 cursor-pointer"
+                      className="w-10 h-10 rounded-full clay-btn-dark flex items-center justify-center shadow-md transition-all shrink-0 cursor-pointer"
                       title={`Select ${plan.name}`}
                     >
                       <ArrowRight className="w-4 h-4 stroke-[2.5]" />
@@ -325,10 +322,10 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
         </div>
 
         {/* Free Normal Usage Guarantee Box */}
-        <div className="p-6 sm:p-8 rounded-[28px] bg-white border border-stone-200/90 shadow-[0_16px_40px_rgba(0,0,0,0.06)]">
+        <div className="clay-card-3d p-6 sm:p-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7F0] border border-stone-300 text-[#161616] font-mono text-xs font-bold uppercase">
+              <div className="inline-flex items-center gap-2 px-3 py-1 clay-pill-3d text-[#161616] font-mono text-xs font-bold uppercase shadow-xs">
                 <ShieldCheck className="w-4 h-4 text-[#D92B8A]" />
                 <span>Zero-Credit Free Access Guarantee</span>
               </div>
@@ -341,19 +338,19 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
             </div>
 
             <div className="grid grid-cols-2 gap-2.5 text-xs font-mono font-bold text-stone-800 shrink-0 w-full md:w-auto">
-              <div className="p-2.5 rounded-2xl bg-[#FAF7F0] border border-stone-200 flex items-center gap-2 shadow-xs">
+              <div className="p-2.5 rounded-2xl clay-card-3d flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#D92B8A]"></span>
                 <span>Studying: 0 cr</span>
               </div>
-              <div className="p-2.5 rounded-2xl bg-[#FAF7F0] border border-stone-200 flex items-center gap-2 shadow-xs">
+              <div className="p-2.5 rounded-2xl clay-card-3d flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#D92B8A]"></span>
                 <span>Taking Quizzes: 0 cr</span>
               </div>
-              <div className="p-2.5 rounded-2xl bg-[#FAF7F0] border border-stone-200 flex items-center gap-2 shadow-xs">
+              <div className="p-2.5 rounded-2xl clay-card-3d flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#D92B8A]"></span>
                 <span>My Sets: 0 cr</span>
               </div>
-              <div className="p-2.5 rounded-2xl bg-[#FAF7F0] border border-stone-200 flex items-center gap-2 shadow-xs">
+              <div className="p-2.5 rounded-2xl clay-card-3d flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#D92B8A]"></span>
                 <span>Study Planner: 0 cr</span>
               </div>
@@ -362,7 +359,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
         </div>
 
         {/* AI Credit Cost Breakdown Table */}
-        <div className="p-6 sm:p-8 rounded-[28px] bg-white border border-stone-200/90 shadow-[0_16px_40px_rgba(0,0,0,0.06)] space-y-6">
+        <div className="clay-card-3d p-6 sm:p-8 space-y-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Sparkles className="w-5 h-5 text-[#D92B8A]" />
@@ -379,7 +376,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
             {creditCostItems.map((item, idx) => (
               <div
                 key={idx}
-                className="p-3.5 rounded-2xl bg-[#FAF7F0] border border-stone-200 flex items-center justify-between gap-3 shadow-xs"
+                className="p-3.5 rounded-2xl clay-card-3d flex items-center justify-between gap-3 shadow-xs"
               >
                 <div>
                   <span className="text-[10px] font-mono font-bold uppercase text-stone-500">
@@ -400,7 +397,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
         </div>
 
         {/* Direct Customer Support & Institutional Inquiries Card */}
-        <div className="p-6 sm:p-8 rounded-[28px] bg-white border border-stone-200/90 shadow-[0_16px_40px_rgba(0,0,0,0.06)] flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="clay-card-3d p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#D92B8A] uppercase">
               <Mail className="w-4 h-4" />
@@ -416,7 +413,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
 
           <a
             href="mailto:support@proudlyafrikan.org"
-            className="px-7 py-4 rounded-full bg-[#18181B] hover:bg-stone-900 text-white font-display font-black text-xs sm:text-sm uppercase tracking-wider shadow-md inline-flex items-center gap-2.5 cursor-pointer transition-all shrink-0"
+            className="px-7 py-4 rounded-full clay-btn-dark font-display font-black text-xs sm:text-sm uppercase tracking-wider shadow-md inline-flex items-center gap-2.5 cursor-pointer transition-all shrink-0"
           >
             <span>Contact Support</span>
             <ArrowRight className="w-4 h-4 text-[#D92B8A]" />
@@ -428,10 +425,10 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
       {selectedPlanForCheckout && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
           <div 
-            className="w-full max-w-lg bg-[#FAF8F5] border-2 border-[#161616] rounded-3xl shadow-[6px_6px_0px_#161616] p-6 sm:p-8 space-y-6"
+            className="w-full max-w-lg clay-card-3d p-6 sm:p-8 space-y-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-4 border-b-2 border-stone-200">
+            <div className="flex items-center justify-between pb-4 border-b border-stone-200">
               <div>
                 <span className="text-[10px] font-mono uppercase font-bold text-stone-500">
                   Plan Subscription Setup
@@ -442,13 +439,13 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
               </div>
               <button
                 onClick={() => setSelectedPlanForCheckout(null)}
-                className="w-8 h-8 rounded-xl border-2 border-[#161616] bg-white text-[#161616] hover:bg-stone-100 flex items-center justify-center font-black cursor-pointer shadow-[1.5px_1.5px_0px_#161616]"
+                className="w-8 h-8 rounded-xl clay-pill-3d bg-white text-[#161616] hover:bg-stone-100 flex items-center justify-center font-black cursor-pointer shadow-xs"
               >
                 ✕
               </button>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border-2 border-[#161616] shadow-[2px_2px_0px_#161616] space-y-2">
+            <div className="p-4 rounded-2xl clay-card-3d space-y-2">
               <div className="flex justify-between items-baseline">
                 <span className="font-mono text-xs font-bold text-stone-600 uppercase">Monthly Price</span>
                 <span className="font-display font-black text-2xl text-[#161616]">
@@ -466,14 +463,14 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
             <div className="flex gap-3">
               <button
                 onClick={() => setSelectedPlanForCheckout(null)}
-                className="tactile-btn flex-1 py-3.5 px-4 rounded-2xl bg-white hover:bg-stone-50 border-2 border-[#161616] text-[#161616] font-display font-black text-xs uppercase cursor-pointer transition-all shadow-[2px_2px_0px_#161616]"
+                className="clay-pill-3d flex-1 py-3.5 px-4 font-display font-black text-xs uppercase cursor-pointer shadow-xs"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmPlanSubscription}
                 disabled={isProcessing}
-                className="tactile-btn flex-1 py-3.5 px-4 rounded-2xl bg-[#D92B8A] hover:bg-[#c02377] text-white font-display font-black text-xs uppercase tracking-wider border-2 border-[#161616] shadow-[3px_3px_0px_#161616] cursor-pointer transition-all disabled:opacity-50"
+                className="clay-btn-crimson flex-1 py-3.5 px-4 font-display font-black text-xs uppercase tracking-wider cursor-pointer shadow-md disabled:opacity-50"
               >
                 {isProcessing ? 'Processing...' : `Confirm & Activate`}
               </button>
