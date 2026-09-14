@@ -27,7 +27,7 @@ export const AllGeneratorsSection: React.FC<AllGeneratorsSectionProps> = ({
             <div
               key={tool.id}
               onClick={() => onSelectGenerator(tool.id)}
-              className="bg-white border border-stone-200/90 hover:border-[#E63956]/50 rounded-3xl p-7 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-6 group"
+              className="clay-card-3d-interactive p-7 flex flex-col justify-between space-y-6 cursor-pointer group"
             >
               <div className="space-y-5">
                 {/* Top Row: Number & Badge */}
@@ -41,7 +41,7 @@ export const AllGeneratorsSection: React.FC<AllGeneratorsSectionProps> = ({
                 </div>
 
                 {/* Dark Icon Box */}
-                <div className="w-12 h-12 rounded-2xl bg-[#18181B] text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
+                <div className="w-12 h-12 rounded-2xl bg-[#18181B] text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
                   <Icon className="w-6 h-6 text-[#E63956]" />
                 </div>
 
@@ -50,16 +50,16 @@ export const AllGeneratorsSection: React.FC<AllGeneratorsSectionProps> = ({
                   <h3 className="font-display font-black text-xl text-[#161616] uppercase tracking-tight group-hover:text-[#E63956] transition-colors">
                     {tool.title}
                   </h3>
-                  <p className="font-sans text-xs sm:text-sm text-stone-500 leading-relaxed">
+                  <p className="font-sans text-xs sm:text-sm text-stone-600 leading-relaxed">
                     {tool.description}
                   </p>
                 </div>
               </div>
 
               {/* Bottom Row Action */}
-              <div className="flex items-center justify-between pt-5 border-t border-stone-100 font-mono text-xs font-bold text-[#E63956] uppercase tracking-wider">
+              <div className="flex items-center justify-between pt-5 border-t border-stone-200/80 font-mono text-xs font-bold text-[#E63956] uppercase tracking-wider">
                 <span>{tool.actionLabel} →</span>
-                <div className="w-7 h-7 rounded-full bg-[#FFF0F2] flex items-center justify-center group-hover:bg-[#E63956] group-hover:text-white transition-colors">
+                <div className="w-7 h-7 rounded-full bg-[#FFF0F2] flex items-center justify-center group-hover:bg-[#E63956] group-hover:text-white transition-colors shadow-xs">
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </div>
               </div>

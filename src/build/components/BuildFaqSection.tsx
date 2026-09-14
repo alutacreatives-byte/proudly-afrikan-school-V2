@@ -36,7 +36,7 @@ export const BuildFaqSection: React.FC = () => {
           </h2>
         </div>
         <div className="lg:col-span-4">
-          <p className="font-sans text-xs sm:text-sm text-stone-500 leading-relaxed">
+          <p className="font-sans text-xs sm:text-sm text-stone-600 leading-relaxed">
             Everything you need to know about active recall, document-grounded quizzes, and personalized study roadmaps.
           </p>
         </div>
@@ -49,10 +49,10 @@ export const BuildFaqSection: React.FC = () => {
           return (
             <div
               key={idx}
-              className={`bg-white rounded-3xl transition-all ${
+              className={`rounded-3xl transition-all ${
                 isOpen
-                  ? 'border-2 border-[#E63956] shadow-[0_6px_25px_rgba(230,57,86,0.12)]'
-                  : 'border border-stone-200/90 shadow-xs hover:border-stone-300'
+                  ? 'bg-gradient-to-b from-[#FFFDF9] to-[#F9F0E6] border-2 border-[#E63956] shadow-[0_12px_35px_rgba(230,57,86,0.15)]'
+                  : 'clay-card-3d'
               }`}
             >
               <button
@@ -60,8 +60,8 @@ export const BuildFaqSection: React.FC = () => {
                 className="w-full px-6 sm:px-8 py-6 text-left flex items-center justify-between gap-4 cursor-pointer group"
               >
                 <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                    isOpen ? 'bg-[#FFF0F2] text-[#E63956]' : 'bg-stone-100 text-stone-500 group-hover:bg-stone-200'
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-xs ${
+                    isOpen ? 'bg-[#FFF0F2] text-[#E63956]' : 'bg-stone-200/80 text-stone-700 group-hover:bg-stone-300'
                   }`}>
                     <Sparkles className="w-4 h-4" />
                   </div>
@@ -70,15 +70,15 @@ export const BuildFaqSection: React.FC = () => {
                   </span>
                 </div>
 
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${
-                  isOpen ? 'bg-[#E63956] text-white' : 'bg-stone-100 text-stone-600'
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors shadow-xs ${
+                  isOpen ? 'bg-[#E63956] text-white' : 'bg-stone-200/80 text-stone-700'
                 }`}>
                   {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </div>
               </button>
 
               {isOpen && (
-                <div className="px-6 sm:px-8 pb-8 font-sans text-xs sm:text-sm text-stone-600 leading-relaxed pt-2 border-t border-stone-100">
+                <div className="px-6 sm:px-8 pb-8 font-sans text-xs sm:text-sm text-stone-600 leading-relaxed pt-2 border-t border-stone-200/80">
                   {faq.a}
                 </div>
               )}

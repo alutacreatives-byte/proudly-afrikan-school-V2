@@ -15,7 +15,7 @@ export const BuildThreeWaysSection: React.FC<BuildThreeWaysSectionProps> = ({
       id: 'topic',
       num: '01',
       badge: 'FASTEST',
-      badgeStyle: 'bg-[#FFF0F2] text-[#E63956] border border-[#FFCCD4]',
+      badgeStyle: 'bg-[#FFF0F2] text-[#E63956] border border-[#FFCCD4] shadow-xs',
       title: 'TYPE IT.',
       subtitle: 'TOPIC & CONCEPT MODE',
       desc: 'Type any subject, exam topic, or concept to generate flashcards, study guides, or practice quizzes.',
@@ -25,7 +25,7 @@ export const BuildThreeWaysSection: React.FC<BuildThreeWaysSectionProps> = ({
       id: 'text',
       num: '02',
       badge: 'DEEP CONTEXT',
-      badgeStyle: 'bg-stone-100 text-stone-700 border border-stone-200',
+      badgeStyle: 'bg-stone-100 text-stone-700 border border-stone-200 shadow-xs',
       title: 'PASTE IT.',
       subtitle: 'LECTURE & CLASS NOTES',
       desc: 'Paste your raw revision notes, textbook summaries, or article snippets to build tailored drills.',
@@ -35,7 +35,7 @@ export const BuildThreeWaysSection: React.FC<BuildThreeWaysSectionProps> = ({
       id: 'pdf',
       num: '03',
       badge: 'PDF • DOC • DOCX',
-      badgeStyle: 'bg-stone-900 text-white',
+      badgeStyle: 'bg-stone-900 text-white shadow-xs',
       title: 'UPLOAD IT.',
       subtitle: 'DOCUMENT & PDF MODE',
       desc: 'Upload syllabus PDFs, past papers, or slides to extract content and ground every quiz with source citations.',
@@ -45,7 +45,7 @@ export const BuildThreeWaysSection: React.FC<BuildThreeWaysSectionProps> = ({
       id: 'capture',
       num: '04',
       badge: 'CAMERA • OCR',
-      badgeStyle: 'bg-[#FFF0F2] text-[#E63956] border border-[#FFCCD4]',
+      badgeStyle: 'bg-[#FFF0F2] text-[#E63956] border border-[#FFCCD4] shadow-xs',
       title: 'CAPTURE IT.',
       subtitle: 'CAMERA & PHOTO MODE',
       desc: 'Photograph homework, textbook pages, handwritten work, equations, diagrams, or worksheets to instantly digitize and study.',
@@ -72,10 +72,10 @@ export const BuildThreeWaysSection: React.FC<BuildThreeWaysSectionProps> = ({
             <div
               key={method.id}
               onClick={() => onSelectMethod(method.id as any)}
-              className={`bg-white rounded-[2rem] p-7 flex flex-col justify-between transition-all cursor-pointer group ${
+              className={`rounded-[2rem] p-7 flex flex-col justify-between transition-all cursor-pointer group ${
                 isActive
-                  ? 'border-2 border-[#E63956] shadow-[0_8px_30px_rgba(230,57,86,0.15)]'
-                  : 'border border-stone-200/90 shadow-xs hover:border-stone-300 hover:shadow-md'
+                  ? 'bg-gradient-to-b from-[#FFFDF9] to-[#F9F0E6] border-2 border-[#E63956] shadow-[0_16px_40px_rgba(230,57,86,0.2)] transform -translate-y-1'
+                  : 'clay-card-3d-interactive'
               }`}
             >
               <div className="space-y-6">
@@ -84,13 +84,13 @@ export const BuildThreeWaysSection: React.FC<BuildThreeWaysSectionProps> = ({
                   <span className="font-mono font-black text-2xl text-stone-900 tracking-tight">
                     {method.num}
                   </span>
-                  <span className={`font-mono text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-xs ${method.badgeStyle}`}>
+                  <span className={`font-mono text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full ${method.badgeStyle}`}>
                     {method.badge}
                   </span>
                 </div>
 
                 {/* Dark Circular Icon Box */}
-                <div className="w-12 h-12 rounded-2xl bg-[#18181B] text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
+                <div className="w-12 h-12 rounded-2xl bg-[#18181B] text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
                   <Icon className="w-6 h-6 text-[#E63956]" />
                 </div>
 
@@ -104,18 +104,18 @@ export const BuildThreeWaysSection: React.FC<BuildThreeWaysSectionProps> = ({
                       {method.subtitle}
                     </span>
                   </div>
-                  <p className="font-sans text-xs sm:text-sm text-stone-500 leading-relaxed">
+                  <p className="font-sans text-xs sm:text-sm text-stone-600 leading-relaxed">
                     {method.desc}
                   </p>
                 </div>
               </div>
 
               {/* Bottom Footer Action */}
-              <div className="flex items-center justify-between pt-6 mt-6 border-t border-stone-100">
+              <div className="flex items-center justify-between pt-6 mt-6 border-t border-stone-200/80">
                 <span className="font-mono text-xs font-bold text-stone-900 uppercase tracking-widest">
                   SELECT MODE
                 </span>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm ${
                   isActive ? 'bg-[#E63956] text-white' : 'bg-stone-900 text-white group-hover:bg-[#E63956]'
                 }`}>
                   <ArrowDown className="w-4 h-4 -rotate-90" />
