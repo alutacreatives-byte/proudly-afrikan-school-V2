@@ -15,14 +15,17 @@ import {
 } from 'lucide-react';
 import { StudyToolType } from '../types';
 import { getSavedResources, deleteResourceFromStorage } from '../../build/utils/storage';
+import { GlobalNavigationButtons } from '../components/GlobalNavigationButtons';
 
 interface StudyMyResourcesProps {
   onBack: () => void;
+  onGoHome?: () => void;
   onOpenResource: (resource: any) => void;
 }
 
 export const StudyMyResources: React.FC<StudyMyResourcesProps> = ({
   onBack,
+  onGoHome,
   onOpenResource,
 }) => {
   const [resources, setResources] = useState<any[]>(getSavedResources());
@@ -72,7 +75,7 @@ export const StudyMyResources: React.FC<StudyMyResourcesProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap">
           <div className="relative flex-1 sm:w-64">
             <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
@@ -83,6 +86,12 @@ export const StudyMyResources: React.FC<StudyMyResourcesProps> = ({
               className="w-full pl-9 pr-4 py-2 bg-white border border-stone-200 rounded-full font-mono text-xs text-stone-800 focus:outline-hidden focus:border-[#E63956]"
             />
           </div>
+          <GlobalNavigationButtons
+            onBack={onBack}
+            onGoHome={onGoHome}
+            backLabel="Back"
+            homeLabel="Home"
+          />
         </div>
       </div>
 

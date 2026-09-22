@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { 
   CheckSquare, 
   Sparkles, 
-  Printer, 
-  Copy, 
   Bookmark, 
   Check, 
   RotateCcw,
@@ -19,15 +17,18 @@ import { saveResourceToStorage } from '../../../build/utils/storage';
 import { useAuthCredit } from '../../../context/AuthCreditContext';
 import { exportQuiz } from '../../../utils/exportUtils';
 import { useScrollToResult } from '../../../utils/useScrollToResult';
+import { GlobalNavigationButtons } from '../../../components/GlobalNavigationButtons';
 
 interface StudyQuizGeneratorProps {
   onBack: () => void;
+  onGoHome?: () => void;
   onSaved?: () => void;
   existingResource?: QuizResult;
 }
 
 export const StudyQuizGenerator: React.FC<StudyQuizGeneratorProps> = ({
   onBack,
+  onGoHome,
   onSaved,
   existingResource,
 }) => {
@@ -47,7 +48,6 @@ export const StudyQuizGenerator: React.FC<StudyQuizGeneratorProps> = ({
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(false);
-  const [copied, setCopied] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const resultRef = useScrollToResult(quiz, isGenerating);
@@ -136,23 +136,6 @@ export const StudyQuizGenerator: React.FC<StudyQuizGeneratorProps> = ({
     setTimeout(() => setSaved(false), 2500);
   };
 
-  const handleCopy = () => {
-    if (!quiz || !Array.isArray(quiz.questions)) return;
-    let text = `# ${quiz.title}\nSubject: ${quiz.subject || category}\n\n`;
-    quiz.questions.forEach((q, idx) => {
-      text += `Question ${idx + 1}: ${q.prompt}\n`;
-      q.options.forEach((opt, oIdx) => {
-        text += `  ${String.fromCharCode(65 + oIdx)}. ${opt}\n`;
-      });
-      text += `Correct Answer: ${String.fromCharCode(65 + (Number(q.correctAnswer) || 0))} - ${q.options[Number(q.correctAnswer) || 0]}\n`;
-      if (q.explanation) text += `Explanation: ${q.explanation}\n`;
-      text += '\n';
-    });
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const handleExportDoc = () => {
     if (!quiz) return;
     exportQuiz(quiz, 'doc');
@@ -184,14 +167,6 @@ export const StudyQuizGenerator: React.FC<StudyQuizGeneratorProps> = ({
           <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
             <button
               type="button"
-              onClick={handleCopy}
-              className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-              {copied ? 'Copied' : 'Copy'}
-            </button>
-            <button
-              type="button"
               onClick={handleExportDoc}
               className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Download Word Document (.doc)"
@@ -210,14 +185,6 @@ export const StudyQuizGenerator: React.FC<StudyQuizGeneratorProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => window.print()}
-              className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              Print
-            </button>
-            <button
-              type="button"
               onClick={handleSave}
               className="px-4 py-2 rounded-xl bg-[#18181B] hover:bg-[#27272A] text-white font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
             >
@@ -226,22 +193,28 @@ export const StudyQuizGenerator: React.FC<StudyQuizGeneratorProps> = ({
             </button>
           </div>
         )}
+        <GlobalNavigationButtons
+          onBack={onBack}
+          onGoHome={onGoHome}
+          backLabel="Back"
+          homeLabel="Home"
+        />
       </div>
 
       {/* Main Layout: Menu directly ABOVE generation area */}
       <div className="space-y-8">
         {/* Form Menu Column */}
         <div className="w-full space-y-6">
-          <div className="p-6 rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] space-y-5">
+          <div className="p-6 sm:p-8 rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] space-y-6">
             <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
               <Sparkles className="w-4 h-4 text-[#E63956]" />
-              <h2 className="font-display font-black text-sm uppercase text-[#161616] tracking-wider">
+              <h2 className="font-display font-black text-base uppercase text-[#161616] tracking-wider">
                 Quiz Setup
               </h2>
             </div>
 
             <div>
-              <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
+              <label className="block font-mono text-[13px] sm:text-sm font-bold text-stone-900 uppercase mb-2">
                 Quiz Topic / Test Area *
               </label>
               <input
@@ -249,30 +222,47 @@ export const StudyQuizGenerator: React.FC<StudyQuizGeneratorProps> = ({
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="e.g. Swahili Coast Maritime Trade"
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-[#E63956] focus:ring-1 focus:ring-[#E63956] bg-stone-50 text-sm font-medium outline-hidden"
+                className="w-full px-4 py-3 sm:py-3.5 rounded-2xl border border-stone-200 focus:border-[#E63956] focus:ring-1 focus:ring-[#E63956] bg-stone-50 text-xs sm:text-sm font-mono text-stone-900 outline-hidden"
               />
             </div>
 
-            <div>
-              <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
-                Subject
-              </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-[#E63956] bg-stone-50 text-sm font-medium outline-hidden"
-              >
-                <option value="AFRICAN HISTORY">African History</option>
-                <option value="SCIENCES & STEM">Sciences & STEM</option>
-                <option value="MATHEMATICS">Mathematics</option>
-                <option value="LITERATURE & ARTS">Literature & Arts</option>
-                <option value="GEOGRAPHY & ENVIRONMENT">Geography & Environment</option>
-                <option value="CIVICS & ECONOMICS">Civics & Economics</option>
-              </select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-mono text-[13px] sm:text-sm font-bold text-stone-900 uppercase mb-2">
+                  Subject
+                </label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-4 py-3 sm:py-3.5 rounded-2xl border border-stone-200 focus:border-[#E63956] bg-stone-50 text-xs sm:text-sm font-mono text-stone-900 outline-hidden"
+                >
+                  <option value="AFRICAN HISTORY">African History</option>
+                  <option value="SCIENCES & STEM">Sciences & STEM</option>
+                  <option value="MATHEMATICS">Mathematics</option>
+                  <option value="LITERATURE & ARTS">Literature & Arts</option>
+                  <option value="GEOGRAPHY & ENVIRONMENT">Geography & Environment</option>
+                  <option value="CIVICS & ECONOMICS">Civics & Economics</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-mono text-[13px] sm:text-sm font-bold text-stone-900 uppercase mb-2">
+                  Questions Count
+                </label>
+                <select
+                  value={count}
+                  onChange={(e) => setCount(Number(e.target.value))}
+                  className="w-full px-4 py-3 sm:py-3.5 rounded-2xl border border-stone-200 focus:border-[#E63956] bg-stone-50 text-xs sm:text-sm font-mono text-stone-900 outline-hidden"
+                >
+                  <option value={5}>5 Questions (Rapid Check)</option>
+                  <option value={8}>8 Questions (Standard Assessment)</option>
+                  <option value={10}>10 Questions (In-Depth Test)</option>
+                </select>
+              </div>
             </div>
 
             <div>
-              <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
+              <label className="block font-mono text-[13px] sm:text-sm font-bold text-stone-900 uppercase mb-2">
                 Difficulty
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -281,7 +271,7 @@ export const StudyQuizGenerator: React.FC<StudyQuizGeneratorProps> = ({
                     key={d}
                     type="button"
                     onClick={() => setDifficulty(d)}
-                    className={`py-2 text-xs font-mono font-bold uppercase rounded-xl border transition-all cursor-pointer ${
+                    className={`py-2.5 text-xs font-mono font-bold uppercase rounded-xl border transition-all cursor-pointer ${
                       difficulty === d
                         ? 'bg-[#18181B] text-white border-[#18181B]'
                         : 'bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100'
@@ -294,24 +284,6 @@ export const StudyQuizGenerator: React.FC<StudyQuizGeneratorProps> = ({
             </div>
 
             <div>
-              <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
-                Questions Count
-              </label>
-              <select
-                value={count}
-                onChange={(e) => setCount(Number(e.target.value))}
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-[#E63956] bg-stone-50 text-sm font-medium outline-hidden"
-              >
-                <option value={5}>5 Questions (Rapid Check)</option>
-                <option value={8}>8 Questions (Standard Assessment)</option>
-                <option value={10}>10 Questions (In-Depth Test)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
-                Optional Source Material (PDF / DOC / Notes)
-              </label>
               <SourceMaterialUpload
                 currentFileName={sourceFileName}
                 onTextExtracted={(text, name) => {
@@ -322,6 +294,7 @@ export const StudyQuizGenerator: React.FC<StudyQuizGeneratorProps> = ({
                   setSourceMaterial('');
                   setSourceFileName('');
                 }}
+                accentColor="#E63956"
               />
             </div>
 

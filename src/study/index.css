@@ -4,7 +4,7 @@
   --font-display: 'Archivo Black', 'Cabinet Grotesk', 'Syne', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'Space Mono', 'Space Grotesk', monospace;
+  --font-mono: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   /* Enhanced accessible typography scale for comfortable readability */
   --text-2xs: 0.8125rem; /* 13px */

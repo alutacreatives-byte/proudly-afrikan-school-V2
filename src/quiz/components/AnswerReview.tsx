@@ -24,7 +24,7 @@ export const AnswerReview: React.FC<AnswerReviewProps> = ({
         <div>
           <button
             onClick={onBackToResults}
-            className="inline-flex items-center gap-1.5 font-mono-code text-xs font-bold text-[#E05A2B] hover:underline mb-2 cursor-pointer"
+            className="inline-flex items-center gap-1.5 font-mono-code text-xs font-bold text-[#E52E5E] hover:underline mb-2 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>BACK TO SUMMARY</span>
@@ -46,7 +46,7 @@ export const AnswerReview: React.FC<AnswerReviewProps> = ({
           </button>
           <button
             onClick={onCreateAnother}
-            className="px-4 py-2.5 bg-[#E05A2B] text-white rounded-full font-mono-code text-xs font-bold uppercase hover:bg-[#CC4F24] transition-colors shadow-xs cursor-pointer"
+            className="px-4 py-2.5 bg-[#E52E5E] text-white rounded-full font-mono-code text-xs font-bold uppercase hover:bg-[#CC4F24] transition-colors shadow-xs cursor-pointer"
           >
             NEW QUIZ
           </button>
@@ -67,7 +67,7 @@ export const AnswerReview: React.FC<AnswerReviewProps> = ({
               className={`bg-white rounded-[2rem] border p-6 sm:p-8 transition-all w-full box-border ${
                 isCorrect
                   ? 'border-[#E6E0D5] shadow-[0_10px_30px_-10px_rgba(41,41,41,0.05)]'
-                  : 'border-[#E05A2B]/40 ring-2 ring-[#E05A2B]/20 bg-[#FFFDFB] shadow-sm'
+                  : 'border-[#E52E5E]/40 ring-2 ring-[#E52E5E]/20 bg-[#FFFDFB] shadow-sm'
               }`}
             >
               {/* Question Header & Status */}
@@ -83,7 +83,7 @@ export const AnswerReview: React.FC<AnswerReviewProps> = ({
                       CORRECT
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#E05A2B] text-white rounded-full font-mono-code text-xs font-bold uppercase">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#E52E5E] text-white rounded-full font-mono-code text-xs font-bold uppercase">
                       <X className="w-3.5 h-3.5 stroke-[3]" />
                       INCORRECT
                     </span>
@@ -101,7 +101,7 @@ export const AnswerReview: React.FC<AnswerReviewProps> = ({
                 {/* User Answer */}
                 <div
                   className={`p-4 rounded-2xl border ${
-                    isCorrect ? 'bg-[#EBF7EE] border-[#1E3A2B]/20 text-[#1E3A2B]' : 'bg-[#FFEBE6] border-[#E05A2B]/20 text-[#E05A2B]'
+                    isCorrect ? 'bg-[#EBF7EE] border-[#1E3A2B]/20 text-[#1E3A2B]' : 'bg-[#FFEBE6] border-[#E52E5E]/20 text-[#E52E5E]'
                   }`}
                 >
                   <span className="font-mono-code text-[11px] font-bold uppercase tracking-wider block mb-1">
@@ -139,7 +139,7 @@ export const AnswerReview: React.FC<AnswerReviewProps> = ({
       <div className="p-6 bg-[#292929] text-[#F5F0E6] rounded-[2rem] shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
         <button
           onClick={onBackToResults}
-          className="font-mono-code text-xs font-bold text-[#E05A2B] hover:underline cursor-pointer"
+          className="font-mono-code text-xs font-bold text-[#E52E5E] hover:underline cursor-pointer"
         >
           ← RETURN TO SCORECARD
         </button>
@@ -153,7 +153,7 @@ export const AnswerReview: React.FC<AnswerReviewProps> = ({
           </button>
           <button
             onClick={onCreateAnother}
-            className="px-5 py-3 bg-[#E05A2B] text-white hover:bg-[#CC4F24] rounded-full font-display font-black text-xs sm:text-sm uppercase shadow-md transition-colors cursor-pointer"
+            className="px-5 py-3 bg-[#E52E5E] text-white hover:bg-[#CC4F24] rounded-full font-display font-black text-xs sm:text-sm uppercase shadow-md transition-colors cursor-pointer"
           >
             CREATE ANOTHER QUIZ
           </button>

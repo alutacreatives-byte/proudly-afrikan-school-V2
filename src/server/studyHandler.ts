@@ -277,7 +277,8 @@ export function registerStudyRoutes(app: express.Express): void {
         const isFlashcards = lowerPrompt.includes('flashcard') || lowerPrompt.includes('"cards"');
         const isEssay = lowerPrompt.includes('essay') || lowerPrompt.includes('gradeletter') || lowerPrompt.includes('specificimprovements');
         const isPdfQuiz = lowerPrompt.includes('grounded assessment quiz') || lowerPrompt.includes('document mastery quiz') || lowerPrompt.includes('diagnostic assessment questions') || (lowerPrompt.includes('document') && lowerPrompt.includes('quiz'));
-        const isQuiz = (lowerPrompt.includes('quiz') || lowerPrompt.includes('"questions"')) && !isPdfQuiz;
+        const isWorksheet = lowerPrompt.includes('worksheet') || lowerPrompt.includes('"activities"') || lowerPrompt.includes('student worksheet');
+        const isQuiz = (lowerPrompt.includes('quiz') || lowerPrompt.includes('"questions"')) && !isPdfQuiz && !isWorksheet;
         const isStudyGuide = lowerPrompt.includes('study guide') || lowerPrompt.includes('"sections"');
         const isPresentation = lowerPrompt.includes('presentation') || lowerPrompt.includes('slide') || lowerPrompt.includes('"slides"');
         const isCourse = lowerPrompt.includes('course') || lowerPrompt.includes('"modules"') || lowerPrompt.includes('curriculum');
@@ -288,6 +289,89 @@ export function registerStudyRoutes(app: express.Express): void {
 
         const subjectMatch = prompt.match(/(?:Subject|Category)(?:\s*\/\s*[A-Za-z]+)?:?\s*([^\n\r"]+)/i);
         const subjectName = subjectMatch ? subjectMatch[1].trim() : 'General Curriculum';
+
+        if (isWorksheet) {
+          return res.json({
+            title: topicName || subjectName || 'Curriculum Topic',
+            topic: topicName,
+            subject: subjectName,
+            gradeLevel: 'Junior / Senior Secondary',
+            description: `Comprehensive student worksheet designed for active completion, critical thinking, and concept reinforcement.`,
+            instructions: 'Read all directions carefully. Complete all activities and write your answers in the provided spaces.',
+            estimatedTimeMinutes: 45,
+            totalMarks: 40,
+            studentHeader: {
+              nameField: 'Student Name: ____________________________________',
+              dateField: 'Date: ________________________',
+              classField: 'Grade / Class: ________________________',
+              scoreField: 'Score: _______ / 40'
+            },
+            activities: [
+              {
+                activityNumber: 1,
+                title: 'Activity 1: Vocabulary & Key Terms Match',
+                type: 'matching',
+                instructions: 'Match each term in Column A with its correct definition in Column B. Write the matching letter in the bracket provided.',
+                items: [
+                  { itemNumber: 1, prompt: `Foundational Principle of ${topicName}`, matchTarget: 'A. The underlying governing rule establishing core operational frameworks.', completionSpace: 'Write letter: [ _____ ]' },
+                  { itemNumber: 2, prompt: `System Mechanism`, matchTarget: 'B. Structured process linking theoretical inputs directly to observable outcomes.', completionSpace: 'Write letter: [ _____ ]' },
+                  { itemNumber: 3, prompt: `Practical Application`, matchTarget: 'C. Systematic implementation in real-world problem-solving contexts.', completionSpace: 'Write letter: [ _____ ]' },
+                  { itemNumber: 4, prompt: `Verification Framework`, matchTarget: 'D. Empirical criteria used to assess validity and measurable performance.', completionSpace: 'Write letter: [ _____ ]' }
+                ]
+              },
+              {
+                activityNumber: 2,
+                title: 'Activity 2: Fill in the Blanks with Word Bank',
+                type: 'fill-in-blanks',
+                instructions: 'Complete each statement using the appropriate term from the Word Bank below.',
+                wordBank: ['Mechanism', 'Empirical', 'Framework', 'Application', 'Principles'],
+                items: [
+                  { itemNumber: 1, prompt: `The central theoretical ____________ establishes how concepts interact within this domain.`, completionSpace: 'Your Answer: ____________________________________' },
+                  { itemNumber: 2, prompt: `Every observable outcome is driven by an underlying ____________ that governs cause and effect.`, completionSpace: 'Your Answer: ____________________________________' },
+                  { itemNumber: 3, prompt: `Practitioners validate theories through rigorous ____________ evidence and testing.`, completionSpace: 'Your Answer: ____________________________________' },
+                  { itemNumber: 4, prompt: `Successful real-world ____________ requires adapting core rules to authentic challenges.`, completionSpace: 'Your Answer: ____________________________________' }
+                ]
+              },
+              {
+                activityNumber: 3,
+                title: 'Activity 3: Structured Conceptual Questions',
+                type: 'short-answer',
+                instructions: 'Answer each question thoroughly using complete sentences. Explain your reasoning.',
+                items: [
+                  { itemNumber: 1, prompt: `Explain why understanding ${topicName} is essential for solving complex challenges in this subject.`, completionSpace: 'Write your response below:\n______________________________________________________________________\n______________________________________________________________________' },
+                  { itemNumber: 2, prompt: `Identify two common misconceptions regarding ${topicName} and contrast them with correct conceptual principles.`, completionSpace: 'Write your response below:\n______________________________________________________________________\n______________________________________________________________________' }
+                ]
+              },
+              {
+                activityNumber: 4,
+                title: 'Activity 4: Practical Scenario & Problem-Solving Application',
+                type: 'application',
+                instructions: 'Read the scenario below and complete the analytical tasks. Show all work and logical deductions.',
+                scenario: `A community or academic project needs to implement principles of ${topicName} to optimize performance and prevent critical failures. You have been asked to analyze the situation and formulate a solution.`,
+                items: [
+                  { itemNumber: 1, prompt: `Step 1: Identify the primary variables that must be controlled or monitored.`, completionSpace: 'Your analysis:\n______________________________________________________________________\n______________________________________________________________________' },
+                  { itemNumber: 2, prompt: `Step 2: Propose a step-by-step action plan to address the scenario effectively.`, completionSpace: 'Your action plan:\n______________________________________________________________________\n______________________________________________________________________' }
+                ]
+              },
+              {
+                activityNumber: 5,
+                title: 'Activity 5: Critical Thinking & Synthesis Reflection',
+                type: 'critical-thinking',
+                instructions: 'Synthesize what you have learned by completing the reflection inquiry below.',
+                items: [
+                  { itemNumber: 1, prompt: `Evaluate how the core ideas of ${topicName} connect to broader themes or contemporary issues in modern society.`, completionSpace: 'Student Reflection:\n______________________________________________________________________\n______________________________________________________________________' }
+                ]
+              }
+            ],
+            teacherAnswerKey: [
+              { activityTitle: 'Activity 1: Vocabulary & Key Terms Match', answers: ['1. Foundational Principle -> A', '2. System Mechanism -> B', '3. Practical Application -> C', '4. Verification Framework -> D'] },
+              { activityTitle: 'Activity 2: Fill in the Blanks', answers: ['1. Framework', '2. Mechanism', '3. Empirical', '4. Application'] },
+              { activityTitle: 'Activity 3: Structured Conceptual Questions', answers: ['1. Model Answer: Understanding provides foundational principles that allow learners to predict outcomes and analyze cause-and-effect relationships.', '2. Model Answer: Misconception 1: Concepts operate in isolation. Misconception 2: Memorization equates to conceptual mastery.'] },
+              { activityTitle: 'Activity 4: Practical Scenario Application', answers: ['1. Primary variables include initial baseline conditions, operational constraints, and measurement accuracy.', '2. Action plan should feature diagnostic evaluation, targeted intervention, and verification feedback.'] },
+              { activityTitle: 'Activity 5: Critical Thinking & Synthesis', answers: ['1. Full marks awarded for linking foundational mechanisms to contemporary societal or technological developments with coherent reasoning.'] }
+            ]
+          });
+        }
 
         if (isFlashcards) {
           return res.json({

@@ -162,22 +162,22 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       </div>
 
       {/* Set Title Banner */}
-      <div className="flex items-center justify-between px-1">
+      <div className="flex items-center justify-between px-3 sm:px-4">
         <div>
           <span className="text-xs font-mono font-bold uppercase text-stone-500">
             {studySet.category}
           </span>
-          <h2 className="font-display font-black text-lg sm:text-xl text-stone-900">
+          <h2 className="font-display font-black text-lg sm:text-xl text-stone-900 break-words">
             {studySet.title}
           </h2>
         </div>
 
         <button
           onClick={handleFlip}
-          className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-white border border-stone-200 rounded-full text-xs font-mono font-bold text-stone-800 shadow-sm hover:bg-stone-50 transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-white border border-stone-200 rounded-full text-xs font-mono font-bold text-stone-800 shadow-sm hover:bg-stone-50 transition-colors shrink-0 ml-2"
         >
           <RotateCw className="w-3.5 h-3.5 text-[#D92B8A]" />
-          <span>Flip [Space]</span>
+          <span>Flip</span>
         </button>
       </div>
 
@@ -274,10 +274,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
         {/* Bottom Prompts / Reveal Action */}
         <div className="pt-6 border-t border-stone-200 flex items-center justify-between">
           {!isFlipped ? (
-            <div className="w-full flex items-center justify-between">
-              <span className="text-xs sm:text-sm font-mono text-stone-500 font-semibold">
-                Click or press Space to reveal
-              </span>
+            <div className="w-full flex items-center justify-end">
               <button
                 id="flashcard-reveal-btn"
                 onClick={(e) => {

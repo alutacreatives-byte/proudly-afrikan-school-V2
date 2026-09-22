@@ -175,10 +175,12 @@ Learning Objectives: ${Array.isArray(learningObjectives) ? learningObjectives.jo
 Teacher Custom Notes: ${additionalInstructions || 'None'}
 Source Material: ${sourceMaterial ? sourceMaterial.slice(0, 4000) : 'None'}
 
+IMPORTANT: The worksheet title MUST strictly be the TOPIC / SUBJECT TITLE: "${topic || subject}" (do NOT prefix with "Worksheet:" or "Interactive Worksheet:").
+
 Return a valid JSON object matching this schema:
 {
   "id": "ws-${Date.now()}",
-  "title": "Interactive Worksheet: ${topic}",
+  "title": "${topic || subject}",
   "subject": "${subject}",
   "topic": "${topic}",
   "gradeLevel": "${gradeLevel}",
@@ -780,6 +782,35 @@ Return a valid JSON object matching this schema:
   });
 }
 
+// Helper to format clean worksheet title strictly as the Topic / Subject title
+function getCleanWorksheetTitle(title?: string, topic?: string, subject?: string): string {
+  const cleanTopic = (topic || '').trim();
+  const cleanSubject = (subject || '').trim();
+
+  let formattedTitle = (title || '').trim();
+  if (formattedTitle) {
+    formattedTitle = formattedTitle
+      .replace(/^(?:Interactive\s+|Mastery\s+|Student\s+|Classroom\s+)?Worksheet\s*[:\-–—]\s*/i, '')
+      .replace(/^Worksheet\b\s*[:\-–—]?\s*/i, '')
+      .trim();
+  }
+
+  const isGeneric = !formattedTitle || /^(?:classroom\s+)?(?:student\s+)?worksheet$/i.test(formattedTitle);
+
+  if (!isGeneric && formattedTitle) {
+    return formattedTitle;
+  }
+
+  if (cleanTopic && cleanSubject && cleanTopic.toLowerCase() !== cleanSubject.toLowerCase()) {
+    if (/^(?:curriculum|general|general\s+science|educational\s+studies|standard)$/i.test(cleanSubject)) {
+      return cleanTopic;
+    }
+    return `${cleanTopic} - ${cleanSubject}`;
+  }
+
+  return cleanTopic || cleanSubject || formattedTitle || 'Classroom Study Topic';
+}
+
 // Normalizer Functions
 function normalizeWorksheet(data: any, subject: string, topic: string, gradeLevel: string, difficulty: string) {
   const sections = Array.isArray(data.sections) && data.sections.length > 0
@@ -808,13 +839,14 @@ function normalizeWorksheet(data: any, subject: string, topic: string, gradeLeve
 
   const totalMarks = Number(data.totalMarks) || sections.reduce((acc: number, s: any) => acc + (Number(s.marks) || 10), 0);
   const estimatedDurationMinutes = Number(data.estimatedDurationMinutes || data.estimatedCompletionTimeMinutes || 45);
+  const cleanTitle = getCleanWorksheetTitle(data.title, topic || data.topic, subject || data.subject);
 
   return {
     ...data,
     id: data.id || `ws-${Date.now()}`,
-    title: data.title || `Interactive Worksheet: ${topic || subject}`,
+    title: cleanTitle,
     subject: data.subject || subject || 'General Science',
-    topic: data.topic || topic || 'Core Study Unit',
+    topic: data.topic || topic || cleanTitle,
     gradeLevel: data.gradeLevel || gradeLevel || 'Junior Secondary / Middle School (Grades 6-8)',
     difficulty: data.difficulty || difficulty || 'Intermediate',
     totalMarks,
@@ -1335,11 +1367,12 @@ function generateFallbackExam(subject: string, topic: string, gradeLevel: string
 }
 
 function generateFallbackWorksheet(subject: string, topic: string, gradeLevel: string, difficulty: string) {
+  const cleanTitle = getCleanWorksheetTitle('', topic, subject);
   return {
     id: `ws-${Date.now()}`,
-    title: `Mastery Worksheet: ${topic || subject}`,
+    title: cleanTitle,
     subject: subject || 'General Science',
-    topic: topic || 'Core Subject Exploration',
+    topic: cleanTitle,
     gradeLevel: gradeLevel || 'Junior Secondary / Middle School (Grades 6-8)',
     difficulty: difficulty || 'Intermediate',
     learningObjectives: [

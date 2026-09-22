@@ -72,33 +72,32 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
   ];
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF7F0] text-[#161616] pb-24">
-      {/* Top Hero Section matching Build 3D soft UI style */}
-      <section className="pt-6 pb-12 bg-gradient-to-b from-[#FFFDF9] to-[#FAF7F0] border-b border-stone-200/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          {/* Edition Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 clay-pill-3d text-xs sm:text-sm font-mono font-bold tracking-wider uppercase text-stone-800 shadow-xs">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D92B8A] inline-block animate-pulse"></span>
-            <span>PROUDLY AFRIKAN EDUCATION • TRANSPARENT PRICING</span>
-          </div>
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+      {/* Top Hero Section matching Study, Quiz, and Build */}
+      <section className="pt-2 pb-8 border-b border-stone-200/80">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          <div className="lg:col-span-8 space-y-6 flex flex-col justify-start">
+              {/* Edition Badge */}
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 clay-pill-3d text-[10px] sm:text-xs font-mono font-bold tracking-wider uppercase text-stone-800 self-start h-8 shadow-xs whitespace-nowrap">
+                <span className="w-2 h-2 rounded-full bg-[#D92B8A] inline-block animate-pulse shrink-0"></span>
+                <span className="truncate">PROUDLY AFRIKAN EDUCATION • TRANSPARENT PRICING</span>
+              </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
-            <div className="lg:col-span-8 space-y-4">
               <h1 className="font-display font-black text-5xl sm:text-7xl md:text-8xl lg:text-[5.5rem] xl:text-[6.25rem] uppercase tracking-tighter text-[#161616] leading-[0.88] sm:leading-[0.9] lg:leading-[0.92] break-words">
                 CHOOSE<br />
                 HOW YOU<br />
-                <span className="text-[#D92B8A]">LEARN.</span>
+                <span className="text-[#E73A56]">LEARN.</span>
               </h1>
 
-              <p className="text-base sm:text-lg lg:text-xl text-stone-700 font-normal leading-[1.65] max-w-2xl">
+              <p className="text-base sm:text-lg lg:text-xl xl:text-[1.3rem] text-stone-700 font-normal leading-[1.65] max-w-2xl min-h-[4rem] sm:min-h-[3.5rem] lg:min-h-[4rem]">
                 Every new user receives <strong className="font-bold text-[#161616]">400 free once-off credits</strong>. Upgrade to flexible monthly subscriptions anytime to power your curriculum, teaching, and study workflow.
               </p>
             </div>
 
             {/* Current Balance Card */}
-            <div className="lg:col-span-4 flex lg:justify-end">
+            <div className="lg:col-span-4 flex lg:justify-end lg:pt-0">
               <div className="w-full lg:w-auto clay-card-3d p-6 space-y-4 shadow-xl">
-                <div className="flex items-center justify-between border-b border-stone-200 pb-3 gap-4">
+                <div className="flex items-center justify-between border-b border-stone-200 pb-3 h-9 gap-4">
                   <div className="flex items-center gap-2 font-display text-xs font-black uppercase tracking-wider text-[#161616]">
                     <Zap className="w-4 h-4 text-[#D92B8A]" />
                     <span>YOUR ACCOUNT</span>
@@ -113,7 +112,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
                     {availableCredits.toLocaleString()} <span className="text-sm font-mono font-normal text-stone-600">Credits</span>
                   </div>
                   <p className="font-mono text-xs text-stone-600">
-                    Available balance for AI generation
+                    Available balance for study generation
                   </p>
                 </div>
 
@@ -125,12 +124,11 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
                 </button>
               </div>
             </div>
-          </div>
         </div>
       </section>
 
       {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 space-y-12">
+      <div className="space-y-16">
         {/* Success Alert */}
         {successNotice && (
           <div className="clay-card-3d p-4 bg-[#FFF0F2] border-[#FFCCD4] text-[#E63956] font-sans text-sm font-bold flex items-center gap-3 shadow-lg animate-in fade-in">
@@ -146,9 +144,9 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
             const isPopular = plan.id === 'STUDENT';
 
             const titleColor = 
-              plan.id === 'FREE' ? '#E62E43' :
-              plan.id === 'LEARNER' ? '#D96B27' :
-              plan.id === 'STUDENT' ? '#D92B8A' : '#D33842';
+              plan.id === 'FREE' ? '#DA8F00' :
+              plan.id === 'LEARNER' ? '#E52E5E' :
+              plan.id === 'STUDENT' ? '#D92B8A' : '#FF8000';
 
             const getBadge = () => {
               if (plan.id === 'FREE') {
@@ -180,7 +178,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
                 return [
                   '400 once-off AI credits on sign',
                   'Unlimited access to Study.',
-                  'Full access to My Sets library',
+                  'Full access to History library',
                   'Standard AI generation speed',
                   'No recurring payment',
                 ];
@@ -269,7 +267,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
                       </span>
                     </div>
 
-                    <div className={`mt-2.5 pt-2.5 flex items-center gap-1.5 text-xs font-mono font-bold tracking-tight text-[#161616] border-t ${
+                    <div className={`mt-2.5 pt-2.5 flex items-center gap-1.5 text-xs font-inter font-bold tracking-tight text-[#161616] border-t ${
                       isPopular ? 'border-[#F0C4D4]' : 'border-[#E3D9C9]'
                     }`}>
                       <Zap className="w-3.5 h-3.5 text-[#D92B8A] fill-[#D92B8A]/20 shrink-0" />
@@ -333,7 +331,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
                 Normal platform use does NOT consume any credits
               </h3>
               <p className="font-sans text-stone-700 text-xs sm:text-sm max-w-3xl leading-relaxed">
-                Credits are used only for AI creation and generation. You can freely study existing sets, take revision quizzes, review saved collections, and manage study timetables without spending a single credit.
+                Credits are used only for content creation and generation. You can freely study existing sets, take revision quizzes, review saved collections, and manage study timetables without spending a single credit.
               </p>
             </div>
 
@@ -348,7 +346,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
               </div>
               <div className="p-2.5 rounded-2xl clay-card-3d flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#D92B8A]"></span>
-                <span>My Sets: 0 cr</span>
+                <span>History: 0 cr</span>
               </div>
               <div className="p-2.5 rounded-2xl clay-card-3d flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#D92B8A]"></span>
@@ -358,7 +356,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
           </div>
         </div>
 
-        {/* AI Credit Cost Breakdown Table */}
+        {/* Credit Cost Breakdown Table */}
         <div className="clay-card-3d p-6 sm:p-8 space-y-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -368,7 +366,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
               </h3>
             </div>
             <p className="font-sans text-xs sm:text-sm text-stone-600">
-              Clear breakdown of AI credits required per generation tool:
+              Clear breakdown of credits required per generation tool:
             </p>
           </div>
 
@@ -399,7 +397,7 @@ export const PricingView: React.FC<PricingViewProps> = ({ onNavigateToTab }) => 
         {/* Direct Customer Support & Institutional Inquiries Card */}
         <div className="clay-card-3d p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#D92B8A] uppercase">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#E73A56] uppercase">
               <Mail className="w-4 h-4" />
               <span>Direct Customer & School Support</span>
             </div>

@@ -89,7 +89,7 @@ export const EducationalContent: React.FC = () => {
     {
       question: 'What is an AI quiz generator?',
       answer:
-        'An AI quiz generator is an intelligent educational tool that analyzes source materials (such as topics, text notes, or PDF documents) and automatically produces rigorous, accurate assessment questions, answer choices, and explanatory notes for rapid self-testing.',
+        'An AI quiz generator is an intelligent educational tool that analyzes source materials, such as topics, text notes, or PDF documents, and automatically produces rigorous, accurate assessment questions, answer choices, and explanatory notes for rapid self-testing.',
     },
     {
       question: 'Can I create a quiz from a PDF?',
@@ -104,12 +104,12 @@ export const EducationalContent: React.FC = () => {
     {
       question: 'Can I choose the difficulty?',
       answer:
-        'Yes. You can select between Easy (foundational definitions and clear options), Medium (nuanced conceptual questions), and Hard (deep analytical questions with plausible distractors).',
+        'Yes. You can select between Easy with foundational definitions and clear options, Medium for nuanced conceptual questions, and Hard featuring deep analytical questions with plausible distractors.',
     },
     {
       question: 'Can I create multiple-choice questions?',
       answer:
-        'Yes. You can choose Multiple Choice (4 choices with one correct answer), True / False statements (2 options), or Mixed mode which blends both formats for variety.',
+        'Yes. You can choose Multiple Choice with four options and one correct answer, True or False statements with two options, or Mixed mode which blends both formats for variety.',
     },
     {
       question: 'Is Proudly Afrikan Quiz free?',
@@ -124,7 +124,7 @@ export const EducationalContent: React.FC = () => {
       <section className="py-8 sm:py-12 border-b border-stone-200/80">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-5 space-y-3">
-            <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#E05A2B] block">
+            <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#E52E5E] block">
               PLATFORM OVERVIEW
             </span>
             <h2 className="font-display font-black text-3xl sm:text-4xl md:text-5xl uppercase tracking-tight text-[#161616] leading-none">
@@ -147,12 +147,12 @@ export const EducationalContent: React.FC = () => {
       <section id="how-it-works" className="py-8 sm:py-12 border-b border-stone-200/80">
         <div className="mb-10 pb-6 border-b border-stone-200/80 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <span className="font-mono text-xs sm:text-sm font-bold uppercase tracking-widest text-[#E05A2B] block mb-2">
+            <span className="font-mono text-xs sm:text-sm font-bold uppercase tracking-widest text-[#E52E5E] block mb-2">
               THE WORKFLOW
             </span>
             <h2 className="font-display font-black text-4xl sm:text-6xl md:text-7xl uppercase tracking-tighter text-[#161616] leading-[0.9]">
               HOW IT<br />
-              <span className="text-[#E05A2B]">WORKS</span>
+              <span className="text-[#E52E5E]">WORKS</span>
             </h2>
           </div>
           <p className="font-mono text-xs sm:text-sm text-stone-600 max-w-md leading-relaxed">
@@ -176,13 +176,13 @@ export const EducationalContent: React.FC = () => {
                     <span className="font-display font-black text-xl sm:text-2xl text-stone-400">
                       {item.step}
                     </span>
-                    <span className="px-2.5 py-1 bg-[#FAF0EB] text-[#E05A2B] border border-[#F0D5C9] rounded-full text-[9px] font-mono font-bold uppercase tracking-wider">
+                    <span className="px-2.5 py-1 bg-[#FAF0EB] text-[#E52E5E] border border-[#F0D5C9] rounded-full text-[9px] font-mono font-bold uppercase tracking-wider">
                       {item.badge}
                     </span>
                   </div>
 
                   {/* Icon */}
-                  <div className="w-11 h-11 rounded-full bg-[#161616] text-[#E05A2B] flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-[#E05A2B] group-hover:text-white transition-all">
+                  <div className="w-11 h-11 rounded-full bg-[#161616] text-[#E52E5E] flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-[#E52E5E] group-hover:text-white transition-all">
                     <Icon className="w-5 h-5" />
                   </div>
 
@@ -199,8 +199,8 @@ export const EducationalContent: React.FC = () => {
 
                 {/* Bottom Action Footer */}
                 <div className="pt-4 mt-5 border-t border-stone-200 flex items-center justify-between text-xs font-mono font-bold text-[#161616]">
-                  <span className="group-hover:text-[#E05A2B] transition-colors">STEP {item.step}</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-[#E05A2B] group-hover:translate-x-1 transition-transform" />
+                  <span className="group-hover:text-[#E52E5E] transition-colors">STEP {item.step}</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-[#E52E5E] group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             );
@@ -212,7 +212,7 @@ export const EducationalContent: React.FC = () => {
       <section className="py-8 sm:py-12 border-b border-stone-200/80">
         <div className="mb-10 pb-6 border-b border-stone-200/80 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#E05A2B] block mb-1">
+            <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#E52E5E] block mb-1">
               TARGET AUDIENCE
             </span>
             <h2 className="font-display font-black text-3xl sm:text-5xl md:text-6xl uppercase tracking-tight text-[#161616] leading-none">
@@ -233,13 +233,13 @@ export const EducationalContent: React.FC = () => {
                 className="bg-white rounded-[1.75rem] border border-stone-200 p-6 sm:p-7 flex flex-col justify-between shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group"
               >
                 <div>
-                  <div className="w-12 h-12 rounded-full bg-[#161616] text-[#E05A2B] flex items-center justify-center mb-5 group-hover:bg-[#E05A2B] group-hover:text-white transition-all shadow-xs">
+                  <div className="w-12 h-12 rounded-full bg-[#161616] text-[#E52E5E] flex items-center justify-center mb-5 group-hover:bg-[#E52E5E] group-hover:text-white transition-all shadow-xs">
                     <Icon className="w-6 h-6" />
                   </div>
                   <h3 className="font-display font-black text-lg sm:text-xl text-[#161616] uppercase mb-1 leading-tight">
                     {item.title}
                   </h3>
-                  <span className="font-mono text-xs font-bold text-[#E05A2B] block mb-3">
+                  <span className="font-mono text-xs font-bold text-[#E52E5E] block mb-3">
                     {item.role}
                   </span>
                   <p className="text-sm text-stone-600 leading-relaxed font-normal">
@@ -255,7 +255,7 @@ export const EducationalContent: React.FC = () => {
       {/* SECTION: FAQ */}
       <section id="faq" className="py-8 sm:py-12 max-w-4xl mx-auto">
         <div className="text-center mb-10">
-          <span className="font-mono text-xs sm:text-sm font-bold uppercase tracking-widest text-[#E05A2B] block mb-2">
+          <span className="font-mono text-xs sm:text-sm font-bold uppercase tracking-widest text-[#E52E5E] block mb-2">
             FREQUENTLY ASKED QUESTIONS
           </span>
           <h2 className="font-display font-black text-3xl sm:text-5xl md:text-6xl uppercase tracking-tight text-[#161616] leading-none">
@@ -273,13 +273,13 @@ export const EducationalContent: React.FC = () => {
               >
                 <button
                   onClick={() => toggleFaq(index)}
-                  className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 font-display font-bold text-base sm:text-lg md:text-xl text-[#161616] cursor-pointer hover:text-[#E05A2B] transition-colors"
+                  className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 font-display font-bold text-base sm:text-lg md:text-xl text-[#161616] cursor-pointer hover:text-[#E52E5E] transition-colors"
                   aria-expanded={isOpen}
                 >
                   <span className="leading-snug">{faq.question}</span>
                   <div
                     className={`w-8 h-8 rounded-full border border-stone-300 flex items-center justify-center shrink-0 transition-transform ${
-                      isOpen ? 'bg-[#E05A2B] text-white rotate-180 border-[#E05A2B]' : 'bg-[#FAF7F0] text-[#161616]'
+                      isOpen ? 'bg-[#E52E5E] text-white rotate-180 border-[#E52E5E]' : 'bg-[#FAF7F0] text-[#161616]'
                     }`}
                   >
                     <ChevronDown className="w-4 h-4" />

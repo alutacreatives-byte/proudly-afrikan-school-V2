@@ -47,7 +47,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
           particleCount: 80,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ['#E05A2B', '#292929', '#1E3A2B', '#F5F0E6'],
+          colors: ['#E52E5E', '#292929', '#1E3A2B', '#F5F0E6'],
         });
       } catch {
         // Safe fallback
@@ -105,7 +105,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
     <div className="bg-white rounded-[2.5rem] border border-[#E6E0D5] shadow-[0_15px_40px_-10px_rgba(41,41,41,0.08)] p-6 sm:p-10 md:p-12 text-center max-w-4xl mx-auto transition-all w-full box-border">
       {/* Top Banner Tag */}
       <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#FAF7F2] rounded-full border border-[#E0D8C5] text-xs font-mono-code font-bold uppercase tracking-wider text-[#292929] mb-8">
-        <Award className="w-4 h-4 text-[#E05A2B]" />
+        <Award className="w-4 h-4 text-[#E52E5E]" />
         <span>ASSESSMENT COMPLETE</span>
       </div>
 
@@ -124,7 +124,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
 
       {/* Encouraging Editorial Feedback */}
       <div className="max-w-xl mx-auto my-8 p-5 sm:p-6 bg-[#FAF7F2] rounded-2xl border border-[#E0D8C5]">
-        <h3 className="font-display font-black text-xl sm:text-2xl md:text-3xl text-[#E05A2B] uppercase">
+        <h3 className="font-display font-black text-xl sm:text-2xl md:text-3xl text-[#E52E5E] uppercase">
           {feedbackTitle}
         </h3>
         <p className="font-display font-bold text-base sm:text-lg md:text-xl text-[#292929] uppercase mt-1">
@@ -138,7 +138,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
           onClick={onReviewAnswers}
           className="py-4 px-4 bg-[#292929] text-[#F5F0E6] hover:bg-[#1A1A1A] font-display font-black text-sm sm:text-base uppercase rounded-2xl shadow-sm hover:shadow-md hover:scale-102 transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
-          <Eye className="w-4 h-4 text-[#E05A2B]" />
+          <Eye className="w-4 h-4 text-[#E52E5E]" />
           <span>REVIEW ANSWERS</span>
         </button>
 
@@ -152,7 +152,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
 
         <button
           onClick={onCreateAnother}
-          className="py-4 px-4 bg-[#E05A2B] text-white hover:bg-[#CC4F24] font-display font-black text-sm sm:text-base uppercase rounded-2xl shadow-sm hover:shadow-md hover:scale-102 transition-all flex items-center justify-center gap-2 cursor-pointer"
+          className="py-4 px-4 bg-[#E52E5E] text-white hover:bg-[#CC4F24] font-display font-black text-sm sm:text-base uppercase rounded-2xl shadow-sm hover:shadow-md hover:scale-102 transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
           <PlusCircle className="w-4 h-4" />
           <span>CREATE ANOTHER</span>
@@ -165,7 +165,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
           onClick={() => setIsShareModalOpen(true)}
           className="px-5 py-3 bg-[#FAF7F2] text-[#292929] font-mono-code font-bold text-xs uppercase tracking-wider rounded-full border border-[#E0D8C5] hover:bg-white shadow-xs hover:shadow-sm transition-all flex items-center gap-2 cursor-pointer"
         >
-          <Share2 className="w-4 h-4 text-[#E05A2B]" />
+          <Share2 className="w-4 h-4 text-[#E52E5E]" />
           <span>SHARE QUIZ</span>
         </button>
 

@@ -27,14 +27,14 @@ const FAQS: FaqItem[] = [
     id: 'faq-3',
     question: 'CAN I PRINT OR EXPORT MY FLASHCARDS AND STUDY GUIDES?',
     answer:
-      'Absolutely. Every study tool provides clean JSON exports, clipboard copying, and printer-ready formats designed for offline study sheets, handouts, or review binders.',
+      'Absolutely. Every study tool provides seamless text exports, clipboard copying, and printer-ready formats designed for offline study sheets, handouts, or review binders.',
     icon: Printer,
   },
   {
     id: 'faq-4',
     question: 'WHERE ARE MY FLASHCARDS AND QUIZZES STORED?',
     answer:
-      'All generated study guides, active decks, diagnostic quizzes, and learning roadmaps are automatically indexed and saved in your local library, accessible at any time under "My Study Library" or the "MY SETS" tab.',
+      'All generated study guides, active decks, diagnostic quizzes, and learning roadmaps are automatically indexed and saved in your local library, accessible at any time under "My Study Library" or the "HISTORY" tab.',
     icon: BookmarkCheck,
   },
 ];

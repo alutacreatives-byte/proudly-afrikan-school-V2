@@ -158,7 +158,6 @@ export const MasterFooter: React.FC<MasterFooterProps> = ({
             </button>
             <div className="font-mono text-[11px] text-stone-400 space-y-1 text-left md:text-right">
               <div>VERSION 1.0 • 2026</div>
-              <div className="font-semibold text-stone-300">CAPS & IEB ALIGNED</div>
             </div>
           </div>
         </div>
@@ -169,7 +168,7 @@ export const MasterFooter: React.FC<MasterFooterProps> = ({
             © {new Date().getFullYear()} PROUDLY AFRIKAN EDUCATION. ALL RIGHTS RESERVED.
           </div>
           <div className="flex items-center gap-2">
-            <span>DESIGNED WITH EDITORIAL RIGOR</span>
+            <span>BUILT WITH PURPOSE</span>
             <span>•</span>
             <a
               href="https://sifisos.com/"

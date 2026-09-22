@@ -21,8 +21,8 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Top micro-ticker */}
       <div className="bg-[#292929] text-[#F5F0E6] py-1.5 px-4 text-xs font-mono-code flex items-center justify-between overflow-x-auto whitespace-nowrap relative z-10">
         <div className="flex items-center gap-3">
-          <span className="inline-block w-2 h-2 rounded-full bg-[#E05A2B] animate-pulse"></span>
-          <span className="tracking-wider uppercase font-bold text-[#E05A2B]">
+          <span className="inline-block w-2 h-2 rounded-full bg-[#E52E5E] animate-pulse"></span>
+          <span className="tracking-wider uppercase font-bold text-[#E52E5E]">
             PROUDLY AFRIKAN EDUCATION
           </span>
           <span className="text-[#736E65] hidden sm:inline">|</span>
@@ -32,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
         <div className="flex items-center gap-4 text-[11px] font-bold text-[#D8D2C5]">
           <span className="hidden md:inline">FREE & UNLIMITED</span>
-          <span className="text-[#E05A2B]">⚡ GEMINI 3.7 FLASH</span>
+          <span className="text-[#E52E5E]">⚡ GEMINI 3.7 FLASH</span>
         </div>
       </div>
 
@@ -45,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
           aria-label="Proudly Afrikan Quiz Home"
         >
           {/* Rounded Emblem Badge with Logo on Orange Background */}
-          <div className="w-10 h-10 sm:w-11 sm:h-11 bg-[#E05A2B] rounded-xl sm:rounded-2xl border border-[#292929]/20 flex items-center justify-center p-1.5 shadow-sm group-hover:scale-105 transition-transform shrink-0">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 bg-[#E52E5E] rounded-xl sm:rounded-2xl border border-[#292929]/20 flex items-center justify-center p-1.5 shadow-sm group-hover:scale-105 transition-transform shrink-0">
             <img
               src="https://sifisos.com/wp-content/uploads/2026/04/Proudly-Afrikan-Logo.png"
               alt="Proudly Afrikan Logo"
@@ -57,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="font-display font-black text-base sm:text-xl tracking-tight leading-none text-[#292929]">
               PROUDLY AFRIKAN
             </div>
-            <div className="font-mono-code text-[11px] sm:text-xs tracking-widest text-[#E05A2B] font-bold mt-0.5">
+            <div className="font-mono-code text-[11px] sm:text-xs tracking-widest text-[#E52E5E] font-bold mt-0.5">
               QUIZ GENERATOR
             </div>
           </div>
@@ -68,19 +68,19 @@ export const Header: React.FC<HeaderProps> = ({
           <nav className="hidden lg:flex items-center gap-6 font-mono-code text-xs font-bold uppercase tracking-wider text-[#4A4A4A]">
             <button
               onClick={() => onScrollToSection('quiz-builder')}
-              className="hover:text-[#E05A2B] transition-colors cursor-pointer"
+              className="hover:text-[#E52E5E] transition-colors cursor-pointer"
             >
               Builder
             </button>
             <button
               onClick={() => onScrollToSection('how-it-works')}
-              className="hover:text-[#E05A2B] transition-colors cursor-pointer"
+              className="hover:text-[#E52E5E] transition-colors cursor-pointer"
             >
               How It Works
             </button>
             <button
               onClick={() => onScrollToSection('faq')}
-              className="hover:text-[#E05A2B] transition-colors cursor-pointer"
+              className="hover:text-[#E52E5E] transition-colors cursor-pointer"
             >
               FAQ
             </button>
@@ -93,7 +93,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="px-3.5 py-2 bg-[#FAF7F2] rounded-full border border-[#E0D8C5] shadow-xs text-xs font-mono-code font-bold text-[#292929] flex items-center gap-1.5 hover:bg-[#EAE4D6] transition-colors"
                 title="Recent Quizzes"
               >
-                <Layers className="w-3.5 h-3.5 text-[#E05A2B]" />
+                <Layers className="w-3.5 h-3.5 text-[#E52E5E]" />
                 <span>SAVED ({recentQuizzes.length})</span>
               </button>
               
@@ -106,7 +106,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <button
                       key={quiz.id}
                       onClick={() => onSelectRecentQuiz(quiz)}
-                      className="w-full text-left px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-[#E05A2B] hover:text-white transition-colors truncate block"
+                      className="w-full text-left px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-[#E52E5E] hover:text-white transition-colors truncate block"
                     >
                       {quiz.title}
                     </button>
@@ -119,7 +119,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Create Quiz Button */}
           <button
             onClick={() => onScrollToSection('quiz-builder')}
-            className="px-5 py-2.5 bg-[#E05A2B] hover:bg-[#CC4F24] text-white font-mono-code font-bold text-xs sm:text-sm tracking-wider uppercase rounded-full shadow-md hover:shadow-lg hover:scale-102 transition-all flex items-center gap-2 cursor-pointer"
+            className="px-5 py-2.5 bg-gradient-to-r from-[#E52E5E] via-[#F25C22] to-[#FF6B00] hover:brightness-105 text-white font-mono-code font-bold text-xs sm:text-sm tracking-wider uppercase rounded-full shadow-md hover:shadow-lg hover:scale-102 transition-all flex items-center gap-2 cursor-pointer"
           >
             <span>MAKE QUIZ</span>
             <ArrowUpRight className="w-4 h-4" />

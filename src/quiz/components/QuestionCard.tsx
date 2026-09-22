@@ -93,7 +93,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
             if (isCorrectChoice) {
               choiceStyle = 'bg-[#1E3A2B] text-white border-[#1E3A2B] shadow-sm';
             } else if (isUserChoice && !isCorrectChoice) {
-              choiceStyle = 'bg-[#E05A2B] text-white border-[#E05A2B] shadow-sm';
+              choiceStyle = 'bg-[#E52E5E] text-white border-[#E52E5E] shadow-sm';
             } else {
               choiceStyle = 'bg-[#FAF7F2]/60 border-[#E0D8C5]/50 text-[#736E65] opacity-50';
             }
@@ -117,7 +117,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
                     hasAnswered && isCorrectChoice
                       ? 'bg-white text-[#1E3A2B]'
                       : hasAnswered && isUserChoice && !isCorrectChoice
-                      ? 'bg-white text-[#E05A2B]'
+                      ? 'bg-white text-[#E52E5E]'
                       : 'bg-[#292929] text-[#F5F0E6]'
                   }`}
                 >
@@ -139,7 +139,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
                     </div>
                   )}
                   {isUserChoice && !isCorrectChoice && (
-                    <div className="w-8 h-8 rounded-full bg-white text-[#E05A2B] flex items-center justify-center font-bold shadow-xs">
+                    <div className="w-8 h-8 rounded-full bg-white text-[#E52E5E] flex items-center justify-center font-bold shadow-xs">
                       <X className="w-4 h-4 sm:w-5 sm:h-5 stroke-[3]" />
                     </div>
                   )}
@@ -158,13 +158,13 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
             className={`p-5 sm:p-6 rounded-2xl border ${
               selectedAnswer === question.correctAnswer
                 ? 'bg-[#EBF7EE] border-[#1E3A2B]/20 text-[#1E3A2B]'
-                : 'bg-[#FFF3E6] border-[#E05A2B]/20 text-[#292929]'
+                : 'bg-[#FFF3E6] border-[#E52E5E]/20 text-[#292929]'
             }`}
           >
             <div className="flex items-center gap-2 mb-2">
               <Lightbulb
                 className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                  selectedAnswer === question.correctAnswer ? 'text-[#1E3A2B]' : 'text-[#E05A2B]'
+                  selectedAnswer === question.correctAnswer ? 'text-[#1E3A2B]' : 'text-[#E52E5E]'
                 }`}
               />
               <span className="font-mono-code font-bold text-xs sm:text-sm uppercase tracking-wider">
@@ -186,7 +186,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 
             <button
               onClick={onNextQuestion}
-              className="w-full sm:w-auto px-8 py-4 bg-[#E05A2B] hover:bg-[#CC4F24] text-white font-display font-black text-base sm:text-lg uppercase tracking-wider rounded-full shadow-lg hover:shadow-xl hover:scale-102 transition-all flex items-center justify-center gap-3 cursor-pointer sm:ml-auto"
+              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#E52E5E] via-[#F25C22] to-[#FF6B00] hover:brightness-105 text-white font-display font-black text-base sm:text-lg uppercase tracking-wider rounded-full shadow-lg hover:shadow-xl hover:scale-102 transition-all flex items-center justify-center gap-3 cursor-pointer sm:ml-auto"
             >
               <span>{questionNumber === totalQuestions ? 'SEE RESULTS' : 'NEXT QUESTION'}</span>
               <ArrowRight className="w-5 h-5 text-white" />

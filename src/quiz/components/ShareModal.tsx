@@ -66,7 +66,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         <div className="flex items-center justify-between pb-4 mb-5 border-b border-[#292929]/10">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full bg-[#FAF7F2] border border-[#E0D8C5] flex items-center justify-center">
-              <Share2 className="w-4 h-4 text-[#E05A2B]" />
+              <Share2 className="w-4 h-4 text-[#E52E5E]" />
             </div>
             <h3 className="font-display font-black text-xl sm:text-2xl text-[#292929] uppercase tracking-tight">
               SHARE THIS QUIZ
@@ -74,7 +74,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#FAF7F2] border border-[#E0D8C5] text-[#292929] hover:bg-[#E05A2B] hover:text-white transition-colors flex items-center justify-center cursor-pointer"
+            className="w-8 h-8 rounded-full bg-[#FAF7F2] border border-[#E0D8C5] text-[#292929] hover:bg-[#E52E5E] hover:text-white transition-colors flex items-center justify-center cursor-pointer"
             aria-label="Close dialog"
           >
             <X className="w-4 h-4" />
@@ -83,7 +83,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
         {/* Quiz Info Summary */}
         <div className="p-4 bg-[#FAF7F2] rounded-2xl border border-[#E0D8C5] mb-4">
-          <span className="font-mono-code text-[11px] font-bold text-[#E05A2B] uppercase tracking-wider block">
+          <span className="font-mono-code text-[11px] font-bold text-[#E52E5E] uppercase tracking-wider block">
             QUIZ TITLE
           </span>
           <p className="font-display font-black text-base text-[#292929] uppercase mt-0.5 truncate">
@@ -97,14 +97,14 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         {/* Editable Custom Message Field */}
         <div className="mb-5">
           <label className="flex items-center gap-2 font-mono-code text-xs font-bold uppercase tracking-wider text-[#292929] mb-2">
-            <MessageSquare className="w-3.5 h-3.5 text-[#E05A2B]" />
+            <MessageSquare className="w-3.5 h-3.5 text-[#E52E5E]" />
             <span>CUSTOM MESSAGE</span>
           </label>
           <textarea
             value={customMessage}
             onChange={(e) => setCustomMessage(e.target.value)}
             rows={2}
-            className="w-full p-3.5 bg-[#FAF7F2] rounded-xl border border-[#E0D8C5] text-sm font-sans font-medium text-[#292929] focus:outline-none focus:ring-2 focus:ring-[#E05A2B] resize-none"
+            className="w-full p-3.5 bg-[#FAF7F2] rounded-xl border border-[#E0D8C5] text-sm font-sans font-medium text-[#292929] focus:outline-none focus:ring-2 focus:ring-[#E52E5E] resize-none"
             placeholder="Write a message to accompany your quiz..."
           />
           <p className="font-mono-code text-[11px] text-[#736E65] mt-1.5">
@@ -116,7 +116,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         <div className="space-y-3 pt-2">
           <button
             onClick={handleNativeShare}
-            className="w-full py-3.5 px-4 bg-[#E05A2B] text-white hover:bg-[#CC4F24] font-display font-black text-sm sm:text-base uppercase rounded-full shadow-md hover:shadow-lg hover:scale-101 flex items-center justify-center gap-2 cursor-pointer transition-all"
+            className="w-full py-3.5 px-4 bg-[#E52E5E] text-white hover:bg-[#CC4F24] font-display font-black text-sm sm:text-base uppercase rounded-full shadow-md hover:shadow-lg hover:scale-101 flex items-center justify-center gap-2 cursor-pointer transition-all"
           >
             <Send className="w-4 h-4" />
             <span>SHARE VIA APPS</span>

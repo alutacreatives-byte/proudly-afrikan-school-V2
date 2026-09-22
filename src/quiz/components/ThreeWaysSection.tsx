@@ -16,7 +16,7 @@ export const ThreeWaysSection: React.FC<ThreeWaysSectionProps> = ({
       id: 'topic' as CreationMethod,
       num: '01',
       badgeText: 'FASTEST',
-      badgeClass: 'bg-[#E05A2B] text-white shadow-xs',
+      badgeClass: 'bg-[#E52E5E] text-white shadow-xs',
       title: 'TYPE IT.',
       subtitle: 'TOPIC & IDEA MODE',
       desc: 'Enter any topic, curriculum subject, or concept and let AI craft a structured quiz resource instantly.',
@@ -68,7 +68,7 @@ export const ThreeWaysSection: React.FC<ThreeWaysSectionProps> = ({
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-6 border-b border-stone-200/80 gap-4">
           <div>
-            <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#E05A2B] block mb-2">
+            <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#E52E5E] block mb-2">
               FLEXIBLE INPUT MODES
             </span>
             <h2 className="font-display font-black text-3xl sm:text-5xl md:text-6xl uppercase tracking-tight text-[#161616] leading-none">
@@ -92,7 +92,7 @@ export const ThreeWaysSection: React.FC<ThreeWaysSectionProps> = ({
                 onClick={() => handleCardClick(card.id)}
                 className={`bg-white rounded-[2rem] border transition-all p-6 sm:p-7 flex flex-col justify-between cursor-pointer group ${
                   isSelected
-                    ? 'border-[#E05A2B] shadow-[0_16px_40px_-10px_rgba(224,90,43,0.15)] ring-2 ring-[#E05A2B]/20'
+                    ? 'border-[#E52E5E] shadow-[0_16px_40px_-10px_rgba(224,90,43,0.15)] ring-2 ring-[#E52E5E]/20'
                     : 'border-stone-200 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-[#161616]/30'
                 }`}
               >
@@ -108,7 +108,7 @@ export const ThreeWaysSection: React.FC<ThreeWaysSectionProps> = ({
                   </div>
 
                   {/* Dark Circular Icon Badge */}
-                  <div className="w-11 h-11 rounded-full bg-[#161616] text-[#E05A2B] flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-[#E05A2B] group-hover:text-white transition-all shadow-xs">
+                  <div className="w-11 h-11 rounded-full bg-[#161616] text-[#E52E5E] flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-[#E52E5E] group-hover:text-white transition-all shadow-xs">
                     <Icon className="w-5 h-5" />
                   </div>
 
@@ -116,7 +116,7 @@ export const ThreeWaysSection: React.FC<ThreeWaysSectionProps> = ({
                   <h3 className="font-display font-black text-xl sm:text-2xl text-[#161616] uppercase tracking-tight leading-tight">
                     {card.title}
                   </h3>
-                  <div className="font-mono text-[11px] font-bold text-[#E05A2B] uppercase tracking-wider mt-1 mb-2.5">
+                  <div className="font-mono text-[11px] font-bold text-[#E52E5E] uppercase tracking-wider mt-1 mb-2.5">
                     {card.subtitle}
                   </div>
 
@@ -128,10 +128,10 @@ export const ThreeWaysSection: React.FC<ThreeWaysSectionProps> = ({
 
                 {/* Bottom Card Action */}
                 <div className="pt-5 mt-5 border-t border-stone-100 flex items-center justify-between">
-                  <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#161616] group-hover:text-[#E05A2B] transition-colors">
+                  <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#161616] group-hover:text-[#E52E5E] transition-colors">
                     LAUNCH BUILDER
                   </span>
-                  <div className="w-7 h-7 rounded-full bg-[#161616] text-white flex items-center justify-center group-hover:bg-[#E05A2B] group-hover:translate-y-0.5 transition-all">
+                  <div className="w-7 h-7 rounded-full bg-[#161616] text-white flex items-center justify-center group-hover:bg-[#E52E5E] group-hover:translate-y-0.5 transition-all">
                     <ArrowDown className="w-3.5 h-3.5" />
                   </div>
                 </div>

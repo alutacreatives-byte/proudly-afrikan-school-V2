@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import { 
   Presentation, 
   Sparkles, 
-  Printer, 
-  Copy, 
   Bookmark, 
-  Check, 
   ArrowLeft,
   ArrowRight,
   Maximize2,
@@ -20,15 +17,18 @@ import { saveResourceToStorage } from '../../../build/utils/storage';
 import { useAuthCredit } from '../../../context/AuthCreditContext';
 import { exportPresentation } from '../../../utils/exportUtils';
 import { useScrollToResult } from '../../../utils/useScrollToResult';
+import { GlobalNavigationButtons } from '../../../components/GlobalNavigationButtons';
 
 interface StudyPresentationGeneratorProps {
   onBack: () => void;
+  onGoHome?: () => void;
   onSaved?: () => void;
   existingResource?: PresentationResult;
 }
 
 export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProps> = ({
   onBack,
+  onGoHome,
   onSaved,
   existingResource,
 }) => {
@@ -49,7 +49,6 @@ export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProp
   const [showSpeakerNotes, setShowSpeakerNotes] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(false);
-  const [copied, setCopied] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const resultRef = useScrollToResult(presentation, isGenerating);
@@ -117,21 +116,6 @@ export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProp
     setTimeout(() => setSaved(false), 2500);
   };
 
-  const handleCopy = () => {
-    if (!presentation || !Array.isArray(presentation.slides)) return;
-    let text = `# ${presentation.title}\nSubtitle: ${presentation.subtitle || ''}\nSubject: ${presentation.subject || category}\n\n`;
-    presentation.slides.forEach((s, idx) => {
-      text += `## Slide ${idx + 1}: ${s.title}\n`;
-      s.bullets.forEach((b) => (text += `- ${b}\n`));
-      if (s.speakerNotes) text += `\nSpeaker Notes: ${s.speakerNotes}\n`;
-      if (s.discussionPrompt) text += `Discussion Prompt: ${s.discussionPrompt}\n`;
-      text += '\n---\n\n';
-    });
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const handleExportDoc = () => {
     if (!presentation) return;
     exportPresentation(presentation, 'doc');
@@ -159,70 +143,58 @@ export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProp
           </h1>
         </div>
 
-        {presentation && Array.isArray(presentation.slides) && presentation.slides.length > 0 && (
-          <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
-            <button
-              type="button"
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              className={`px-4 py-2 rounded-xl border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer ${
-                isFullscreen ? 'bg-stone-800 text-white border-stone-700' : 'bg-white border-stone-200 text-stone-800 hover:bg-stone-50'
-              }`}
-            >
-              {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-              {isFullscreen ? 'Exit Fullscreen' : 'Present'}
-            </button>
-            <button
-              type="button"
-              onClick={handleCopy}
-              className={`px-4 py-2 rounded-xl border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer ${
-                isFullscreen ? 'bg-stone-800 text-white border-stone-700' : 'bg-white border-stone-200 text-stone-800 hover:bg-stone-50'
-              }`}
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-              {copied ? 'Copied' : 'Copy'}
-            </button>
-            <button
-              type="button"
-              onClick={handleExportDoc}
-              className={`px-4 py-2 rounded-xl border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer ${
-                isFullscreen ? 'bg-stone-800 text-white border-stone-700' : 'bg-white border-stone-200 text-stone-800 hover:bg-stone-50'
-              }`}
-              title="Download Word Document (.doc)"
-            >
-              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
-              DOC
-            </button>
-            <button
-              type="button"
-              onClick={handleExportPdf}
-              className={`px-4 py-2 rounded-xl border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer ${
-                isFullscreen ? 'bg-stone-800 text-white border-stone-700' : 'bg-white border-stone-200 text-stone-800 hover:bg-stone-50'
-              }`}
-              title="Download PDF Document (.pdf)"
-            >
-              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
-              PDF
-            </button>
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className={`px-4 py-2 rounded-xl border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer ${
-                isFullscreen ? 'bg-stone-800 text-white border-stone-700' : 'bg-white border-stone-200 text-stone-800 hover:bg-stone-50'
-              }`}
-            >
-              <Printer className="w-3.5 h-3.5" />
-              Print
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              className="px-4 py-2 rounded-xl bg-[#E63956] hover:bg-[#D32F4C] text-white font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-            >
-              <Bookmark className="w-3.5 h-3.5" />
-              {saved ? 'Saved' : 'Save Deck'}
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end flex-wrap">
+          {presentation && Array.isArray(presentation.slides) && presentation.slides.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setIsFullscreen(!isFullscreen)}
+                className={`px-4 py-2 rounded-xl border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer ${
+                  isFullscreen ? 'bg-stone-800 text-white border-stone-700' : 'bg-white border-stone-200 text-stone-800 hover:bg-stone-50'
+                }`}
+              >
+                {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                {isFullscreen ? 'Exit Fullscreen' : 'Present'}
+              </button>
+              <button
+                type="button"
+                onClick={handleExportDoc}
+                className={`px-4 py-2 rounded-xl border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer ${
+                  isFullscreen ? 'bg-stone-800 text-white border-stone-700' : 'bg-white border-stone-200 text-stone-800 hover:bg-stone-50'
+                }`}
+                title="Download Word Document (.doc)"
+              >
+                <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+                DOC
+              </button>
+              <button
+                type="button"
+                onClick={handleExportPdf}
+                className={`px-4 py-2 rounded-xl border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer ${
+                  isFullscreen ? 'bg-stone-800 text-white border-stone-700' : 'bg-white border-stone-200 text-stone-800 hover:bg-stone-50'
+                }`}
+                title="Download PDF Document (.pdf)"
+              >
+                <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
+                PDF
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                className="px-4 py-2 rounded-xl bg-[#E63956] hover:bg-[#D32F4C] text-white font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+              >
+                <Bookmark className="w-3.5 h-3.5" />
+                {saved ? 'Saved' : 'Save Deck'}
+              </button>
+            </div>
+          )}
+          <GlobalNavigationButtons
+            onBack={onBack}
+            onGoHome={onGoHome}
+            backLabel="Back"
+            homeLabel="Home"
+          />
+        </div>
       </div>
 
       {/* Main Layout: Menu directly ABOVE generation area */}
@@ -230,81 +202,74 @@ export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProp
         {/* Left Form (Hidden in fullscreen) */}
         {!isFullscreen && (
           <div className="w-full space-y-6">
-            <div className="p-6 rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] space-y-5">
-              <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
-                <Sparkles className="w-4 h-4 text-[#E63956]" />
-                <h2 className="font-display font-black text-sm uppercase text-[#161616] tracking-wider">
-                  Deck Configuration
-                </h2>
-              </div>
+            <div className="p-6 sm:p-10 rounded-[2.5rem] bg-[#FAF4EC] border border-[#EFE5DA] shadow-[0_2px_10px_rgba(100,80,60,0.04),_0_12px_30px_rgba(100,80,60,0.08),_0_28px_56px_-6px_rgba(100,80,60,0.10),_0_45px_80px_-12px_rgba(100,80,60,0.08)] space-y-6">
 
-              <div>
-                <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
-                  Presentation Topic *
+              <div className="text-left">
+                <label className="block font-mono text-[11px] sm:text-xs font-bold text-stone-600 uppercase mb-2">
+                  PRESENTATION TOPIC *
                 </label>
                 <input
                   type="text"
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   placeholder="e.g. Great Zimbabwe Architecture & Trade"
-                  className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-[#E63956] focus:ring-1 focus:ring-[#E63956] bg-stone-50 text-sm font-medium outline-hidden"
+                  className="w-full bg-[#EFE8DE] border border-[#E4DCD0] rounded-2xl p-4 font-mono text-xs sm:text-sm text-stone-900 placeholder-stone-400/80 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.07),_inset_-2px_-2px_4px_rgba(255,255,255,0.8)] focus:outline-hidden focus:border-[#E62E6B] transition-all"
                 />
               </div>
 
-              <div>
-                <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
-                  Subject
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-[#E63956] bg-stone-50 text-sm font-medium outline-hidden"
-                >
-                  <option value="AFRICAN HISTORY">African History</option>
-                  <option value="SCIENCES & STEM">Sciences & STEM</option>
-                  <option value="MATHEMATICS">Mathematics</option>
-                  <option value="LITERATURE & ARTS">Literature & Arts</option>
-                  <option value="GEOGRAPHY & ENVIRONMENT">Geography & Environment</option>
-                  <option value="CIVICS & ECONOMICS">Civics & Economics</option>
-                </select>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+                <div>
+                  <label className="block font-mono text-[11px] sm:text-xs font-bold text-stone-600 uppercase mb-2">
+                    SUBJECT
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full bg-[#EFE8DE] border border-[#E4DCD0] rounded-2xl p-4 font-mono text-xs sm:text-sm text-stone-900 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.07),_inset_-2px_-2px_4px_rgba(255,255,255,0.8)] focus:outline-hidden focus:border-[#E62E6B] cursor-pointer transition-all"
+                  >
+                    <option value="AFRICAN HISTORY">African History</option>
+                    <option value="SCIENCES & STEM">Sciences & STEM</option>
+                    <option value="MATHEMATICS">Mathematics</option>
+                    <option value="LITERATURE & ARTS">Literature & Arts</option>
+                    <option value="GEOGRAPHY & ENVIRONMENT">Geography & Environment</option>
+                    <option value="CIVICS & ECONOMICS">Civics & Economics</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-mono text-[11px] sm:text-xs font-bold text-stone-600 uppercase mb-2">
+                    AUDIENCE LEVEL
+                  </label>
+                  <select
+                    value={gradeLevel}
+                    onChange={(e) => setGradeLevel(e.target.value)}
+                    className="w-full bg-[#EFE8DE] border border-[#E4DCD0] rounded-2xl p-4 font-mono text-xs sm:text-sm text-stone-900 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.07),_inset_-2px_-2px_4px_rgba(255,255,255,0.8)] focus:outline-hidden focus:border-[#E62E6B] cursor-pointer transition-all"
+                  >
+                    <option value="Primary / Middle School">Primary / Middle School</option>
+                    <option value="Secondary / High School">Secondary / High School</option>
+                    <option value="Undergraduate / University">Undergraduate / University</option>
+                    <option value="Academic Conference / Professional">Academic Conference / Professional</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-mono text-[11px] sm:text-xs font-bold text-stone-600 uppercase mb-2">
+                    SLIDE COUNT
+                  </label>
+                  <select
+                    value={count}
+                    onChange={(e) => setCount(Number(e.target.value))}
+                    className="w-full bg-[#EFE8DE] border border-[#E4DCD0] rounded-2xl p-4 font-mono text-xs sm:text-sm text-stone-900 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.07),_inset_-2px_-2px_4px_rgba(255,255,255,0.8)] focus:outline-hidden focus:border-[#E62E6B] cursor-pointer transition-all"
+                  >
+                    <option value={5}>5 Slides (Overview / Lightning)</option>
+                    <option value={6}>6 Slides (Standard Lecture Deck)</option>
+                    <option value={8}>8 Slides (In-Depth Topic Presentation)</option>
+                    <option value={10}>10 Slides (Comprehensive Keynote)</option>
+                  </select>
+                </div>
               </div>
 
               <div>
-                <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
-                  Audience Level
-                </label>
-                <select
-                  value={gradeLevel}
-                  onChange={(e) => setGradeLevel(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-[#E63956] bg-stone-50 text-sm font-medium outline-hidden"
-                >
-                  <option value="Primary / Middle School">Primary / Middle School</option>
-                  <option value="Secondary / High School">Secondary / High School</option>
-                  <option value="Undergraduate / University">Undergraduate / University</option>
-                  <option value="Academic Conference / Professional">Academic Conference / Professional</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
-                  Slide Count
-                </label>
-                <select
-                  value={count}
-                  onChange={(e) => setCount(Number(e.target.value))}
-                  className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-[#E63956] bg-stone-50 text-sm font-medium outline-hidden"
-                >
-                  <option value={5}>5 Slides (Overview / Lightning)</option>
-                  <option value={6}>6 Slides (Standard Lecture Deck)</option>
-                  <option value={8}>8 Slides (In-Depth Topic Presentation)</option>
-                  <option value={10}>10 Slides (Comprehensive Keynote)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block font-mono text-xs font-bold text-stone-700 uppercase mb-2">
-                  Optional Source Material (PDF / DOC / Notes)
-                </label>
                 <SourceMaterialUpload
                   currentFileName={sourceFileName}
                   onTextExtracted={(text, name) => {
@@ -315,6 +280,7 @@ export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProp
                     setSourceMaterial('');
                     setSourceFileName('');
                   }}
+                  accentColor="#E62E6B"
                 />
               </div>
 
@@ -328,10 +294,10 @@ export const StudyPresentationGenerator: React.FC<StudyPresentationGeneratorProp
                 type="button"
                 disabled={isGenerating}
                 onClick={handleGenerate}
-                className="w-full py-3.5 rounded-xl bg-[#E63956] hover:bg-[#D32F4C] disabled:bg-stone-300 text-white font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+                className="w-full py-4 rounded-full bg-[#E62E6B] hover:bg-[#d8245f] disabled:bg-stone-300 text-white font-display font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[0_10px_28px_rgba(230,46,107,0.4)] active:scale-[0.99]"
               >
                 <Sparkles className="w-4 h-4" />
-                {isGenerating ? 'Designing Presentation...' : 'Generate Slide Deck →'}
+                <span>{isGenerating ? 'Designing Presentation...' : 'GENERATE SLIDE DECK →'}</span>
               </button>
             </div>
           </div>

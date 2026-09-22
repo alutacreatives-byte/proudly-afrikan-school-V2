@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
-  Printer, 
-  Copy, 
   Check, 
   BookOpen, 
   GraduationCap, 
@@ -25,13 +23,16 @@ import {
   Download
 } from 'lucide-react';
 import { UnifiedItem } from './MySetsWorkspace';
-import { exportUnifiedItem } from '../utils/exportUtils';
+import { exportUnifiedItem, getCleanWorksheetTitle } from '../utils/exportUtils';
+import { GlobalNavigationButtons } from '../components/GlobalNavigationButtons';
 
 interface SavedResultViewerProps {
   item: UnifiedItem;
   onClose: () => void;
   onOpenInWorkbench?: () => void;
   onLaunchPractice?: (mode: 'study' | 'flashcards' | 'practice') => void;
+  onBack?: () => void;
+  onGoHome?: () => void;
 }
 
 export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
@@ -39,14 +40,22 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
   onClose,
   onOpenInWorkbench,
   onLaunchPractice,
+  onBack,
+  onGoHome,
 }) => {
-  const [copied, setCopied] = useState(false);
   const [showMarkingGuide, setShowMarkingGuide] = useState(false);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [activeFlashcardIndex, setActiveFlashcardIndex] = useState(0);
   const [isCardFlipped, setIsCardFlipped] = useState(false);
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
   const [showQuizResults, setShowQuizResults] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   // Extract underlying data
   const studySet = item.originalStudySet;
@@ -58,126 +67,73 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
   const toolType = buildRes?.toolType || (studySet ? 'study-set' : quiz ? 'quiz' : 'custom');
 
   // Handle Copy full text representation
-  const handleCopy = () => {
-    let text = `${item.title.toUpperCase()}\n`;
-    text += `Category: ${item.categoryOrSubject} | Type: ${item.kindLabel}\n`;
-    text += `Created: ${new Date(item.createdAt).toLocaleDateString()}\n\n`;
-
-    if (studySet && studySet.concepts) {
-      text += `CONCEPTS & VOCABULARY:\n`;
-      studySet.concepts.forEach((c, idx) => {
-        text += `\n${idx + 1}. ${c.title}\n`;
-        text += `Explanation: ${c.explanation}\n`;
-        if (c.whyItMatters) text += `Why it matters: ${c.whyItMatters}\n`;
-        if (c.keyFacts && c.keyFacts.length) text += `Key Facts: ${c.keyFacts.join(', ')}\n`;
-      });
-    } else if (quiz && quiz.questions) {
-      text += `QUIZ QUESTIONS:\n`;
-      quiz.questions.forEach((q, idx) => {
-        text += `\nQuestion ${idx + 1}: ${q.question}\n`;
-        q.options.forEach((opt, oIdx) => {
-          text += `  [${String.fromCharCode(65 + oIdx)}] ${opt} ${Number(oIdx) === Number(q.correctAnswer) ? '✓' : ''}\n`;
-        });
-        if (q.explanation) text += `Explanation: ${q.explanation}\n`;
-      });
-    } else if (toolType === 'exam' && anyData.sections) {
-      text += `EXAMINATION PAPER\nDuration: ${anyData.durationMinutes || 60} mins | Total Marks: ${anyData.totalMarks || 50}\n\n`;
-      anyData.sections.forEach((sec: any) => {
-        text += `\n--- ${sec.name.toUpperCase()} (${sec.totalMarks} Marks) ---\n`;
-        (sec.questions || []).forEach((q: any) => {
-          text += `\nQ${q.questionNumber}. ${q.questionText} [${q.marks} Marks]\n`;
-          if (q.options) {
-            q.options.forEach((opt: string, i: number) => {
-              text += `   (${String.fromCharCode(65 + i)}) ${opt}\n`;
-            });
-          }
-          if (q.correctAnswer) text += `Answer: ${q.correctAnswer}\n`;
-        });
-      });
-    } else if (toolType === 'worksheet' && anyData.exercises) {
-      text += `WORKSHEET\nInstructions: ${anyData.instructions || ''}\n\n`;
-      anyData.exercises.forEach((ex: any) => {
-        text += `\n${ex.sectionTitle.toUpperCase()}\n`;
-        (ex.questions || []).forEach((q: any) => {
-          text += `${q.number || '•'}. ${q.prompt}\n`;
-          if (q.answer) text += `Answer: ${q.answer}\n`;
-        });
-      });
-    } else if (toolType === 'lesson-plan' && anyData.phases) {
-      text += `LESSON PLAN\nGrade: ${anyData.gradeLevel} | Duration: ${anyData.durationMinutes} mins\n\n`;
-      if (anyData.objectives) {
-        text += `Objectives:\n${anyData.objectives.map((o: string) => `• ${o}`).join('\n')}\n\n`;
-      }
-      anyData.phases.forEach((p: any) => {
-        text += `[${p.phase} - ${p.durationMinutes}m]\nTeacher: ${p.teacherActivity}\nStudents: ${p.studentActivity}\n\n`;
-      });
-    } else if (toolType === 'presentation' && anyData.slides) {
-      text += `PRESENTATION SLIDE DECK\n\n`;
-      anyData.slides.forEach((s: any) => {
-        text += `Slide ${s.slideNumber}: ${s.title}\n`;
-        (s.bullets || []).forEach((b: string) => (text += `• ${b}\n`));
-        if (s.speakerNotes) text += `Notes: ${s.speakerNotes}\n`;
-        text += '\n';
-      });
-    } else if ((toolType === 'course' || toolType === 'course-builder') && anyData.modules) {
-      text += `CURRICULUM COURSE\nDuration: ${anyData.totalWeeksOrHours}\n\n`;
-      anyData.modules.forEach((m: any) => {
-        text += `Module ${m.moduleNumber}: ${m.title}\n`;
-        (m.lessons || []).forEach((l: any) => (text += `  - ${l.title} (${l.duration}): ${l.keyTakeaway}\n`));
-      });
-    } else if (toolType === 'learning-path' && anyData.milestones) {
-      text += `LEARNING ROADMAP\n\n`;
-      anyData.milestones.forEach((m: any) => {
-        text += `Milestone ${m.milestoneNumber}: ${m.title} (${m.timeframe})\n`;
-        if (m.skillsAcquired) text += `Skills: ${m.skillsAcquired.join(', ')}\n`;
-        if (m.checkpointAssessment) text += `Assessment: ${m.checkpointAssessment}\n\n`;
-      });
-    } else if (toolType === 'mind-map' && (anyData.rootNode || anyData.topic)) {
-      text += `MIND MAP: ${anyData.rootNode?.title || anyData.topic}\n`;
-      const dumpNodes = (node: any, depth = 0) => {
-        if (!node) return;
-        text += `${'  '.repeat(depth)}• ${node.title || node.name || ''}\n`;
-        if (node.notes) text += `${'  '.repeat(depth)}  Notes: ${node.notes}\n`;
-        (node.children || []).forEach((c: any) => dumpNodes(c, depth + 1));
-      };
-      dumpNodes(anyData.rootNode);
-    } else if (toolType === 'study-guide') {
-      text += `STUDY GUIDE\n${anyData.executiveSummary || item.description}\n\n`;
-      (anyData.sections || []).forEach((sec: any) => {
-        text += `--- ${sec.title} ---\n${sec.content}\n\n`;
-      });
-    } else {
-      text += item.description + '\n\n';
-      if (anyData.content) text += anyData.content + '\n';
-      if (anyData.summary) text += anyData.summary + '\n';
-      if (anyData.keyPoints) text += anyData.keyPoints.map((p: string) => `• ${p}`).join('\n') + '\n';
-    }
-
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-xs overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/60 backdrop-blur-xs overflow-hidden">
       <div 
-        className="relative w-full max-w-5xl bg-[#FAF7F0] border border-[#E3D9C9] rounded-[28px] sm:rounded-[36px] shadow-[0_20px_70px_rgba(0,0,0,0.3)] my-auto flex flex-col max-h-[92vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        className="relative w-full max-w-5xl h-[92vh] max-h-[92vh] bg-[#FAF7F0] border border-[#E3D9C9] rounded-[24px] sm:rounded-[36px] shadow-[0_20px_70px_rgba(0,0,0,0.3)] my-auto flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header Bar */}
-        <div className="bg-white border-b border-[#EAE3D6] px-5 sm:px-8 py-4 sm:py-5 flex items-center justify-between gap-4 shrink-0">
-          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+        {/* Header Bar with Global Navigation */}
+        <div className="bg-white border-b border-[#EAE3D6] px-4 sm:px-8 py-4 flex flex-col gap-3 shrink-0">
+          {/* Top Row: Navigation & Actions */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+            <GlobalNavigationButtons
+              onBack={onBack || onClose}
+              onGoHome={onGoHome}
+              backLabel="Back"
+              homeLabel="Home"
+            />
+
+            {/* Top Actions */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => exportUnifiedItem(item, 'doc')}
+                className="px-3 py-1.5 rounded-full bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                title="Download Word Document (.doc)"
+              >
+                <Download className="w-3.5 h-3.5 text-[#E52E5E]" />
+                <span className="hidden sm:inline">DOC</span>
+              </button>
+
+              <button
+                onClick={() => exportUnifiedItem(item, 'pdf')}
+                className="px-3 py-1.5 rounded-full bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                title="Download PDF Document (.pdf)"
+              >
+                <Download className="w-3.5 h-3.5 text-[#E52E5E]" />
+                <span className="hidden sm:inline">PDF</span>
+              </button>
+
+              {onOpenInWorkbench && (
+                <button
+                  onClick={onOpenInWorkbench}
+                  className="px-3.5 py-1.5 rounded-full bg-[#161616] hover:bg-stone-800 text-white font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                  title="Open in tool generator"
+                >
+                  <span>WORKBENCH</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-[#E52E5E]" />
+                </button>
+              )}
+
+              <button
+                onClick={onClose}
+                className="p-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-900 transition-colors cursor-pointer ml-1"
+                title="Close viewer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom Row: Icon, Metadata & Title */}
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0 pt-1">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#E02D68] to-[#C92255] text-white flex items-center justify-center shadow-sm shrink-0">
               {studySet ? <BookOpen className="w-5 h-5" /> : quiz ? <GraduationCap className="w-5 h-5" /> : <Layers className="w-5 h-5" />}
             </div>
 
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#FCE8F3] text-[#D92B8A] border border-[#F5C2DC]">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#FFF0F3] text-[#E52E5E] border border-[#FFCCD4]">
                   {item.kindLabel}
                 </span>
                 <span className="text-xs font-mono font-semibold text-stone-500 uppercase">
@@ -189,73 +145,15 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
                 </span>
               </div>
 
-              <h2 className="font-display font-black text-lg sm:text-xl text-[#161616] uppercase truncate mt-0.5">
+              <h2 className="font-display font-black text-sm sm:text-base lg:text-xl text-[#161616] uppercase break-words mt-0.5 max-w-full">
                 {item.title}
               </h2>
             </div>
           </div>
-
-          {/* Top Actions */}
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={handleCopy}
-              className="px-3.5 py-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Copy to clipboard"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-              <span className="hidden sm:inline">{copied ? 'COPIED' : 'COPY'}</span>
-            </button>
-
-            <button
-              onClick={handlePrint}
-              className="px-3.5 py-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Print document"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">PRINT</span>
-            </button>
-
-            <button
-              onClick={() => exportUnifiedItem(item, 'doc')}
-              className="px-3.5 py-2 rounded-full bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-              title="Download Word Document (.doc)"
-            >
-              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
-              <span className="hidden sm:inline">DOC</span>
-            </button>
-
-            <button
-              onClick={() => exportUnifiedItem(item, 'pdf')}
-              className="px-3.5 py-2 rounded-full bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-              title="Download PDF Document (.pdf)"
-            >
-              <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
-              <span className="hidden sm:inline">PDF</span>
-            </button>
-
-            {onOpenInWorkbench && (
-              <button
-                onClick={onOpenInWorkbench}
-                className="px-4 py-2 rounded-full bg-[#161616] hover:bg-stone-800 text-white font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-                title="Open in tool generator"
-              >
-                <span>OPEN WORKBENCH</span>
-                <ExternalLink className="w-3.5 h-3.5 text-[#D92B8A]" />
-              </button>
-            )}
-
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-900 transition-colors cursor-pointer ml-1"
-              title="Close viewer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
         </div>
 
         {/* Scrollable Content Body */}
-        <div className="p-5 sm:p-8 overflow-y-auto space-y-6 flex-1">
+        <div className="p-4 sm:p-8 overflow-y-auto no-scrollbar space-y-6 flex-1">
           
           {/* 1. STUDY SET VIEWER */}
           {studySet && (
@@ -263,7 +161,7 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
               <div className="bg-white border border-[#EAE3D6] rounded-3xl p-6 shadow-xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <span className="text-xs font-mono font-bold text-[#D92B8A] uppercase tracking-wider">
+                    <span className="text-xs font-mono font-bold text-[#DA8F00] uppercase tracking-wider">
                       ACTIVE CURRICULUM MODULE • {studySet.concepts?.length || 0} CONCEPTS
                     </span>
                     <h3 className="font-display font-black text-2xl uppercase text-[#161616] mt-1">
@@ -278,7 +176,7 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
                     <div className="flex flex-wrap items-center gap-2 shrink-0">
                       <button
                         onClick={() => onLaunchPractice('study')}
-                        className="px-4 py-2.5 bg-[#D92B8A] hover:bg-[#c02479] text-white font-mono text-xs font-bold uppercase rounded-full shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        className="px-4 py-2.5 bg-[#DA8F00] hover:bg-[#c02479] text-white font-mono text-xs font-bold uppercase rounded-full shadow-xs flex items-center gap-1.5 cursor-pointer"
                       >
                         <BookOpen className="w-3.5 h-3.5" />
                         <span>LEARN</span>
@@ -287,14 +185,14 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
                         onClick={() => onLaunchPractice('flashcards')}
                         className="px-4 py-2.5 bg-white border border-stone-300 hover:bg-pink-50 text-stone-800 font-mono text-xs font-bold uppercase rounded-full shadow-xs flex items-center gap-1.5 cursor-pointer"
                       >
-                        <Layers className="w-3.5 h-3.5 text-[#D92B8A]" />
+                        <Layers className="w-3.5 h-3.5 text-[#DA8F00]" />
                         <span>FLASHCARDS</span>
                       </button>
                       <button
                         onClick={() => onLaunchPractice('practice')}
                         className="px-4 py-2.5 bg-stone-900 hover:bg-black text-white font-mono text-xs font-bold uppercase rounded-full shadow-xs flex items-center gap-1.5 cursor-pointer"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#D92B8A]" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#DA8F00]" />
                         <span>PRACTICE</span>
                       </button>
                     </div>
@@ -314,7 +212,7 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
                   {(studySet.concepts || []).map((concept, idx) => (
                     <div 
                       key={concept.id || idx}
-                      className="bg-white border border-[#EAE3D6] rounded-2xl p-5 shadow-xs hover:border-[#D92B8A]/40 transition-all space-y-2.5"
+                      className="bg-white border border-[#EAE3D6] rounded-2xl p-5 shadow-xs hover:border-[#DA8F00]/40 transition-all space-y-2.5"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <span className="w-6 h-6 rounded-full bg-[#FAF7F0] border border-[#EAE3D6] text-stone-600 font-mono text-xs font-bold flex items-center justify-center shrink-0">
@@ -565,54 +463,104 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
           {/* 4. WORKSHEET VIEWER */}
           {toolType === 'worksheet' && (
             <div className="space-y-6">
-              <div className="bg-white border border-[#EAE3D6] rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-4">
+              <div className="bg-white border-2 border-stone-300 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-stone-200 pb-4">
                   <div>
-                    <span className="text-xs font-mono font-bold text-[#E63956] uppercase">PRACTICE WORKSHEET</span>
-                    <h3 className="font-display font-black text-2xl uppercase text-[#161616] mt-0.5">
-                      {anyData.title || item.title}
+                    <span className="text-[18px] font-mono font-bold text-[#E63956] uppercase block">STUDENT CLASSROOM WORKSHEET</span>
+                    <h3 className="font-display font-black text-[26px] sm:text-[32px] uppercase text-[#161616] mt-1">
+                      {getCleanWorksheetTitle(anyData.title || item.title, anyData.topic || item.originalBuildResource?.topic, anyData.subject || item.categoryOrSubject)}
                     </h3>
                   </div>
-                  <div className="flex items-center gap-2 font-mono text-xs text-stone-600">
+                  <div className="flex items-center gap-2 font-mono text-[18px] font-bold text-stone-700">
                     <span>Grade: {anyData.gradeLevel || 'Standard'}</span>
                     <span>•</span>
-                    <span>Level: {anyData.difficulty || 'All'}</span>
+                    <span>Score: {anyData.totalMarks ? `Total ${anyData.totalMarks} Marks` : '100 Marks'}</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#FAF7F0] p-3 rounded-2xl text-xs font-mono text-stone-600">
-                  <div><span className="font-bold">Name:</span> __________________</div>
-                  <div><span className="font-bold">Date:</span> __________________</div>
-                  <div><span className="font-bold">Class:</span> _________________</div>
-                  <div><span className="font-bold">Score:</span> _____ / 100</div>
+                {anyData.description && (
+                  <p className="text-[18px] font-bold text-stone-800 leading-relaxed bg-stone-50 p-4 rounded-2xl border-2 border-stone-200">
+                    {anyData.description}
+                  </p>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-[#FAF7F0] p-4 rounded-2xl text-[18px] font-mono font-bold text-stone-800 border-2 border-stone-200">
+                  <div>Name: __________________</div>
+                  <div>Date: __________________</div>
+                  <div>Class: _________________</div>
+                  <div>Score: _____ / {anyData.totalMarks || 100}</div>
                 </div>
 
                 {anyData.instructions && (
-                  <div className="text-xs sm:text-sm font-sans text-stone-700 bg-amber-50/60 p-4 rounded-2xl border border-amber-200/60">
-                    <span className="font-mono font-bold uppercase text-amber-900 block mb-1">Instructions:</span>
+                  <div className="text-[18px] font-sans font-bold text-amber-950 bg-amber-50/90 p-5 rounded-2xl border-2 border-amber-300">
+                    <span className="font-mono font-black uppercase text-amber-900 block mb-1.5 text-[18px]">General Instructions:</span>
                     {anyData.instructions}
                   </div>
                 )}
               </div>
 
-              {/* Exercises */}
-              <div className="space-y-4">
-                {(anyData.exercises || []).map((ex: any, eIdx: number) => (
-                  <div key={eIdx} className="bg-white border border-[#EAE3D6] rounded-2xl p-6 shadow-xs space-y-4">
-                    <h4 className="font-display font-black text-base uppercase text-[#161616] border-b border-stone-100 pb-2">
-                      {ex.sectionTitle || `Exercise ${eIdx + 1}`}
-                    </h4>
+              {/* Activities or Exercises */}
+              <div className="space-y-6">
+                {(anyData.activities || anyData.exercises || []).map((act: any, aIdx: number) => (
+                  <div key={aIdx} className="bg-white border-2 border-stone-300 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
+                    <div className="border-b-2 border-stone-200 pb-3">
+                      <h4 className="font-display font-black text-[22px] sm:text-[24px] uppercase text-[#161616]">
+                        {act.title || act.sectionTitle || `Activity ${aIdx + 1}`}
+                      </h4>
+                      {act.instructions && (
+                        <p className="text-[18px] font-bold text-stone-700 mt-1">
+                          {act.instructions}
+                        </p>
+                      )}
+                    </div>
 
-                    <div className="space-y-3">
-                      {(ex.questions || []).map((q: any, qIdx: number) => (
-                        <div key={qIdx} className="p-3 bg-[#FAF7F0] rounded-xl space-y-2">
-                          <div className="flex items-start gap-2.5">
-                            <span className="font-mono text-xs font-bold text-[#E63956]">{q.number || qIdx + 1}.</span>
-                            <span className="font-sans text-sm text-stone-800 font-medium">{q.prompt}</span>
+                    {Array.isArray(act.wordBank) && act.wordBank.length > 0 && (
+                      <div className="p-4 bg-indigo-50/90 border-2 border-indigo-200 rounded-2xl space-y-2">
+                        <span className="text-[18px] font-black uppercase text-indigo-950 block">Word Bank:</span>
+                        <div className="flex flex-wrap gap-2">
+                          {act.wordBank.map((word: string, wIdx: number) => (
+                            <span key={wIdx} className="px-3.5 py-1.5 bg-white border-2 border-indigo-200 rounded-xl font-bold text-[18px] text-indigo-950 shadow-xs">
+                              {word}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {act.scenario && (
+                      <div className="p-5 bg-amber-50/80 border-2 border-amber-200 rounded-2xl space-y-1">
+                        <span className="text-[18px] font-black uppercase text-amber-950 block">Practical Scenario:</span>
+                        <p className="text-[18px] font-bold text-stone-900 leading-relaxed">{act.scenario}</p>
+                      </div>
+                    )}
+
+                    <div className="space-y-4">
+                      {(act.items || act.questions || []).map((itemObj: any, iIdx: number) => (
+                        <div key={iIdx} className="p-4 bg-[#FAF7F0] rounded-2xl space-y-3 border-2 border-stone-200/80">
+                          <div className="flex items-start gap-3">
+                            <span className="font-mono text-[19px] font-black text-[#E63956] shrink-0">
+                              {itemObj.itemNumber || itemObj.number || iIdx + 1}.
+                            </span>
+                            <div className="space-y-2 w-full">
+                              <span className="font-sans text-[19px] text-stone-900 font-black block leading-snug">
+                                {itemObj.prompt}
+                              </span>
+                              {itemObj.matchTarget && (
+                                <div className="p-3 bg-white rounded-xl border border-stone-200 text-[18px] font-bold text-stone-800">
+                                  {itemObj.matchTarget}
+                                </div>
+                              )}
+                              {itemObj.completionSpace && (
+                                <div className="text-[18px] font-mono font-bold text-stone-600 bg-white/80 p-3 rounded-xl border border-dashed border-stone-300 whitespace-pre-line">
+                                  {itemObj.completionSpace}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          {q.answer && (
-                            <div className="pl-6 pt-1 text-xs font-mono text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200">
-                              <span className="font-bold uppercase">Answer Key: </span> {q.answer}
+                          {(itemObj.answer || itemObj.explanation) && (
+                            <div className="text-[18px] font-mono font-bold text-emerald-900 bg-emerald-50 p-3.5 rounded-xl border-2 border-emerald-300">
+                              <span className="font-black uppercase">Answer Key: </span>
+                              {itemObj.answer || itemObj.explanation}
                             </div>
                           )}
                         </div>
@@ -620,6 +568,29 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
                     </div>
                   </div>
                 ))}
+
+                {/* Teacher Solutions / Answer Key */}
+                {Array.isArray(anyData.teacherAnswerKey) && anyData.teacherAnswerKey.length > 0 && (
+                  <div className="bg-emerald-50/90 border-2 border-emerald-300 rounded-3xl p-6 sm:p-8 space-y-4">
+                    <h4 className="font-display font-black text-[22px] uppercase text-emerald-950 border-b-2 border-emerald-200 pb-2">
+                      Teacher Solutions & Answer Key
+                    </h4>
+                    <div className="space-y-4">
+                      {anyData.teacherAnswerKey.map((keySec: any, kIdx: number) => (
+                        <div key={kIdx} className="space-y-2">
+                          <h5 className="font-sans font-black text-[19px] text-emerald-900">
+                            {keySec.activityTitle}
+                          </h5>
+                          <ul className="list-disc pl-6 space-y-1 text-[18px] font-bold text-emerald-950">
+                            {(keySec.answers || []).map((ans: string, aKeyIdx: number) => (
+                              <li key={aKeyIdx}>{ans}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -628,7 +599,7 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
           {toolType === 'mind-map' && (
             <div className="space-y-6">
               <div className="bg-white border border-[#EAE3D6] rounded-3xl p-6 shadow-xs">
-                <span className="text-xs font-mono font-bold text-[#D92B8A] uppercase">VISUAL CONCEPT HIERARCHY</span>
+                <span className="text-xs font-mono font-bold text-[#DA8F00] uppercase">VISUAL CONCEPT HIERARCHY</span>
                 <h3 className="font-display font-black text-2xl uppercase text-[#161616] mt-1">
                   {anyData.rootNode?.title || anyData.topic || item.title}
                 </h3>
@@ -649,7 +620,7 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
                   {(anyData.rootNode?.children || []).map((branch: any, bIdx: number) => (
                     <div key={bIdx} className="bg-[#FAF7F0] border border-[#EAE3D6] rounded-2xl p-5 space-y-3 shadow-2xs">
                       <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full bg-[#D92B8A]"></span>
+                        <span className="w-3 h-3 rounded-full bg-[#DA8F00]"></span>
                         <h5 className="font-display font-black text-sm uppercase text-[#161616]">
                           {branch.title}
                         </h5>
@@ -772,7 +743,7 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
                         <div>
                           <div className="flex items-center justify-between text-xs font-mono text-stone-400 pb-4 border-b border-stone-800">
                             <span>SLIDE {activeSlideIndex + 1} OF {anyData.slides.length}</span>
-                            <span className="uppercase text-[#D92B8A] font-bold">{anyData.title || item.title}</span>
+                            <span className="uppercase text-[#DA8F00] font-bold">{anyData.title || item.title}</span>
                           </div>
 
                           <h3 className="font-display font-black text-2xl sm:text-4xl uppercase text-white mt-6">
@@ -782,7 +753,7 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
                           <ul className="space-y-3 mt-6 text-sm sm:text-base font-sans text-stone-300 max-w-3xl">
                             {(currentSlide.bullets || []).map((b: string, i: number) => (
                               <li key={i} className="flex items-start gap-2.5">
-                                <span className="text-[#D92B8A] font-bold">•</span>
+                                <span className="text-[#DA8F00] font-bold">•</span>
                                 <span>{b}</span>
                               </li>
                             ))}
@@ -791,7 +762,7 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
 
                         {currentSlide.speakerNotes && (
                           <div className="pt-4 border-t border-stone-800 text-xs font-mono text-stone-400 bg-stone-950/60 p-3.5 rounded-xl">
-                            <span className="font-bold text-[#D92B8A] uppercase">Speaker Notes: </span>
+                            <span className="font-bold text-[#DA8F00] uppercase">Speaker Notes: </span>
                             {currentSlide.speakerNotes}
                           </div>
                         )}
@@ -896,7 +867,7 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       {anyData.keyPoints.map((pt: string, idx: number) => (
                         <div key={idx} className="p-3 bg-white border border-stone-200 rounded-xl text-xs font-sans text-stone-800 flex items-start gap-2">
-                          <Check className="w-3.5 h-3.5 text-[#D92B8A] shrink-0 mt-0.5" />
+                          <Check className="w-3.5 h-3.5 text-[#DA8F00] shrink-0 mt-0.5" />
                           <span>{pt}</span>
                         </div>
                       ))}
@@ -922,19 +893,6 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
             </div>
           )}
 
-        </div>
-
-        {/* Footer Bar */}
-        <div className="bg-[#FAF7F0] border-t border-[#EAE3D6] px-6 py-4 flex items-center justify-between gap-4 shrink-0">
-          <span className="text-xs font-mono text-stone-500">
-            Proudly Afrikan Archive ID: {item.id}
-          </span>
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-stone-900 hover:bg-black text-white font-mono text-xs font-bold uppercase rounded-full shadow-xs cursor-pointer"
-          >
-            CLOSE
-          </button>
         </div>
 
       </div>

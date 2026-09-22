@@ -28,10 +28,13 @@ import {
   Type,
   ClipboardList,
   FileUp,
-  ChevronDown
+  ChevronDown,
+  RefreshCw
 } from 'lucide-react';
 import { BROAD_SUBJECT_AREAS } from '../data/subjectCategories';
 import { GeneratorMode } from './CreateSetModal';
+import { useAuthCredit } from '../../context/AuthCreditContext';
+import { useDynamicInspiration, STUDY_TOPICS_POOL } from '../../data/inspirationTopics';
 
 interface HomeScreenProps {
   onNavigate: (view: AppView, categoryFilter?: string) => void;
@@ -57,15 +60,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenTutor,
 }) => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
-
-  const inspirationTopics = [
-    { label: '📜 Timbuktu Manuscripts', topic: 'Timbuktu Manuscripts & Medieval African Astronomy' },
-    { label: '🏛️ Great Zimbabwe', topic: 'Great Zimbabwe Stone Architecture & Trade' },
-    { label: '⛵ Swahili Navigation', topic: 'Swahili Maritime Navigation & Indian Ocean Commerce' },
-    { label: '🪙 Aksum Coinage', topic: 'Kingdom of Aksum Gold Coinage & Metallurgy' },
-    { label: '🌿 Medicinal Botany', topic: 'African Medicinal Botany & Traditional Pharmacopeia' },
-    { label: '🎵 West African Griots', topic: 'West African Griot Oral History Traditions' },
-  ];
+  const { user } = useAuthCredit();
+  const { topics: inspirationTopics, refreshTopics } = useDynamicInspiration(
+    STUDY_TOPICS_POOL,
+    'study',
+    user?.email || user?.id || (user as any)?.uid
+  );
 
   const generatorSuite = [
     {
@@ -194,11 +194,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       <section className="pt-2 pb-8 border-b border-stone-200/80">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           {/* Left Column: Edition Badge, Giant Display Headline, Subtext & Action Buttons */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 space-y-6 flex flex-col justify-start">
             {/* Edition Pill Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/90 border border-stone-300/80 rounded-full shadow-sm text-xs sm:text-sm font-mono font-bold tracking-wider uppercase text-stone-800">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#D92B8A] inline-block animate-pulse"></span>
-              <span>PROUDLY AFRIKAN EDUCATION • STUDY COMPANION</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/90 border border-stone-300/80 rounded-full shadow-sm text-[10px] sm:text-xs font-mono font-bold tracking-wider uppercase text-stone-800 self-start h-8 whitespace-nowrap">
+              <span className="w-2 h-2 rounded-full bg-[#D92B8A] inline-block animate-pulse shrink-0"></span>
+              <span className="truncate">PROUDLY AFRIKAN EDUCATION • STUDY COMPANION</span>
             </div>
             
             {/* Giant Oversized Display Headline: 80-100px Desktop, 60-76px Tablet, 42-54px Mobile */}
@@ -209,7 +209,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </h1>
 
             {/* Clear, comfortable, easy-to-read subtext (20-24px desktop, 18-21px tablet, 16-18px mobile) */}
-            <p className="text-base sm:text-lg lg:text-xl xl:text-[1.3rem] text-stone-700 font-normal leading-[1.65] max-w-2xl">
+            <p className="text-base sm:text-lg lg:text-xl xl:text-[1.3rem] text-stone-700 font-normal leading-[1.65] max-w-2xl min-h-[4rem] sm:min-h-[3.5rem] lg:min-h-[4rem]">
               Turn any topic, text notes, or educational PDF into sharp, classroom-ready exams, lesson plans, worksheets, and interactive study sets in seconds.
             </p>
 
@@ -243,53 +243,70 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           {/* Right Column: Instant Inspiration Card & Metrics */}
-          <div className="lg:col-span-5 space-y-5 lg:pt-4">
-            {/* Instant Inspiration Elevated Rounded Card */}
-            <div className="bg-[#FAF8F5] border-2 border-stone-200/90 shadow-2xl rounded-3xl p-6 sm:p-7 space-y-4">
-              <div className="flex items-center justify-between border-b border-stone-200 pb-3">
+          <div className="lg:col-span-5 space-y-5 lg:pt-0">
+            {/* Instant Inspiration Clay Card */}
+            <div className="clay-card-3d p-6 sm:p-7 space-y-4">
+              <div className="flex items-center justify-between border-b border-stone-200/80 pb-3 h-9">
                 <div className="flex items-center gap-2 font-display text-xs sm:text-sm font-black uppercase tracking-wider text-stone-900">
-                  <span className="text-[#D92B8A] text-sm">❖</span>
-                  <span>INSTANT INSPIRATION</span>
+                  <span className="text-[#FF7A00] text-sm">❖</span>
+                  <span>INSTANT STUDY INSPIRATION</span>
                 </div>
-                <span className="font-mono text-xs text-stone-400 font-bold uppercase tracking-wider">
-                  TAP TO TRY
-                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={refreshTopics}
+                    className="p-1 text-stone-400 hover:text-[#FF7A00] transition-colors rounded-full hover:bg-stone-200/50 cursor-pointer"
+                    title="Shuffle topics"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="font-mono text-xs text-stone-400 font-bold uppercase tracking-wider">
+                    TAP TO TRY
+                  </span>
+                </div>
               </div>
 
               {/* 2-Column Pill Button Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {inspirationTopics.map((item, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      const matched = featuredSets.find(s => 
-                        s.title.toLowerCase().includes(item.label.split(' ')[1].toLowerCase())
-                      );
-                      if (matched) {
-                        onSelectSet(matched, 'study');
-                      } else {
-                        onCreateSetClick('topic', item.topic);
-                      }
-                    }}
-                    className="px-3.5 py-2.5 bg-white hover:bg-pink-50/60 border border-stone-200/90 hover:border-pink-300 text-stone-800 hover:text-[#D92B8A] font-medium text-xs sm:text-sm rounded-full transition-all shadow-sm flex items-center gap-2 text-left truncate cursor-pointer"
-                  >
-                    <span className="truncate">{item.label}</span>
-                  </button>
-                ))}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 min-h-[10.5rem]">
+                {inspirationTopics.map((item, idx) => {
+                  const match = item.label.match(/^(\p{Extended_Pictographic}|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|\uD83E[\uDD00-\uDFFF]|[\u2600-\u27BF])\s*(.*)$/u);
+                  const emoji = match ? match[1] : '';
+                  const title = match ? match[2] : item.label;
+
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        const matched = featuredSets.find(s => 
+                          s.title.toLowerCase().includes(item.label.split(' ')[1].toLowerCase())
+                        );
+                        if (matched) {
+                          onSelectSet(matched, 'study');
+                        } else {
+                          onCreateSetClick('topic', item.topic);
+                        }
+                      }}
+                      className="h-11 px-3.5 clay-pill-3d hover:border-[#FF7A00]/40 hover:text-[#FF7A00] text-stone-800 font-medium text-xs sm:text-sm flex items-center gap-2 text-left truncate cursor-pointer transition-all"
+                    >
+                      {emoji && <span className="text-base shrink-0">{emoji}</span>}
+                      <span className="truncate">{title}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="pt-2 text-center">
                 <span className="text-xs font-mono text-stone-500 font-medium">
-                  * Click any topic above to launch pre-filled workbench.
+                  * Click any topic above to launch pre-filled study workbench.
                 </span>
               </div>
             </div>
 
-            {/* Quick Metrics Bar in Rounded Pill Container */}
-            <div className="grid grid-cols-3 gap-2 bg-white border border-stone-200/90 p-3.5 rounded-2xl shadow-sm">
-              <div className="text-center border-r border-stone-200 pr-2">
-                <div className="font-mono text-lg sm:text-xl font-black text-[#D92B8A] flex items-center justify-center gap-1">
-                  <Flame className="w-4 h-4 fill-[#D92B8A]" />
+            {/* Quick Metrics Bar in Clay Lozenge */}
+            <div className="grid grid-cols-3 gap-2 clay-card-3d p-3.5 rounded-2xl">
+              <div className="text-center border-r border-stone-200/80 pr-2">
+                <div className="font-mono text-lg sm:text-xl font-black text-[#FF7A00] flex items-center justify-center gap-1">
+                  <Flame className="w-4 h-4 fill-[#FF7A00]" />
                   {stats.streakDays}
                 </div>
                 <div className="font-mono text-xs font-bold text-stone-600 uppercase tracking-wider">
@@ -297,8 +314,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 </div>
               </div>
 
-              <div className="text-center border-r border-stone-200 px-2">
-                <div className="font-mono text-lg sm:text-xl font-black text-stone-800">
+              <div className="text-center border-r border-stone-200/80 px-2">
+                <div className="font-mono text-lg sm:text-xl font-black text-stone-900">
                   {stats.conceptsStudied}
                 </div>
                 <div className="font-mono text-xs font-bold text-stone-600 uppercase tracking-wider">
@@ -307,7 +324,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </div>
 
               <div className="text-center pl-2">
-                <div className="font-mono text-lg sm:text-xl font-black text-[#D92B8A]">
+                <div className="font-mono text-lg sm:text-xl font-black text-[#FF7A00]">
                   {stats.sessionsCompleted}
                 </div>
                 <div className="font-mono text-xs font-bold text-stone-600 uppercase tracking-wider">
@@ -932,7 +949,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             },
             {
               q: 'HOW ARE ACTIVE MEMORY & SPACED REPETITION SCHEDULES CALCULATED?',
-              a: 'Our active memory system employs the SuperMemo SM-2 algorithm. Based on your self-reported recall ratings (Again, Hard, Good, Easy), it calculates optimal review intervals (1, 3, 7, 14, 30 days) to prevent forgetting curve decay with minimal daily study time.'
+              a: 'Our active memory system employs the SuperMemo SM-2 algorithm. Based on your self-reported recall ratings ranging from Again and Hard to Good and Easy, it calculates optimal review intervals across 1, 3, 7, 14, or 30 days to prevent forgetting curve decay with minimal daily study time.'
             },
             {
               q: 'CAN TEACHERS AND EDUCATORS EXPORT PRINT-READY EXAMS & WORKSHEETS?',

@@ -130,7 +130,7 @@ function AppContent() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full">
+      <main className="flex-1 w-full pb-20 sm:pb-32">
         {activeTab === 'STUDY' && (
           <StudyApp
             key={selectedStudySet ? `study-${selectedStudySet.id}-${studyInitialView}` : 'study-default'}
@@ -151,6 +151,8 @@ function AppContent() {
             key={selectedQuiz ? `quiz-${selectedQuiz.id}` : 'quiz-default'}
             initialQuiz={selectedQuiz}
             onNavigateToTab={handleSelectTab}
+            onGoHome={handleGoHome}
+            onBack={handleBackFromStudy}
           />
         )}
 
@@ -158,7 +160,8 @@ function AppContent() {
           <BuildApp
             key={selectedBuildResource ? `build-${selectedBuildResource.id}` : 'build-main'}
             initialResource={selectedBuildResource}
-            onGoHome={() => handleSelectTab('STUDY')}
+            onGoHome={handleGoHome}
+            onBack={handleBackFromStudy}
           />
         )}
 
@@ -170,6 +173,8 @@ function AppContent() {
             onNavigateToStudy={() => setActiveTab('STUDY')}
             onNavigateToQuiz={() => setActiveTab('QUIZ')}
             onNavigateToBuild={() => setActiveTab('BUILD')}
+            onBack={handleBackFromStudy}
+            onGoHome={handleGoHome}
           />
         )}
 

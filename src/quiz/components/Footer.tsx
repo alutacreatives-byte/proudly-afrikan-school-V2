@@ -16,7 +16,7 @@ export const Footer: React.FC<FooterProps> = ({
         {/* Massive Brand Statement */}
         <div className="border-b border-[#4A4A4A] pb-12 mb-12">
           <div className="font-display font-black text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-[#F5F0E6] uppercase leading-none">
-            PROUDLY <span className="text-[#E05A2B]">AFRIKAN</span>
+            PROUDLY <span className="text-[#E52E5E]">AFRIKAN</span>
           </div>
           <div className="font-mono-code text-sm sm:text-base text-[#A39E93] tracking-widest uppercase mt-3">
             EMPOWERING CONTINENTAL INTELLECT & GLOBAL MASTERY
@@ -26,7 +26,7 @@ export const Footer: React.FC<FooterProps> = ({
         {/* Links and Manifesto Grid */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start mb-12">
           <div className="md:col-span-6 space-y-4">
-            <h4 className="font-mono-code text-xs font-bold uppercase tracking-widest text-[#E05A2B]">
+            <h4 className="font-mono-code text-xs font-bold uppercase tracking-widest text-[#E52E5E]">
               ABOUT THIS TOOL
             </h4>
             <p className="text-sm sm:text-base text-[#D8D2C5] max-w-md leading-relaxed">
@@ -35,14 +35,14 @@ export const Footer: React.FC<FooterProps> = ({
           </div>
 
           <div className="md:col-span-3 space-y-3">
-            <h4 className="font-mono-code text-xs font-bold uppercase tracking-widest text-[#E05A2B]">
+            <h4 className="font-mono-code text-xs font-bold uppercase tracking-widest text-[#E52E5E]">
               NAVIGATION
             </h4>
             <ul className="space-y-2 font-mono-code text-xs font-bold text-[#F5F0E6]">
               <li>
                 <button
                   onClick={() => onScrollToSection('quiz-builder')}
-                  className="hover:text-[#E05A2B] transition-colors cursor-pointer"
+                  className="hover:text-[#E52E5E] transition-colors cursor-pointer"
                 >
                   → QUIZ GENERATOR
                 </button>
@@ -50,7 +50,7 @@ export const Footer: React.FC<FooterProps> = ({
               <li>
                 <button
                   onClick={() => onScrollToSection('how-it-works')}
-                  className="hover:text-[#E05A2B] transition-colors cursor-pointer"
+                  className="hover:text-[#E52E5E] transition-colors cursor-pointer"
                 >
                   → HOW IT WORKS
                 </button>
@@ -58,7 +58,7 @@ export const Footer: React.FC<FooterProps> = ({
               <li>
                 <button
                   onClick={() => onScrollToSection('faq')}
-                  className="hover:text-[#E05A2B] transition-colors cursor-pointer"
+                  className="hover:text-[#E52E5E] transition-colors cursor-pointer"
                 >
                   → FREQUENTLY ASKED QUESTIONS
                 </button>
@@ -69,7 +69,7 @@ export const Footer: React.FC<FooterProps> = ({
           <div className="md:col-span-3 space-y-3 flex flex-col items-start md:items-end">
             <button
               onClick={onScrollToTop}
-              className="px-4 py-3 bg-[#E05A2B] hover:bg-[#CC4F24] text-white font-mono-code font-bold text-xs uppercase tracking-wider brutal-border brutal-shadow-sm brutal-hover flex items-center gap-2 cursor-pointer"
+              className="px-4 py-3 bg-gradient-to-r from-[#E52E5E] via-[#F25C22] to-[#FF6B00] hover:brightness-105 text-white font-mono-code font-bold text-xs uppercase tracking-wider brutal-border brutal-shadow-sm brutal-hover flex items-center gap-2 cursor-pointer"
             >
               <span>BACK TO TOP</span>
               <ArrowUp className="w-4 h-4" />
@@ -86,13 +86,13 @@ export const Footer: React.FC<FooterProps> = ({
             © {new Date().getFullYear()} PROUDLY AFRIKAN EDUCATION. ALL RIGHTS RESERVED.
           </div>
           <div className="flex items-center gap-2">
-            <span>DESIGNED WITH EDITORIAL RIGOR</span>
+            <span>BUILT WITH PURPOSE</span>
             <span>•</span>
             <a
               href="https://sifisos.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#E05A2B] hover:underline font-bold transition-colors"
+              className="text-[#E52E5E] hover:underline font-bold transition-colors"
             >
               POWERED BY SIFISOS.COM
             </a>

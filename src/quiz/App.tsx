@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { GlobalNavigationButtons } from '../components/GlobalNavigationButtons';
 import { Hero } from './components/Hero';
 import { ThreeWaysSection } from './components/ThreeWaysSection';
 import { QuizBuilder } from './components/QuizBuilder';
@@ -25,14 +26,36 @@ export interface QuizAppProps {
   key?: React.Key;
   initialQuiz?: Quiz | null;
   onNavigateToTab?: (tab: 'STUDY' | 'QUIZ' | 'BUILD' | 'MY SETS' | 'PLANNER') => void;
+  onGoHome?: () => void;
+  onBack?: () => void;
 }
 
 export default function App({
   initialQuiz,
   onNavigateToTab,
+  onGoHome,
+  onBack,
 }: QuizAppProps = {}) {
   // Navigation & View State
   const [viewState, setViewState] = useState<AppViewState>(initialQuiz ? 'quiz_active' : 'builder');
+
+  const handleGoHome = () => {
+    if (onGoHome) {
+      onGoHome();
+    } else if (onNavigateToTab) {
+      onNavigateToTab('STUDY');
+    }
+  };
+
+  const handleBack = () => {
+    if (viewState !== 'builder') {
+      setViewState('builder');
+    } else if (onBack) {
+      onBack();
+    } else if (onNavigateToTab) {
+      onNavigateToTab('STUDY');
+    }
+  };
 
   // Creation State
   const [creationMethod, setCreationMethod] = useState<CreationMethod>('topic');
@@ -230,7 +253,7 @@ export default function App({
   };
 
   // Return to home / builder view
-  const handleGoHome = () => {
+  const handleResetToBuilder = () => {
     setViewState('builder');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -263,11 +286,29 @@ export default function App({
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F0] text-[#161616] flex flex-col justify-between selection:bg-[#E05A2B] selection:text-white">
+    <div className="min-h-screen bg-[#FAF7F0] text-[#161616] flex flex-col justify-between selection:bg-[#E52E5E] selection:text-white">
+      {/* Top Navigation Bar in QUIZ - displayed ONLY when inside an active quiz / review / results */}
+      {viewState !== 'builder' && (
+        <div className="w-full bg-[#FAF7F0] border-b border-stone-200/80 sticky top-0 z-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between">
+            <GlobalNavigationButtons
+              onBack={handleBack}
+              onGoHome={handleGoHome}
+              backLabel="Back"
+              homeLabel="Home"
+            />
+
+            <div className="text-xs font-mono font-bold text-stone-500 uppercase tracking-wider hidden sm:block">
+              {`QUIZ • ${viewState.toUpperCase().replace('_', ' ')}`}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Global Error Banner if API failed */}
       {globalError && (
-        <div className="bg-[#FFEBE6] border-b-2 border-[#E05A2B] py-3 px-4 text-center font-mono-code text-xs sm:text-sm text-[#292929] flex items-center justify-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-[#E05A2B] shrink-0" />
+        <div className="bg-[#FFEBE6] border-b-2 border-[#E52E5E] py-3 px-4 text-center font-mono-code text-xs sm:text-sm text-[#292929] flex items-center justify-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-[#E52E5E] shrink-0" />
           <span>{globalError}</span>
           <button
             onClick={() => setGlobalError(null)}
@@ -280,7 +321,7 @@ export default function App({
 
       {/* VIEW STATE: BUILDER & LANDING PAGE */}
       {viewState === 'builder' && (
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 space-y-14 sm:space-y-16 pb-20">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12 pb-20">
           {/* Section 1: Hero */}
           <Hero
             onStartClick={() => scrollToSection('quiz-builder')}
@@ -312,7 +353,7 @@ export default function App({
           <section className="py-4">
             <div className="bg-white rounded-[2rem] border border-[#E6E0D5] p-7 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_10px_30px_-10px_rgba(41,41,41,0.05)]">
               <div className="space-y-1.5 text-center md:text-left">
-                <span className="font-mono-code text-xs font-bold uppercase tracking-widest text-[#E05A2B]">
+                <span className="font-mono-code text-xs font-bold uppercase tracking-widest text-[#E52E5E]">
                   INSTANT TRIAL
                 </span>
                 <h3 className="font-display font-black text-2xl sm:text-3xl text-[#292929] uppercase tracking-tight">
@@ -327,7 +368,7 @@ export default function App({
                 onClick={handleLoadDemoQuiz}
                 className="px-7 py-4 bg-[#292929] text-[#F5F0E6] hover:bg-[#1A1A1A] font-display font-black text-base uppercase rounded-full shadow-md hover:shadow-lg hover:scale-102 transition-all flex items-center gap-2.5 cursor-pointer shrink-0"
               >
-                <Play className="w-4 h-4 text-[#E05A2B] fill-[#E05A2B]" />
+                <Play className="w-4 h-4 text-[#E52E5E] fill-[#E52E5E]" />
                 <span>LAUNCH DEMO QUIZ</span>
               </button>
             </div>
@@ -345,7 +386,7 @@ export default function App({
           <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#292929]/20">
             <button
               onClick={() => setViewState('builder')}
-              className="inline-flex items-center gap-2 font-mono-code text-xs font-bold text-[#292929] hover:text-[#E05A2B] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 font-mono-code text-xs font-bold text-[#292929] hover:text-[#E52E5E] transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>EXIT TO BUILDER</span>
