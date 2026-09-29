@@ -9,7 +9,7 @@ import {
   EssayGraderResult,
   PdfQuizResult,
   TutorChatResult,
-  PresentationResult,
+  FocusQuestResult,
   CourseResult,
   LearningPathResult
 } from './types';
@@ -18,10 +18,11 @@ import { StudyGuideGenerator } from './components/generators/StudyGuideGenerator
 import { FlashcardGenerator } from './components/generators/FlashcardGenerator';
 import { EssayGraderGenerator } from './components/generators/EssayGraderGenerator';
 import { TutorChatGenerator } from './components/generators/TutorChatGenerator';
-import { StudyPresentationGenerator } from './components/generators/StudyPresentationGenerator';
+import { PacStudyGame } from './components/generators/PacStudyGame';
 import { StudyCourseGenerator } from './components/generators/StudyCourseGenerator';
 import { StudyLearningPathGenerator } from './components/generators/StudyLearningPathGenerator';
 import { StudyMyResources } from './components/StudyMyResources';
+import { StudyToolsMenu } from './components/StudyToolsMenu';
 import { FlashcardsView } from './components/FlashcardsView';
 import { PracticeView } from './components/PracticeView';
 import { StudySessionView } from './components/StudySessionView';
@@ -38,6 +39,11 @@ export interface StudyAppProps {
   onOpenGlobalTutor?: () => void;
   onGoHome?: () => void;
   onBackToPreviousPage?: () => void;
+  activeFocusSession?: any;
+  onStartFocusSession?: (session: any) => void;
+  onPauseFocusSession?: () => void;
+  onResumeFocusSession?: () => void;
+  onStopSession?: () => void;
 }
 
 interface StudyHistoryItem {
@@ -54,12 +60,28 @@ export default function StudyApp({
   onOpenGlobalTutor,
   onGoHome,
   onBackToPreviousPage,
+  activeFocusSession,
+  onStartFocusSession,
+  onPauseFocusSession,
+  onResumeFocusSession,
+  onStopSession,
 }: StudyAppProps = {}) {
-  const [activeTool, setActiveTool] = useState<StudyToolType | 'my-resources' | 'legacy-view' | null>(
-    initialView && initialView !== 'home' ? 'legacy-view' : null
-  );
+  const [activeTool, setActiveTool] = useState<StudyToolType | 'my-resources' | 'legacy-view' | null>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const toolParam = params.get('tool') || params.get('game');
+      if (toolParam === 'focus-quest' || toolParam === 'pacman' || toolParam === 'pac-study') {
+        return 'focus-quest';
+      }
+      if (toolParam === 'flashcards' || toolParam === 'flashcard') {
+        return 'flashcards';
+      }
+    } catch (e) {}
+    return initialView && initialView !== 'home' ? 'legacy-view' : null;
+  });
   const [activeResource, setActiveResource] = useState<any>(null);
   const [savedCount, setSavedCount] = useState<number>(() => getSavedResources().length);
+  const [flashcardNavKey, setFlashcardNavKey] = useState<number>(0);
 
   // Legacy set state for cross-tab compatibility
   const [activeLegacySet, setActiveLegacySet] = useState<StudySet | null>(initialSet || null);
@@ -126,6 +148,10 @@ export default function StudyApp({
         createdAt: new Date().toISOString(),
         toolType: toolId,
       };
+    }
+
+    if (toolId === 'flashcards') {
+      setFlashcardNavKey((prev) => prev + 1);
     }
 
     setActiveResource(nextResource);
@@ -250,6 +276,18 @@ export default function StudyApp({
   };
 
   const renderActiveContent = () => {
+    const renderWithMenu = (content: React.ReactNode) => (
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <div id="study-menu-active-toolbar" className="w-full">
+          <StudyToolsMenu
+            activeTool={activeTool}
+            onSelectTool={handleSelectTool}
+          />
+        </div>
+        {content}
+      </div>
+    );
+
     // 1. My Saved Study Library
     if (activeTool === 'my-resources') {
       return (
@@ -263,7 +301,7 @@ export default function StudyApp({
 
     // 2. Study Guide Generator (Tool 01)
     if (activeTool === 'study-guide') {
-      return (
+      return renderWithMenu(
         <StudyGuideGenerator
           key="gen-study-guide"
           onBack={handleBack}
@@ -276,9 +314,9 @@ export default function StudyApp({
 
     // 3. Flashcard Generator (Tool 02)
     if (activeTool === 'flashcards') {
-      return (
+      return renderWithMenu(
         <FlashcardGenerator
-          key="gen-flashcards"
+          key={`gen-flashcards-${activeResource?.id || flashcardNavKey}`}
           onBack={handleBack}
           onGoHome={handleGoHome}
           onSaved={refreshSavedCount}
@@ -289,7 +327,7 @@ export default function StudyApp({
 
     // 4. Essay Grader (Tool 04 - replaced Practice Quiz Generator)
     if (activeTool === 'essay-grader' || (activeTool as any) === 'quiz') {
-      return (
+      return renderWithMenu(
         <EssayGraderGenerator
           key="gen-essay-grader"
           onBack={handleBack}
@@ -302,7 +340,7 @@ export default function StudyApp({
 
     // 5. Tutor Chat (Tool 05 - replaced PDF & Document Quiz)
     if (activeTool === 'pdf-quiz' || (activeTool as any) === 'tutor-chat') {
-      return (
+      return renderWithMenu(
         <TutorChatGenerator
           key="gen-tutor-chat"
           onBack={handleBack}
@@ -313,22 +351,27 @@ export default function StudyApp({
       );
     }
 
-    // 6. Presentation Slide Generator (Tool 05)
-    if (activeTool === 'presentation') {
-      return (
-        <StudyPresentationGenerator
-          key="gen-presentation"
+    // 6. Pac-Study Arcade Maze (Tool 06)
+    if (activeTool === 'focus-quest') {
+      return renderWithMenu(
+        <PacStudyGame
+          key="gen-focus-quest"
           onBack={handleBack}
           onGoHome={handleGoHome}
           onSaved={refreshSavedCount}
-          existingResource={activeResource as PresentationResult}
+          existingResource={activeResource as FocusQuestResult}
+          activeSession={activeFocusSession}
+          onStartSession={onStartFocusSession}
+          onPauseSession={onPauseFocusSession}
+          onResumeSession={onResumeFocusSession}
+          onStopSession={onStopSession}
         />
       );
     }
 
     // 7. Course Curriculum Generator (Tool 06)
     if (activeTool === 'course') {
-      return (
+      return renderWithMenu(
         <StudyCourseGenerator
           key="gen-course"
           onBack={handleBack}
@@ -341,7 +384,7 @@ export default function StudyApp({
 
     // 8. Learning Pathway Generator (Tool 07)
     if (activeTool === 'learning-path') {
-      return (
+      return renderWithMenu(
         <StudyLearningPathGenerator
           key="gen-learning-path"
           onBack={handleBack}

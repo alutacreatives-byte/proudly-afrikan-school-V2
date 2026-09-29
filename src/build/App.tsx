@@ -9,6 +9,7 @@ import { GeneratorModal } from './components/GeneratorModal';
 interface BuildAppProps {
   initialResource?: SavedResource | null;
   onGoHome?: () => void;
+  onBack?: () => void;
 }
 
 export default function BuildApp({ initialResource }: BuildAppProps) {
@@ -57,6 +58,7 @@ export default function BuildApp({ initialResource }: BuildAppProps) {
         {/* 3. All 6 Generators Suite Section */}
         <AllGeneratorsSection
           onSelectTool={handleOpenGenerator}
+          onSelectGenerator={handleOpenGenerator}
         />
 
         {/* 4. Frequently Asked Questions Section */}

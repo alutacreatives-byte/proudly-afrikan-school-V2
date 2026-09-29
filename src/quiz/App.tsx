@@ -321,7 +321,7 @@ export default function App({
 
       {/* VIEW STATE: BUILDER & LANDING PAGE */}
       {viewState === 'builder' && (
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12 pb-20">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-10 sm:space-y-12">
           {/* Section 1: Hero */}
           <Hero
             onStartClick={() => scrollToSection('quiz-builder')}

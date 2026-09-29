@@ -3,12 +3,16 @@ import { BUILD_TOOLS_LIST } from './BuildToolsMenu';
 import { ArrowUpRight } from 'lucide-react';
 
 interface AllGeneratorsSectionProps {
-  onSelectGenerator: (toolId: string) => void;
+  onSelectGenerator?: (toolId: string) => void;
+  onSelectTool?: (toolId: string) => void;
 }
 
 export const AllGeneratorsSection: React.FC<AllGeneratorsSectionProps> = ({
   onSelectGenerator,
+  onSelectTool,
 }) => {
+  const handleSelect = onSelectGenerator || onSelectTool || (() => {});
+
   return (
     <div className="space-y-8">
       <div className="text-center space-y-2">
@@ -26,7 +30,7 @@ export const AllGeneratorsSection: React.FC<AllGeneratorsSectionProps> = ({
           return (
             <div
               key={tool.id}
-              onClick={() => onSelectGenerator(tool.id)}
+              onClick={() => handleSelect(tool.id)}
               className="clay-card-3d-interactive p-7 flex flex-col justify-between space-y-6 cursor-pointer group"
             >
               <div className="space-y-5">

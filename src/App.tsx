@@ -34,6 +34,47 @@ function AppContent() {
   // Total saved items count for badge
   const [totalSavedCount, setTotalSavedCount] = useState<number>(0);
 
+  // Global Focus Quest Active Session
+  const [activeFocusSession, setActiveFocusSession] = useState<any | null>(null);
+
+  // Timer tick effect & Tab visibility (pause on hidden)
+  useEffect(() => {
+    if (!activeFocusSession || !activeFocusSession.isRunning || activeFocusSession.isPaused || activeFocusSession.isCompleted) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setActiveFocusSession((prev: any) => {
+        if (!prev || !prev.isRunning || prev.isPaused) return prev;
+        const nextRemaining = prev.remainingSeconds - 1;
+        if (nextRemaining <= 0) {
+          return {
+            ...prev,
+            remainingSeconds: 0,
+            isRunning: false,
+            isCompleted: true,
+          };
+        }
+        return {
+          ...prev,
+          remainingSeconds: nextRemaining,
+        };
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [activeFocusSession?.isRunning, activeFocusSession?.isPaused, activeFocusSession?.isCompleted]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && activeFocusSession && activeFocusSession.isRunning && !activeFocusSession.isPaused && !activeFocusSession.isCompleted) {
+        setActiveFocusSession((prev: any) => prev ? { ...prev, isPaused: true } : null);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [activeFocusSession]);
+
   const calculateSavedCount = () => {
     try {
       const sets = StorageService.getAllStudySets().length;
@@ -139,6 +180,11 @@ function AppContent() {
             onNavigateToTab={handleSelectTab}
             onGoHome={handleGoHome}
             onBackToPreviousPage={handleBackFromStudy}
+            activeFocusSession={activeFocusSession}
+            onStartFocusSession={(session) => setActiveFocusSession(session)}
+            onPauseFocusSession={() => setActiveFocusSession((prev: any) => prev ? { ...prev, isPaused: true } : null)}
+            onResumeFocusSession={() => setActiveFocusSession((prev: any) => prev ? { ...prev, isPaused: false } : null)}
+            onStopSession={() => setActiveFocusSession(null)}
             onOpenGlobalTutor={() => {
               setTutorMode('tutor');
               setIsTutorOpen(true);
@@ -213,6 +259,27 @@ function AppContent() {
       <AccountModal
         onNavigateToPricing={() => handleSelectTab('PRICING')}
       />
+
+      {/* Persistent Focus Indicator when a session is active */}
+      {activeFocusSession && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#18181B] text-white px-4 py-3 rounded-2xl shadow-2xl border border-stone-700 flex items-center gap-3">
+          <div className={`w-3 h-3 rounded-full ${activeFocusSession.isPaused ? 'bg-amber-400' : 'bg-emerald-400 animate-pulse'}`} />
+          <div className="text-xs font-mono">
+            <div className="font-bold text-stone-200 truncate max-w-[140px]">{activeFocusSession.topic}</div>
+            <div className="text-stone-400">
+              {Math.floor(activeFocusSession.remainingSeconds / 60).toString().padStart(2, '0')}:
+              {(activeFocusSession.remainingSeconds % 60).toString().padStart(2, '0')} left 
+              {activeFocusSession.isPaused && ' (Paused)'}
+            </div>
+          </div>
+          <button
+            onClick={() => setActiveTab('STUDY')}
+            className="ml-2 px-3 py-1.5 bg-[#E63956] hover:bg-[#d52b48] text-white text-xs font-mono font-bold uppercase rounded-xl transition-colors cursor-pointer shadow-xs"
+          >
+            View
+          </button>
+        </div>
+      )}
     </div>
   );
 }

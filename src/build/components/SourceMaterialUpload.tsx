@@ -9,6 +9,9 @@ interface SourceMaterialUploadProps {
   currentFileName?: string;
   onClear?: () => void;
   onGoHome?: () => void;
+  sourceText?: string;
+  onSourceTextChange?: (text: any) => void;
+  accentColor?: string;
 }
 
 export const SourceMaterialUpload: React.FC<SourceMaterialUploadProps> = ({
@@ -16,6 +19,9 @@ export const SourceMaterialUpload: React.FC<SourceMaterialUploadProps> = ({
   onContentExtracted,
   currentFileName,
   onClear,
+  sourceText,
+  onSourceTextChange,
+  accentColor,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);

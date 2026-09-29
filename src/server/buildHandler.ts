@@ -442,53 +442,82 @@ app.post('/api/generate/presentation', async (req, res) => {
     sourceMaterial = '',
   } = req.body;
 
-  try {
-    const prompt = `You are a master presentation designer crafting an educational slide deck for Proudly Afrikan Build.
-Subject: ${subject}
-Topic: ${topic}
-Audience / Learning Level: ${audienceLevel}
-Total Slides: ${slidesCount}
-Presentation Style: ${presentationStyle}
-Key Points: ${keyPoints || 'Core principles of the topic'}
-Learning Objectives: ${Array.isArray(learningObjectives) ? learningObjectives.join('; ') : learningObjectives}
-Source Material: ${sourceMaterial ? sourceMaterial.slice(0, 4000) : 'None'}
+  const safeTopic = (topic || '').trim() || (subject || '').trim() || 'Curriculum Subject';
+  const safeSubject = (subject || '').trim() || safeTopic;
+  const targetSlidesCount = Math.max(3, Math.min(20, Number(slidesCount) || 6));
 
-Return a valid JSON object matching this schema:
+  try {
+    const prompt = `You are an elite educational presentation designer crafting a master classroom slide deck for Proudly Afrikan Build.
+Subject: ${safeSubject}
+Topic: ${safeTopic}
+Target Audience / Grade Level: ${audienceLevel}
+Requested Number of Slides: ${targetSlidesCount}
+Presentation Style / Theme: ${presentationStyle}
+Specific Focus / Key Points: ${keyPoints || 'Foundational concepts, governing mechanisms, authentic case studies, and critical discussion prompts'}
+${Array.isArray(learningObjectives) && learningObjectives.length > 0 ? `Learning Objectives: ${learningObjectives.join('; ')}` : ''}
+${sourceMaterial ? `Source Material Excerpt: "${sourceMaterial.slice(0, 3000)}"` : ''}
+
+CRITICAL REQUIREMENTS:
+- Generate EXACTLY ${targetSlidesCount} detailed, pedagogical slides in the "slides" array.
+- Structure the presentation deck progressively:
+  Slide 1: Title slide ("slideType": "title") introducing the topic, pedagogical scope, and target audience.
+  Slide 2: Roadmap & Key Learning Objectives ("slideType": "concept") with 3-4 clear, measurable targets.
+  Slide 3: Foundational Principles & Core Terminology ("slideType": "concept") defining governing laws or terms.
+  Slide 4: Deep-Dive Mechanisms & Frameworks ("slideType": "concept") explaining how systems or concepts function.
+  Slide 5: Real-World African / Global Case Study ("slideType": "case-study") providing authentic practical application.
+  Slide 6: Guided Problem Solving & Methodological Steps ("slideType": "concept").
+  Slide 7: Interactive Classroom Activity / Group Challenge ("slideType": "activity") with prompt.
+  Slide 8+: Comparative Nuance, Common Misconceptions, and Contemporary Relevance.
+  Final Slide: Synthesis, Actionable Key Takeaways & Reflection ("slideType": "summary").
+- For EVERY slide, provide:
+  - "id": "s-1", "s-2", etc.
+  - "slideNumber": 1, 2, ...
+  - "slideType": "title" | "concept" | "case-study" | "activity" | "summary"
+  - "title": Clear, engaging uppercase heading
+  - "subtitle": Brief explanatory subhead
+  - "bulletPoints": 3 to 5 substantive, informative bullet points (avoid generic one-word bullets)
+  - "speakerNotes": Thorough, conversational notes for the instructor explaining the concept and giving teaching tips
+  - "suggestedVisualOrDiagram": Concrete description of what graphic, whiteboard diagram, map, or chart to show
+  - "discussionOrEngagementPrompt": A thought-provoking question to ask the audience
+
+Return ONLY valid JSON matching this schema:
 {
   "id": "pres-${Date.now()}",
-  "title": "Presentation: ${topic}",
-  "subtitle": "Subtitle describing the presentation theme",
-  "subject": "${subject}",
-  "topic": "${topic}",
+  "title": "Presentation: ${safeTopic}",
+  "subtitle": "Comprehensive Slide Deck on ${safeTopic}",
+  "subject": "${safeSubject}",
+  "topic": "${safeTopic}",
   "targetAudience": "${audienceLevel}",
   "gradeLevel": "${audienceLevel}",
   "themeOrColorMood": "${presentationStyle}",
-  "slidesCount": ${Number(slidesCount) || 6},
+  "slidesCount": ${targetSlidesCount},
   "slides": [
     {
       "id": "s-1",
       "slideNumber": 1,
-      "title": "Slide Title",
-      "subtitle": "Slide Subtitle",
-      "bulletPoints": ["Point 1", "Point 2", "Point 3", "Point 4"],
-      "speakerNotes": "Comprehensive notes for the speaker...",
-      "suggestedVisualOrDiagram": "Visual diagram description",
-      "discussionOrEngagementPrompt": "Interactive question for audience"
+      "slideType": "title",
+      "title": "${safeTopic}",
+      "subtitle": "Foundations, Frameworks & Practical Applications",
+      "bulletPoints": ["Core curriculum orientation", "Key analytical perspectives", "Discussion and case study roadmap"],
+      "speakerNotes": "Welcome the learners and introduce the key inquiries...",
+      "suggestedVisualOrDiagram": "Visual title card layout",
+      "discussionOrEngagementPrompt": "Introductory inquiry question"
     }
   ],
+  "conclusionTakeaway": "Mastery in ${safeTopic} empowers critical reasoning and practical innovation.",
   "createdAt": "${new Date().toISOString()}"
 }`;
 
     const parsed = await generateJsonWithGemini(prompt, 0.4);
     if (parsed) {
-      const normalized = normalizePresentation(parsed, subject, topic, audienceLevel);
+      const normalized = normalizePresentation(parsed, safeSubject, safeTopic, audienceLevel);
       return res.json({ success: true, data: normalized });
     }
     throw new Error('Gemini returned empty response');
   } catch (error: any) {
     console.error('Error generating presentation (using fallback):', error?.message || error);
-    const fallback = generateFallbackPresentation(subject, topic, audienceLevel, slidesCount, presentationStyle);
-    const normalized = normalizePresentation(fallback, subject, topic, audienceLevel);
+    const fallback = generateFallbackPresentation(safeSubject, safeTopic, audienceLevel, targetSlidesCount, presentationStyle);
+    const normalized = normalizePresentation(fallback, safeSubject, safeTopic, audienceLevel);
     return res.json({
       success: true,
       fallbackUsed: true,
@@ -1593,67 +1622,197 @@ function generateFallbackStudyPack(docName: string, text: string, level: string)
 }
 
 function generateFallbackPresentation(subject: string, topic: string, audience: string, count: number, style: string) {
+  const safeTopic = topic || subject || 'Core Topic';
+  const safeSubject = subject || safeTopic;
+  const targetCount = Math.max(3, Math.min(20, Number(count) || 6));
+
+  const slideTemplates = [
+    {
+      slideType: 'title',
+      title: `${safeTopic}`,
+      subtitle: 'Foundations, Frameworks & Practical Applications',
+      bulletPoints: [
+        'Proudly Afrikan Build Master Educational Series',
+        `Curriculum Level: ${audience || 'Secondary & Tertiary'}`,
+        `Presentation Focus: ${style || 'Educational Lecture & Discussion'}`
+      ],
+      speakerNotes: `Welcome everyone to this presentation on ${safeTopic}. Today, we will establish clear conceptual frameworks, explore real-world evidence, and engage in critical discussion.`,
+      suggestedVisualOrDiagram: 'High-contrast introductory title slide with warm terracotta and ochre geometric vector accents.',
+      discussionOrEngagementPrompt: `Before we begin: what first comes to mind when you hear the term "${safeTopic}"?`
+    },
+    {
+      slideType: 'concept',
+      title: 'Roadmap & Learning Objectives',
+      subtitle: 'What We Aim to Master Today',
+      bulletPoints: [
+        `Understand the foundational principles and historical context of ${safeTopic}.`,
+        'Identify governing mechanisms, operational workflows, and cause-and-effect relationships.',
+        'Analyze authentic African and international case studies.',
+        'Apply theoretical knowledge through guided classroom problem-solving.'
+      ],
+      speakerNotes: 'Review these learning outcomes with learners to prime their cognitive focus. Encourage them to take structured notes as we address each point.',
+      suggestedVisualOrDiagram: 'Visual 4-phase learning pathway diagram with numbered milestones.',
+      discussionOrEngagementPrompt: 'Which of these learning objectives do you anticipate will be the most challenging?'
+    },
+    {
+      slideType: 'concept',
+      title: 'Foundational Principles & Key Terminology',
+      subtitle: 'The Core Building Blocks',
+      bulletPoints: [
+        `Historical roots and intellectual genesis of ${safeTopic}.`,
+        'Standard operational definitions used by scholars and leading practitioners.',
+        'The primary governing laws and baseline assumptions of the field.',
+        'Distinguishing essential facts from widespread popular misconceptions.'
+      ],
+      speakerNotes: 'Pause on the vocabulary terms. Misconceptions in this area often stem from confusing colloquial usage with formal scientific or academic definitions.',
+      suggestedVisualOrDiagram: 'Conceptual pyramid highlighting core axioms at the base and derived principles higher up.',
+      discussionOrEngagementPrompt: 'Why is it critical to establish exact definitions before evaluating complex systems?'
+    },
+    {
+      slideType: 'concept',
+      title: 'Mechanisms & Operational Frameworks',
+      subtitle: 'How the System Functions in Practice',
+      bulletPoints: [
+        'Step-by-step procedural breakdown of core interactions.',
+        'Feedback loops, input-output variables, and constraint factors.',
+        'Interdependence between individual components and the overarching system.',
+        'Key performance indicators and verification benchmarks.'
+      ],
+      speakerNotes: 'Walk students through the procedural flow. Use a whiteboard or interactive pointer to trace how inputs transform into observable results.',
+      suggestedVisualOrDiagram: 'Detailed cyclical workflow diagram showing inputs, processing stages, and output metrics.',
+      discussionOrEngagementPrompt: 'What happens if one variable in this chain fails or is altered?'
+    },
+    {
+      slideType: 'case-study',
+      title: 'Authentic Case Study & Real-World Evidence',
+      subtitle: 'Examining Impact in Context',
+      bulletPoints: [
+        `Exemplary real-world application of ${safeTopic} across African and global contexts.`,
+        'Baseline conditions, targeted interventions, and empirical outcomes recorded.',
+        'Navigating real-world environmental, socioeconomic, and resource constraints.',
+        'Key lessons extracted by researchers and community leaders.'
+      ],
+      speakerNotes: 'Ground the abstract theory in this concrete real-world case study. Emphasize how local context shapes the application of universal principles.',
+      suggestedVisualOrDiagram: 'Case study infographic comparing before-and-after metrics with contextual photo or map.',
+      discussionOrEngagementPrompt: 'How would you adapt this case study approach to solve an issue in your local community?'
+    },
+    {
+      slideType: 'concept',
+      title: 'Methodology & Step-by-Step Problem Solving',
+      subtitle: 'From Theory to Analytical Execution',
+      bulletPoints: [
+        'Stage 1: Diagnostic evaluation and data gathering.',
+        'Stage 2: Hypothesis formulation and scenario modelling.',
+        'Stage 3: Targeted execution with controlled parameters.',
+        'Stage 4: Post-implementation review and iterative optimization.'
+      ],
+      speakerNotes: 'Model the problem-solving protocol live with the class. Demonstrate the importance of systematic rigor over intuition.',
+      suggestedVisualOrDiagram: 'Four-stage procedural flowchart with decision branches and checkpoints.',
+      discussionOrEngagementPrompt: 'Why is post-implementation review often the most overlooked yet vital step?'
+    },
+    {
+      slideType: 'activity',
+      title: 'Classroom Inquiry & Group Challenge',
+      subtitle: 'Active Application & Collaborative Synthesis',
+      bulletPoints: [
+        `Form small groups of 3 to 4 learners to analyze a targeted dilemma in ${safeTopic}.`,
+        'Identify 2 primary opportunities and 2 significant risks in the presented scenario.',
+        'Draft a 3-point recommendation strategy supported by empirical evidence.',
+        'Appoint a spokesperson to deliver a 60-second summary to the room.'
+      ],
+      speakerNotes: 'Set a 10-minute timer. Circulate around the room to offer targeted prompts and challenge assumptions.',
+      suggestedVisualOrDiagram: 'Group breakout activity card with structured discussion prompts and countdown timer.',
+      discussionOrEngagementPrompt: 'What was the single most debated point inside your small group discussion?'
+    },
+    {
+      slideType: 'concept',
+      title: 'Critical Nuances & Common Pitfalls',
+      subtitle: 'Sharpening Advanced Understanding',
+      bulletPoints: [
+        'Pitfall 1: Over-simplifying multi-factor causation into single-factor explanations.',
+        'Pitfall 2: Confusing correlation with direct underlying causal mechanisms.',
+        'Critique of traditional models and emerging contemporary counter-perspectives.',
+        'Ethical implications and responsible stewardship in modern practice.'
+      ],
+      speakerNotes: 'Help learners transition from basic recall to nuanced evaluative thinking. Acknowledge unresolved debates in the field.',
+      suggestedVisualOrDiagram: 'Comparison table contrasting common naive assumptions vs rigorous analytical reality.',
+      discussionOrEngagementPrompt: 'How can scholars ensure ethical responsibility when implementing new solutions?'
+    },
+    {
+      slideType: 'concept',
+      title: 'Contemporary Innovations & Future Horizons',
+      subtitle: 'Emerging Frontiers & Opportunities',
+      bulletPoints: [
+        `Technological and pedagogical advances transforming ${safeTopic} today.`,
+        'Cross-disciplinary synthesis with digital tools, data science, and sustainable practices.',
+        'Opportunities for African youth, researchers, and innovators to lead global dialogue.',
+        'Key research questions currently being explored at university and research institutes.'
+      ],
+      speakerNotes: 'Inspire learners with the future potential of this topic. Highlight African pioneers contributing to global breakthroughs.',
+      suggestedVisualOrDiagram: 'Trend trajectory graph projecting developments over the next decade.',
+      discussionOrEngagementPrompt: 'In 10 years, which aspect of this field do you think will be unrecognizable?'
+    },
+    {
+      slideType: 'summary',
+      title: 'Key Takeaways & Reflective Synthesis',
+      subtitle: 'Consolidating Core Insights',
+      bulletPoints: [
+        `Foundational mastery of ${safeTopic} provides a resilient framework for lifelong learning.`,
+        'Analytical rigor, evidence-based reasoning, and ethical application must always guide practice.',
+        'Complete the accompanying worksheet exercises and practice quiz to reinforce retention.',
+        'Next session: Advanced case studies and independent research presentations.'
+      ],
+      speakerNotes: 'Summarize the overarching narrative. Thank the students for their active participation and distribute the reinforcement materials.',
+      suggestedVisualOrDiagram: 'Executive summary visual badge checklist with QR code or link to practice sets.',
+      discussionOrEngagementPrompt: 'What is the single most valuable insight you will take away from today\'s lecture?'
+    }
+  ];
+
+  // Pick or interpolate slides to match targetCount exactly
+  const slides = [];
+  for (let i = 0; i < targetCount; i++) {
+    let template;
+    if (i === 0) {
+      template = slideTemplates[0]; // Title
+    } else if (i === targetCount - 1) {
+      template = slideTemplates[slideTemplates.length - 1]; // Summary
+    } else {
+      // Pick intermediate templates
+      const templateIdx = 1 + (i - 1) % (slideTemplates.length - 2);
+      template = slideTemplates[templateIdx];
+    }
+
+    slides.push({
+      id: `s-${i + 1}`,
+      slideNumber: i + 1,
+      slideType: template.slideType,
+      title: template.title,
+      subtitle: template.subtitle,
+      bulletPoints: [...template.bulletPoints],
+      bullets: [...template.bulletPoints],
+      speakerNotes: template.speakerNotes,
+      suggestedVisualOrDiagram: template.suggestedVisualOrDiagram,
+      visualCue: template.suggestedVisualOrDiagram,
+      discussionOrEngagementPrompt: template.discussionOrEngagementPrompt,
+    });
+  }
+
   return {
     id: `pres-${Date.now()}`,
-    title: `${topic || subject}: Master Presentation`,
+    title: `${safeTopic}: Master Slide Deck`,
     subtitle: 'Educational Lecture & Visual Concept Deck',
-    subject: subject || 'General Education',
-    topic: topic || 'Core Topic',
+    subject: safeSubject,
+    topic: safeTopic,
     targetAudience: audience || 'Senior Secondary / High School (Grades 9-12)',
     presentationStyle: style || 'Educational Lecture & Discussion',
     learningObjectives: [
-      `Gain a clear understanding of the foundational principles of ${topic || subject}.`,
+      `Gain a clear understanding of the foundational principles of ${safeTopic}.`,
       'Analyze practical case studies and real-world implementations.',
       'Synthesize key insights for applied practice.'
     ],
-    slidesCount: Number(count) || 6,
-    slides: [
-      {
-        id: 's-1',
-        slideNumber: 1,
-        slideType: 'title',
-        title: `${topic || subject}`,
-        subtitle: 'Foundations, Frameworks & Practical Applications',
-        bulletPoints: [
-          'Proudly Afrikan Build Educational Series',
-          `Target Level: ${audience}`,
-          'Interactive Lecture & Discussion Framework'
-        ],
-        speakerNotes: 'Welcome the audience and frame today\'s session around clear, actionable educational outcomes.',
-        suggestedVisualOrDiagram: 'Striking high-contrast title card with African ochre geometric vector accents.',
-      },
-      {
-        id: 's-2',
-        slideNumber: 2,
-        slideType: 'content',
-        title: 'Core Principles & Fundamentals',
-        subtitle: 'The Building Blocks of the Subject',
-        bulletPoints: [
-          `Understanding the historical and theoretical genesis of ${topic || subject}.`,
-          'Key terminology and operational definitions.',
-          'Standard frameworks utilized by researchers and practitioners.',
-          'Common misconceptions and critical clarifications.'
-        ],
-        speakerNotes: 'Pause here to ensure all students grasp the core definitions before moving to complex models.',
-        suggestedVisualOrDiagram: 'Conceptual diagram illustrating the 3 foundational pillars.',
-        discussionOrEngagementPrompt: 'What is one example of this concept that you have encountered in everyday life?'
-      },
-      {
-        id: 's-3',
-        slideNumber: 3,
-        slideType: 'summary',
-        title: 'Key Takeaways & Synthesis',
-        subtitle: 'Summary and Next Steps',
-        bulletPoints: [
-          'Mastery requires understanding foundational mechanics first.',
-          'Always connect theoretical models to empirical evidence.',
-          'Continue to the structured practice exercises.'
-        ],
-        speakerNotes: 'Summarize key points and open the floor for final student reflections.',
-        suggestedVisualOrDiagram: 'Summary visual checklist.',
-      }
-    ],
-    conclusionTakeaway: `Mastery in ${topic || subject} opens new horizons for intellectual growth and practical innovation.`,
+    slidesCount: slides.length,
+    slides,
+    conclusionTakeaway: `Mastery in ${safeTopic} opens new horizons for intellectual growth and practical innovation.`,
     createdAt: new Date().toISOString(),
   };
 }

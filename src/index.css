@@ -510,3 +510,14 @@
     text-decoration: underline !important;
   }
 }
+
+@keyframes incomingCardPrev {
+  0% {
+    transform: translate3d(-105%, 15px, 0) rotate(-10deg) scale(0.94);
+    opacity: 0;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}

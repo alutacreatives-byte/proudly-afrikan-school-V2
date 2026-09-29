@@ -29,7 +29,7 @@ export const STUDY_TOPICS_POOL: StudyInspirationTopic[] = [
   { label: '📜 Timbuktu Manuscripts', topic: 'Timbuktu Manuscripts & Medieval African Astronomy', category: 'HISTORY & SCIENCE', tool: 'study-guide' },
   { label: '🏛️ Great Zimbabwe Architecture', topic: 'Great Zimbabwe Stone Architecture & Medieval Trade Networks', category: 'AFRICAN HISTORY', tool: 'flashcards' },
   { label: '⛵ Swahili Maritime Commerce', topic: 'Swahili Maritime Navigation & Indian Ocean Commerce', category: 'GEOGRAPHY & TRADE', tool: 'quiz' },
-  { label: '🪙 Kingdom of Aksum Coinage', topic: 'Kingdom of Aksum Gold Coinage & Red Sea Metallurgy', category: 'ECONOMICS & HISTORY', tool: 'presentation' },
+  { label: '🪙 Kingdom of Aksum Coinage', topic: 'Kingdom of Aksum Gold Coinage & Red Sea Metallurgy', category: 'ECONOMICS & HISTORY', tool: 'focus-quest' },
   { label: '👑 Nubian Pyramids of Meroë', topic: 'Nubian Pyramids of Meroë & Kingdom of Kush Dynasties', category: 'ANCIENT HISTORY', tool: 'learning-path' },
   { label: '🎨 Kingdom of Benin Bronzes', topic: 'Kingdom of Benin Bronze Casting Techniques & Metallurgy', category: 'ART & HISTORY', tool: 'study-guide' },
   { label: '🛡️ Oromo Gadaa System', topic: 'Oromo Gadaa System of Democratic Governance & Social Structure', category: 'POLITICAL SCIENCE', tool: 'course' },
@@ -38,16 +38,16 @@ export const STUDY_TOPICS_POOL: StudyInspirationTopic[] = [
   // Sciences & Medicine
   { label: '🌿 African Medicinal Botany', topic: 'African Medicinal Botany & Traditional Pharmacopeia', category: 'SCIENCES & HEALTH', tool: 'study-guide' },
   { label: '🧬 CRISPR-Cas9 Gene Editing', topic: 'CRISPR-Cas9 Gene Editing Mechanics & Bioethics', category: 'MOLECULAR BIOLOGY', tool: 'flashcards' },
-  { label: '☀️ Solar Photovoltaic Physics', topic: 'Solar Photovoltaic Cell Physics & Renewable Energy Systems', category: 'PHYSICS & ENERGY', tool: 'presentation' },
+  { label: '☀️ Solar Photovoltaic Physics', topic: 'Solar Photovoltaic Cell Physics & Renewable Energy Systems', category: 'PHYSICS & ENERGY', tool: 'focus-quest' },
   { label: '🧠 Neural Networks & AI', topic: 'Deep Learning Neural Networks & Artificial Intelligence Architecture', category: 'COMPUTER SCIENCE', tool: 'learning-path' },
   { label: '🦠 Human Immune System', topic: 'Human Immune System Mechanics, Antibodies & Vaccines', category: 'MEDICINE & IMMUNOLOGY', tool: 'flashcards' },
-  { label: '🪐 James Webb Astrophysics', topic: 'James Webb Space Telescope Discoveries & Infrared Astrophysics', category: 'ASTRONOMY', tool: 'presentation' },
+  { label: '🪐 James Webb Astrophysics', topic: 'James Webb Space Telescope Discoveries & Infrared Astrophysics', category: 'ASTRONOMY', tool: 'focus-quest' },
 
   // Mathematics & Economics
   { label: '🦴 Ishango Mathematics', topic: 'Ishango Bone & Prehistoric Mathematical System in Central Africa', category: 'MATHEMATICS', tool: 'study-guide' },
   { label: '📊 AfCFTA Trade Economics', topic: 'African Continental Free Trade Area (AfCFTA) Economic Impact', category: 'ECONOMICS', tool: 'course' },
   { label: '📈 Calculus & Integration', topic: 'Calculus Derivatives, Integration & Real-World Applications', category: 'MATHEMATICS', tool: 'quiz' },
-  { label: '📱 FinTech & Mobile Money', topic: 'M-Pesa, FinTech & Digital Financial Inclusion in Africa', category: 'FINANCE & TECH', tool: 'presentation' },
+  { label: '📱 FinTech & Mobile Money', topic: 'M-Pesa, FinTech & Digital Financial Inclusion in Africa', category: 'FINANCE & TECH', tool: 'focus-quest' },
 
   // Literature & Philosophy
   { label: '🎵 West African Griot Traditions', topic: 'West African Griot Oral History Traditions & Genealogies', category: 'LITERATURE & ARTS', tool: 'learning-path' },

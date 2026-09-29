@@ -20,10 +20,14 @@ import {
   Eye,
   RotateCcw,
   Share2,
-  Download
+  Download,
+  Maximize2,
+  Minimize2,
+  Presentation as PresentationIcon,
+  MessageSquare
 } from 'lucide-react';
 import { UnifiedItem } from './MySetsWorkspace';
-import { exportUnifiedItem, getCleanWorksheetTitle } from '../utils/exportUtils';
+import { exportUnifiedItem, getCleanWorksheetTitle, downloadPresentationHtml } from '../utils/exportUtils';
 import { GlobalNavigationButtons } from '../components/GlobalNavigationButtons';
 
 interface SavedResultViewerProps {
@@ -45,6 +49,8 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
 }) => {
   const [showMarkingGuide, setShowMarkingGuide] = useState(false);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [isFullscreenPresentation, setIsFullscreenPresentation] = useState(false);
+  const [showSpeakerNotes, setShowSpeakerNotes] = useState(true);
   const [activeFlashcardIndex, setActiveFlashcardIndex] = useState(0);
   const [isCardFlipped, setIsCardFlipped] = useState(false);
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
@@ -731,71 +737,284 @@ export const SavedResultViewer: React.FC<SavedResultViewerProps> = ({
           )}
 
           {/* 7. SLIDE DECK VIEWER */}
-          {toolType === 'presentation' && (
-            <div className="space-y-6">
-              {anyData.slides && anyData.slides.length > 0 ? (
-                <div className="space-y-6">
-                  {/* Active Slide Canvas */}
-                  {(() => {
-                    const currentSlide = anyData.slides[activeSlideIndex] || anyData.slides[0];
-                    return (
-                      <div className="bg-stone-900 text-white border border-stone-800 rounded-3xl p-8 sm:p-12 shadow-md space-y-6 min-h-[300px] flex flex-col justify-between">
-                        <div>
-                          <div className="flex items-center justify-between text-xs font-mono text-stone-400 pb-4 border-b border-stone-800">
-                            <span>SLIDE {activeSlideIndex + 1} OF {anyData.slides.length}</span>
-                            <span className="uppercase text-[#DA8F00] font-bold">{anyData.title || item.title}</span>
-                          </div>
+          {toolType === 'presentation' && (() => {
+            const itemAny = item as any;
+            const rawSlides = Array.isArray(anyData.slides) && anyData.slides.length > 0
+              ? anyData.slides
+              : (Array.isArray(itemAny.slides) && itemAny.slides.length > 0)
+                ? itemAny.slides
+                : (Array.isArray(anyData.sections) && anyData.sections.length > 0)
+                  ? anyData.sections.map((sec: any, idx: number) => ({
+                      id: `s-${idx + 1}`,
+                      slideNumber: idx + 1,
+                      slideType: 'concept',
+                      title: sec.heading || `Slide ${idx + 1}`,
+                      subtitle: '',
+                      bulletPoints: typeof sec.content === 'string' ? sec.content.split('\n').filter(Boolean) : [],
+                      speakerNotes: 'Key lecture points for this topic.',
+                    }))
+                  : [];
 
-                          <h3 className="font-display font-black text-2xl sm:text-4xl uppercase text-white mt-6">
-                            {currentSlide.title}
-                          </h3>
+            if (!rawSlides || rawSlides.length === 0) {
+              return (
+                <div className="bg-white border border-[#EAE3D6] rounded-3xl p-8 text-center space-y-3">
+                  <PresentationIcon className="w-12 h-12 text-[#FF7A00] mx-auto opacity-70" />
+                  <h4 className="font-display font-black text-xl text-stone-800">NO SLIDES FOUND IN THIS RESOURCE</h4>
+                  <p className="text-sm text-stone-600 max-w-md mx-auto">This resource does not contain slide content. You can generate a fresh presentation deck using the Presentation Generator.</p>
+                </div>
+              );
+            }
 
-                          <ul className="space-y-3 mt-6 text-sm sm:text-base font-sans text-stone-300 max-w-3xl">
-                            {(currentSlide.bullets || []).map((b: string, i: number) => (
-                              <li key={i} className="flex items-start gap-2.5">
-                                <span className="text-[#DA8F00] font-bold">•</span>
-                                <span>{b}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+            const currentSlide = rawSlides[activeSlideIndex] || rawSlides[0];
+            const currentBullets = currentSlide.bulletPoints || currentSlide.bullets || [];
+            const visualCue = currentSlide.suggestedVisualOrDiagram || currentSlide.visualCue;
+            const discussionPrompt = currentSlide.discussionOrEngagementPrompt;
+            const themeMood = anyData.themeOrColorMood || anyData.presentationStyle || 'Educational Deck';
 
-                        {currentSlide.speakerNotes && (
-                          <div className="pt-4 border-t border-stone-800 text-xs font-mono text-stone-400 bg-stone-950/60 p-3.5 rounded-xl">
-                            <span className="font-bold text-[#DA8F00] uppercase">Speaker Notes: </span>
-                            {currentSlide.speakerNotes}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
+            return (
+              <div className="space-y-6">
+                {/* Presentation Subheader & Actions */}
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-[#EAE3D6] shadow-xs">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#FF7A00] animate-pulse"></span>
+                    <span className="text-xs font-mono font-bold text-stone-700 uppercase tracking-wider">
+                      {rawSlides.length} SLIDES &bull; {themeMood}
+                    </span>
+                  </div>
 
-                  {/* Slide Carousel Controls */}
-                  <div className="flex items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-[#EAE3D6]">
+                  <div className="flex items-center gap-2">
                     <button
-                      onClick={() => setActiveSlideIndex(prev => Math.max(0, prev - 1))}
-                      disabled={activeSlideIndex === 0}
-                      className="px-4 py-2 bg-stone-100 hover:bg-stone-200 disabled:opacity-40 rounded-full text-xs font-mono font-bold uppercase flex items-center gap-1 cursor-pointer"
+                      onClick={() => setShowSpeakerNotes(prev => !prev)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
+                        showSpeakerNotes ? 'bg-[#FF7A00]/10 text-[#FF7A00] border border-[#FF7A00]/30' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                      }`}
                     >
-                      <ChevronLeft className="w-4 h-4" /> PREV
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>{showSpeakerNotes ? 'HIDE NOTES' : 'SHOW NOTES'}</span>
                     </button>
 
-                    <span className="text-xs font-mono font-bold text-stone-600">
-                      Slide {activeSlideIndex + 1} of {anyData.slides.length}
-                    </span>
+                    <button
+                      onClick={() => downloadPresentationHtml(item)}
+                      className="px-3.5 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl text-xs font-mono font-bold uppercase transition-all flex items-center gap-1.5 cursor-pointer"
+                      title="Download interactive HTML slides file to present offline"
+                    >
+                      <Download className="w-3.5 h-3.5 text-[#FF7A00]" />
+                      <span>HTML SLIDES</span>
+                    </button>
 
                     <button
-                      onClick={() => setActiveSlideIndex(prev => Math.min(anyData.slides.length - 1, prev + 1))}
-                      disabled={activeSlideIndex === anyData.slides.length - 1}
-                      className="px-4 py-2 bg-stone-100 hover:bg-stone-200 disabled:opacity-40 rounded-full text-xs font-mono font-bold uppercase flex items-center gap-1 cursor-pointer"
+                      onClick={() => setIsFullscreenPresentation(true)}
+                      className="px-4 py-1.5 bg-gradient-to-r from-[#FF7A00] to-[#D48800] hover:brightness-105 text-white rounded-xl text-xs font-display font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm cursor-pointer"
                     >
-                      NEXT <ChevronRight className="w-4 h-4" />
+                      <Maximize2 className="w-3.5 h-3.5" />
+                      <span>PRESENT FULLSCREEN</span>
                     </button>
                   </div>
                 </div>
-              ) : null}
-            </div>
-          )}
+
+                {/* Active Slide Canvas */}
+                <div className="bg-[#18181B] text-white border border-stone-800 rounded-3xl p-6 sm:p-10 shadow-xl space-y-6 min-h-[380px] flex flex-col justify-between relative overflow-hidden">
+                  {/* Subtle background glow */}
+                  <div className="absolute top-0 right-0 w-72 h-72 bg-[#FF7A00]/5 rounded-full blur-3xl pointer-events-none"></div>
+
+                  <div className="space-y-5 relative z-10">
+                    <div className="flex items-center justify-between text-xs font-mono text-stone-400 pb-3 border-b border-stone-800">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#FF7A00]/20 text-[#FF7A00] font-bold text-[10px] tracking-wider uppercase">
+                          {currentSlide.slideType || 'SLIDE'} {activeSlideIndex + 1} OF {rawSlides.length}
+                        </span>
+                      </div>
+                      <span className="uppercase text-stone-400 font-bold truncate max-w-xs">{anyData.title || item.title}</span>
+                    </div>
+
+                    <div>
+                      <h3 className="font-display font-black text-2xl sm:text-3xl lg:text-4xl uppercase tracking-tight text-white leading-tight">
+                        {currentSlide.title}
+                      </h3>
+                      {currentSlide.subtitle && (
+                        <p className="text-sm sm:text-base font-sans text-stone-400 mt-2 font-medium">
+                          {currentSlide.subtitle}
+                        </p>
+                      )}
+                    </div>
+
+                    <ul className="space-y-3 pt-2 text-sm sm:text-base font-sans text-stone-200 max-w-3xl">
+                      {currentBullets.map((b: string, i: number) => (
+                        <li key={i} className="flex items-start gap-3 leading-relaxed">
+                          <span className="text-[#FF7A00] font-bold text-base shrink-0 mt-0.5">❖</span>
+                          <span>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* Visual Cue & Discussion Boxes */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3">
+                      {visualCue && (
+                        <div className="bg-stone-900/90 border-l-4 border-[#10B981] p-3 rounded-r-xl text-xs space-y-1">
+                          <span className="font-mono font-bold text-[#10B981] uppercase tracking-wider block text-[10px]">
+                            SUGGESTED VISUAL / DIAGRAM
+                          </span>
+                          <p className="text-stone-300 leading-snug">{visualCue}</p>
+                        </div>
+                      )}
+
+                      {discussionPrompt && (
+                        <div className="bg-stone-900/90 border-l-4 border-[#38BDF8] p-3 rounded-r-xl text-xs space-y-1">
+                          <span className="font-mono font-bold text-[#38BDF8] uppercase tracking-wider block text-[10px]">
+                            DISCUSSION & ENGAGEMENT PROMPT
+                          </span>
+                          <p className="text-stone-300 leading-snug">{discussionPrompt}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Speaker Notes */}
+                  {showSpeakerNotes && currentSlide.speakerNotes && (
+                    <div className="mt-4 pt-3.5 border-t border-stone-800 text-xs font-mono text-stone-300 bg-stone-950/80 p-3.5 rounded-xl relative z-10 border border-stone-800/80">
+                      <span className="font-bold text-[#FF7A00] uppercase tracking-wider">SPEAKER NOTES: </span>
+                      <span className="text-stone-400 font-sans">{currentSlide.speakerNotes}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Slide Thumbnail Tabs / Quick Jump */}
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                  {rawSlides.map((s: any, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveSlideIndex(idx)}
+                      className={`shrink-0 px-3 py-2 rounded-xl text-left border transition-all cursor-pointer ${
+                        idx === activeSlideIndex
+                          ? 'bg-[#FF7A00] text-black border-[#FF7A00] font-bold shadow-xs'
+                          : 'bg-white text-stone-700 hover:bg-stone-100 border-[#EAE3D6]'
+                      }`}
+                    >
+                      <div className="text-[10px] font-mono opacity-80 uppercase">SLIDE {idx + 1}</div>
+                      <div className="text-xs font-display font-bold truncate max-w-[130px]">{s.title || `Slide ${idx + 1}`}</div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Slide Carousel Controls */}
+                <div className="flex items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-[#EAE3D6]">
+                  <button
+                    onClick={() => setActiveSlideIndex(prev => Math.max(0, prev - 1))}
+                    disabled={activeSlideIndex === 0}
+                    className="px-5 py-2.5 bg-stone-100 hover:bg-stone-200 disabled:opacity-30 rounded-xl text-xs font-mono font-bold uppercase flex items-center gap-1.5 cursor-pointer transition-all"
+                  >
+                    <ChevronLeft className="w-4 h-4" /> PREVIOUS SLIDE
+                  </button>
+
+                  <span className="text-xs font-mono font-bold text-stone-600">
+                    Slide {activeSlideIndex + 1} of {rawSlides.length}
+                  </span>
+
+                  <button
+                    onClick={() => setActiveSlideIndex(prev => Math.min(rawSlides.length - 1, prev + 1))}
+                    disabled={activeSlideIndex === rawSlides.length - 1}
+                    className="px-5 py-2.5 bg-stone-100 hover:bg-stone-200 disabled:opacity-30 rounded-xl text-xs font-mono font-bold uppercase flex items-center gap-1.5 cursor-pointer transition-all"
+                  >
+                    NEXT SLIDE <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Fullscreen Presenter Mode Modal */}
+                {isFullscreenPresentation && (
+                  <div className="fixed inset-0 z-50 bg-[#121214] text-white flex flex-col justify-between p-6 sm:p-12 animate-in fade-in duration-200">
+                    {/* Top bar */}
+                    <div className="flex items-center justify-between pb-4 border-b border-stone-800">
+                      <div className="flex items-center gap-3">
+                        <span className="px-3 py-1 rounded-full bg-[#FF7A00] text-black font-bold text-xs uppercase font-mono">
+                          SLIDE {activeSlideIndex + 1} / {rawSlides.length}
+                        </span>
+                        <span className="text-sm font-display font-bold text-stone-300 uppercase tracking-wide">
+                          {currentSlide.slideType || 'SLIDE'}: {currentSlide.title}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setShowSpeakerNotes(p => !p)}
+                          className="px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-lg text-xs font-mono font-bold uppercase cursor-pointer"
+                        >
+                          {showSpeakerNotes ? 'HIDE NOTES [N]' : 'SHOW NOTES [N]'}
+                        </button>
+                        <button
+                          onClick={() => setIsFullscreenPresentation(false)}
+                          className="p-2 bg-stone-800 hover:bg-stone-700 text-white rounded-lg cursor-pointer"
+                          title="Exit Fullscreen (ESC)"
+                        >
+                          <Minimize2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Giant Slide Content */}
+                    <div className="flex-1 flex flex-col justify-center max-w-5xl mx-auto w-full py-8 space-y-8">
+                      <div>
+                        <h2 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-white leading-tight">
+                          {currentSlide.title}
+                        </h2>
+                        {currentSlide.subtitle && (
+                          <h4 className="text-lg sm:text-2xl text-stone-400 font-sans mt-3">
+                            {currentSlide.subtitle}
+                          </h4>
+                        )}
+                      </div>
+
+                      <ul className="space-y-4 text-lg sm:text-2xl font-sans text-stone-200 max-w-4xl">
+                        {currentBullets.map((b: string, i: number) => (
+                          <li key={i} className="flex items-start gap-4 leading-relaxed">
+                            <span className="text-[#FF7A00] font-bold text-2xl shrink-0">❖</span>
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      {showSpeakerNotes && currentSlide.speakerNotes && (
+                        <div className="bg-stone-900 border border-stone-800 p-4 rounded-2xl text-sm font-sans text-stone-300">
+                          <strong className="text-[#FF7A00] font-mono uppercase text-xs block mb-1">Speaker Notes:</strong>
+                          {currentSlide.speakerNotes}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Bottom controls */}
+                    <div className="flex items-center justify-between pt-4 border-t border-stone-800">
+                      <button
+                        onClick={() => setActiveSlideIndex(prev => Math.max(0, prev - 1))}
+                        disabled={activeSlideIndex === 0}
+                        className="px-6 py-3 bg-stone-800 hover:bg-stone-700 disabled:opacity-30 rounded-xl text-sm font-bold uppercase cursor-pointer"
+                      >
+                        &larr; PREVIOUS
+                      </button>
+
+                      <div className="flex items-center gap-1.5">
+                        {rawSlides.map((_: any, i: number) => (
+                          <span
+                            key={i}
+                            onClick={() => setActiveSlideIndex(i)}
+                            className={`w-3 h-3 rounded-full cursor-pointer transition-all ${
+                              i === activeSlideIndex ? 'bg-[#FF7A00] scale-125' : 'bg-stone-700 hover:bg-stone-500'
+                            }`}
+                          />
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() => setActiveSlideIndex(prev => Math.min(rawSlides.length - 1, prev + 1))}
+                        disabled={activeSlideIndex === rawSlides.length - 1}
+                        className="px-6 py-3 bg-[#FF7A00] hover:brightness-105 text-black font-black uppercase rounded-xl text-sm cursor-pointer"
+                      >
+                        NEXT &rarr;
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* 8. COURSE & LEARNING PATH VIEWER */}
           {(toolType === 'course' || toolType === 'course-builder') && (
