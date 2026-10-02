@@ -6,7 +6,7 @@ import type {
   PdfQuizResult,
   FlashcardResult,
   LearningPathResult,
-  PresentationResult,
+  FocusQuestResult,
   TutorChatResult,
   EssayGraderResult,
 } from '../study/types';
@@ -919,55 +919,29 @@ export function exportLearningPath(path: LearningPathResult, format: 'doc' | 'pd
   }
 }
 
-export function exportPresentation(pres: PresentationResult, format: 'doc' | 'pdf' | 'print') {
+export function exportFocusQuest(quest: FocusQuestResult, format: 'doc' | 'pdf' | 'print') {
   const meta = resolveDocumentMeta({
-    subject: pres.subject || pres.topic || pres.title,
-    documentType: 'Presentation Slide Deck',
-    toolUsed: 'Presentation Tool',
+    subject: quest.subject || quest.topic || quest.title,
+    documentType: 'Focus Quest Session',
+    toolUsed: 'Focus Quest Tool',
   });
   const filename = meta.filenameBase;
 
   if (format === 'doc' || format === 'print') {
-    let html = '';
-    if (pres.subtitle) {
-      html += `<p><em>${escapeHtml(pres.subtitle)}</em></p>`;
-    }
-    if (pres.slides && pres.slides.length > 0) {
-      html += `<h2>Slide Outline & Speaker Notes (${pres.slides.length} Slides)</h2>`;
-      pres.slides.forEach((s) => {
-        html += `<div class="box"><h2>Slide ${s.slideNumber}: ${escapeHtml(s.title)}</h2>`;
-        if (s.bullets && s.bullets.length > 0) {
-          html += `<ul>${s.bullets.map((b) => `<li>${escapeHtml(b)}</li>`).join('')}</ul>`;
-        }
-        if (s.speakerNotes) {
-          html += `<p><strong>Speaker Notes:</strong> ${escapeHtml(s.speakerNotes)}</p>`;
-        }
-        if (s.discussionPrompt) {
-          html += `<p><strong>Discussion Prompt:</strong> ${escapeHtml(s.discussionPrompt)}</p>`;
-        }
-        html += `</div>`;
-      });
-    }
+    let html = `<h2>Topic: ${escapeHtml(quest.topic)}</h2>`;
+    html += `<p><strong>Duration:</strong> ${quest.durationMinutes} Minutes</p>`;
+    html += `<p><strong>World Environment:</strong> ${escapeHtml(quest.worldType)}</p>`;
+    html += `<p><strong>Completed At:</strong> ${new Date(quest.completedAt).toLocaleString()}</p>`;
     if (format === 'print') {
-      printDocumentHtml(pres.title, html, meta);
+      printDocumentHtml(quest.title, html, meta);
     } else {
-      downloadDocFile(filename, pres.title, html, meta);
+      downloadDocFile(filename, quest.title, html, meta);
     }
   } else {
-    const sections: PdfSection[] = [];
-    if (pres.subtitle) {
-      sections.push({ content: pres.subtitle });
-    }
-    if (pres.slides && pres.slides.length > 0) {
-      pres.slides.forEach((s) => {
-        sections.push({
-          heading: `Slide ${s.slideNumber}: ${s.title}`,
-          bulletPoints: s.bullets,
-          callout: s.speakerNotes ? `Speaker Notes: ${s.speakerNotes}` : undefined,
-        });
-      });
-    }
-    downloadPdfFile(filename, pres.title, sections, meta);
+    const sections: PdfSection[] = [
+      { heading: 'Quest Details', bulletPoints: [`Topic: ${quest.topic}`, `Duration: ${quest.durationMinutes} minutes`, `World Environment: ${quest.worldType}`] }
+    ];
+    downloadPdfFile(filename, quest.title, sections, meta);
   }
 }
 
@@ -1081,9 +1055,9 @@ export function resolveBuildResourceMeta(resource: any): DocumentMeta {
   } else if (toolType.includes('path') || toolType.includes('roadmap')) {
     documentType = 'Learning Path Roadmap';
     toolUsed = 'Learning Path Tool';
-  } else if (toolType.includes('presentation') || toolType.includes('slide')) {
-    documentType = 'Presentation Slide Deck';
-    toolUsed = 'Presentation Tool';
+  } else if (toolType.includes('focus-quest') || toolType.includes('quest')) {
+    documentType = 'Focus Quest Session';
+    toolUsed = 'Focus Quest Tool';
   } else if (toolType.includes('essay') || toolType.includes('grader')) {
     documentType = 'Essay Evaluation & Feedback';
     toolUsed = 'Essay Grader Tool';
@@ -1172,8 +1146,18 @@ export function exportUnifiedItem(item: any, format: 'doc' | 'pdf' | 'print') {
     return;
   }
 
-  // Check if item itself has sections, questions, or activities directly (e.g. from GeneratorModal or SavedResultViewer)
-  if (item.sections || item.questions || item.activities || anyData.activities || anyData.exercises || item.exercises) {
+  // Check if item itself has sections, questions, activities, or slides directly
+  if (
+    item.sections ||
+    item.questions ||
+    item.activities ||
+    item.slides ||
+    anyData.slides ||
+    toolType === 'presentation' ||
+    anyData.activities ||
+    anyData.exercises ||
+    item.exercises
+  ) {
     exportBuildResource({ ...item, ...anyData }, format);
     return;
   }
@@ -1765,6 +1749,535 @@ function downloadWorksheetPdf(filename: string, resource: any) {
   doc.save(cleanFilename);
 }
 
+/**
+ * Downloads a standalone, interactive HTML presentation deck that can be presented
+ * offline in any web browser with keyboard arrows, presenter notes, and fullscreen mode.
+ */
+export function downloadPresentationHtml(rawResource: any) {
+  const resource = rawResource?.data ? { ...rawResource.data, ...rawResource } : (rawResource || {});
+  const meta = resolveBuildResourceMeta(resource);
+  const cleanTitle = resource.title || meta.subject || 'Presentation Deck';
+  const slides = Array.isArray(resource.slides) && resource.slides.length > 0
+    ? resource.slides
+    : (Array.isArray(resource.sections) ? resource.sections.map((sec: any, idx: number) => ({
+        id: `s-${idx + 1}`,
+        slideNumber: idx + 1,
+        slideType: 'concept',
+        title: sec.heading || `Slide ${idx + 1}`,
+        subtitle: '',
+        bulletPoints: typeof sec.content === 'string' ? sec.content.split('\n').filter(Boolean) : [],
+        speakerNotes: 'Discuss key concepts with learners.',
+      })) : []);
+
+  const slidesJson = JSON.stringify(slides);
+  const theme = resource.themeOrColorMood || resource.presentationStyle || 'African Earth & Ochre';
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${escapeHtml(cleanTitle)} - Proudly Afrikan Presentation Deck</title>
+  <style>
+    :root {
+      --bg: #18181b;
+      --card-bg: #27272a;
+      --card-border: #3f3f46;
+      --accent: #FF7A00;
+      --accent-gradient: linear-gradient(135deg, #FF7A00, #D09500);
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    header {
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #111113;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .brand {
+      font-weight: 900;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .meta-badge {
+      font-size: 0.75rem;
+      background: #2d261e;
+      color: #f59e0b;
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+      font-weight: 700;
+    }
+    .header-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    button.btn {
+      background: #3f3f46;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    button.btn:hover { background: #52525b; }
+    button.btn-accent { background: var(--accent); color: black; }
+    button.btn-accent:hover { opacity: 0.9; }
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .slide-canvas {
+      width: 100%;
+      max-width: 980px;
+      min-height: 520px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1.5rem;
+      padding: 2.5rem 3rem;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+    .slide-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    h1.slide-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+      color: #ffffff;
+    }
+    h3.slide-subtitle {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 1.75rem;
+    }
+    ul.bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      font-size: 1.15rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+    ul.bullet-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    ul.bullet-list li::before {
+      content: '❖';
+      color: var(--accent);
+      font-size: 0.9rem;
+      margin-top: 0.2rem;
+      flex-shrink: 0;
+    }
+    .cue-box {
+      background: #1c1917;
+      border-left: 4px solid var(--accent);
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      color: #e7e5e4;
+      margin-top: 0.75rem;
+    }
+    .cue-label {
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-size: 0.75rem;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+    .notes-drawer {
+      margin-top: 1.5rem;
+      background: #18181b;
+      border: 1px dashed #52525b;
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #d4d4d8;
+      display: none;
+    }
+    .notes-drawer.open { display: block; }
+    footer {
+      padding: 1rem 1.5rem;
+      background: #111113;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .progress-dots {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      overflow-x: auto;
+      max-width: 50vw;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 9999px;
+      background: #3f3f46;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .dot.active {
+      background: var(--accent);
+      width: 24px;
+      border-radius: 5px;
+    }
+    .key-hints {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: none;
+    }
+    @media (min-width: 768px) {
+      .key-hints { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span>❖ Proudly Afrikan Build</span>
+      <span class="meta-badge">${escapeHtml(theme)}</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn" id="btn-toggle-notes" title="Toggle Presenter Notes (N)">Notes [N]</button>
+      <button class="btn btn-accent" id="btn-fullscreen" title="Fullscreen Presentation (F)">Fullscreen [F]</button>
+    </div>
+  </header>
+
+  <main id="presentation-container">
+    <div class="slide-canvas">
+      <div>
+        <div class="slide-meta">
+          <span id="slide-num-indicator">SLIDE 1 OF 1</span>
+          <span id="slide-type-indicator">TITLE SLIDE</span>
+        </div>
+        <h1 class="slide-title" id="slide-title"></h1>
+        <h3 class="slide-subtitle" id="slide-subtitle"></h3>
+        <ul class="bullet-list" id="slide-bullets"></ul>
+      </div>
+
+      <div>
+        <div id="slide-visual-box" class="cue-box" style="display: none;">
+          <span class="cue-label">Suggested Visual / Diagram</span>
+          <span id="slide-visual-text"></span>
+        </div>
+
+        <div id="slide-prompt-box" class="cue-box" style="display: none; border-left-color: #38bdf8;">
+          <span class="cue-label" style="color: #38bdf8;">Discussion & Engagement Prompt</span>
+          <span id="slide-prompt-text"></span>
+        </div>
+
+        <div class="notes-drawer" id="notes-drawer">
+          <strong style="color: var(--accent); text-transform: uppercase; font-size: 0.75rem; display: block; margin-bottom: 0.25rem;">Presenter Notes:</strong>
+          <span id="slide-notes-text"></span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div style="display: flex; gap: 0.5rem; align-items: center;">
+      <button class="btn" id="btn-prev">&larr; Previous</button>
+      <button class="btn btn-accent" id="btn-next">Next &rarr;</button>
+    </div>
+
+    <div class="progress-dots" id="dots-container"></div>
+
+    <div class="key-hints">
+      Use <strong>&larr;</strong> <strong>&rarr;</strong> or <strong>Space</strong> to navigate &bull; <strong>N</strong> for Notes &bull; <strong>F</strong> for Fullscreen
+    </div>
+  </footer>
+
+  <script>
+    const slides = ${slidesJson};
+    let currentIndex = 0;
+    let notesOpen = false;
+
+    const titleEl = document.getElementById('slide-title');
+    const subtitleEl = document.getElementById('slide-subtitle');
+    const bulletsEl = document.getElementById('slide-bullets');
+    const numIndicatorEl = document.getElementById('slide-num-indicator');
+    const typeIndicatorEl = document.getElementById('slide-type-indicator');
+    const visualBoxEl = document.getElementById('slide-visual-box');
+    const visualTextEl = document.getElementById('slide-visual-text');
+    const promptBoxEl = document.getElementById('slide-prompt-box');
+    const promptTextEl = document.getElementById('slide-prompt-text');
+    const notesDrawerEl = document.getElementById('notes-drawer');
+    const notesTextEl = document.getElementById('slide-notes-text');
+    const dotsContainer = document.getElementById('dots-container');
+
+    function renderSlide(index) {
+      if (!slides || slides.length === 0) return;
+      if (index < 0) index = 0;
+      if (index >= slides.length) index = slides.length - 1;
+      currentIndex = index;
+
+      const slide = slides[index];
+      numIndicatorEl.textContent = 'SLIDE ' + (index + 1) + ' OF ' + slides.length;
+      typeIndicatorEl.textContent = (slide.slideType || 'SLIDE').toUpperCase();
+
+      titleEl.textContent = slide.title || '';
+      if (slide.subtitle) {
+        subtitleEl.textContent = slide.subtitle;
+        subtitleEl.style.display = 'block';
+      } else {
+        subtitleEl.style.display = 'none';
+      }
+
+      bulletsEl.innerHTML = '';
+      const bullets = slide.bulletPoints || slide.bullets || [];
+      bullets.forEach(b => {
+        const li = document.createElement('li');
+        li.textContent = b;
+        bulletsEl.appendChild(li);
+      });
+
+      const visual = slide.suggestedVisualOrDiagram || slide.visualCue;
+      if (visual) {
+        visualTextEl.textContent = visual;
+        visualBoxEl.style.display = 'block';
+      } else {
+        visualBoxEl.style.display = 'none';
+      }
+
+      if (slide.discussionOrEngagementPrompt) {
+        promptTextEl.textContent = slide.discussionOrEngagementPrompt;
+        promptBoxEl.style.display = 'block';
+      } else {
+        promptBoxEl.style.display = 'none';
+      }
+
+      notesTextEl.textContent = slide.speakerNotes || 'No speaker notes recorded for this slide.';
+
+      // Update dots
+      dotsContainer.innerHTML = '';
+      slides.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i === currentIndex ? ' active' : '');
+        dot.title = 'Jump to slide ' + (i + 1);
+        dot.addEventListener('click', () => renderSlide(i));
+        dotsContainer.appendChild(dot);
+      });
+    }
+
+    document.getElementById('btn-prev').addEventListener('click', () => renderSlide(currentIndex - 1));
+    document.getElementById('btn-next').addEventListener('click', () => renderSlide(currentIndex + 1));
+
+    document.getElementById('btn-toggle-notes').addEventListener('click', () => {
+      notesOpen = !notesOpen;
+      notesDrawerEl.classList.toggle('open', notesOpen);
+    });
+
+    document.getElementById('btn-fullscreen').addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {});
+      } else {
+        document.exitFullscreen().catch(err => {});
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        renderSlide(currentIndex + 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        renderSlide(currentIndex - 1);
+      } else if (e.key === 'n' || e.key === 'N') {
+        notesOpen = !notesOpen;
+        notesDrawerEl.classList.toggle('open', notesOpen);
+      } else if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(err => {});
+        } else {
+          document.exitFullscreen().catch(err => {});
+        }
+      }
+    });
+
+    renderSlide(0);
+  </script>
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  triggerDownload(blob, `${meta.filenameBase}-Slide-Deck.html`);
+}
+
+/**
+ * Exports presentation slides as Word Document (.doc) or Printable layout
+ */
+export function exportPresentationDoc(rawResource: any, format: 'doc' | 'print') {
+  const resource = rawResource?.data ? { ...rawResource.data, ...rawResource } : (rawResource || {});
+  const meta = resolveBuildResourceMeta(resource);
+  const cleanTitle = resource.title || meta.subject || 'Presentation Deck';
+  const slides = Array.isArray(resource.slides) && resource.slides.length > 0
+    ? resource.slides
+    : (Array.isArray(resource.sections) ? resource.sections.map((sec: any, idx: number) => ({
+        id: `s-${idx + 1}`,
+        slideNumber: idx + 1,
+        slideType: 'concept',
+        title: sec.heading || `Slide ${idx + 1}`,
+        subtitle: '',
+        bulletPoints: typeof sec.content === 'string' ? sec.content.split('\n').filter(Boolean) : [],
+        speakerNotes: 'Discuss key concepts with learners.',
+      })) : []);
+
+  let html = `<p><span class="badge">PROUDLY AFRIKAN BUILD &bull; PRESENTATION SLIDE DECK</span></p>`;
+  if (resource.subtitle || resource.description) {
+    html += `<p style="font-size: 13pt; color: #4b5563; font-weight: bold; margin-bottom: 20pt;">${escapeHtml(resource.subtitle || resource.description)}</p>`;
+  }
+
+  slides.forEach((slide: any, idx: number) => {
+    const slideNum = slide.slideNumber || idx + 1;
+    const bullets = slide.bulletPoints || slide.bullets || [];
+    const visual = slide.suggestedVisualOrDiagram || slide.visualCue;
+    const prompt = slide.discussionOrEngagementPrompt;
+    const notes = slide.speakerNotes;
+
+    html += `
+      <div style="page-break-after: always; border: 2pt solid #FF7A00; border-radius: 8pt; padding: 22pt; background-color: #FFFDF9; margin-bottom: 24pt;">
+        <div style="font-size: 10pt; font-weight: 800; color: #B25500; text-transform: uppercase; letter-spacing: 0.8pt; margin-bottom: 8pt;">
+          SLIDE ${slideNum} OF ${slides.length} &bull; ${escapeHtml(slide.slideType || 'CONTENT SLIDE')}
+        </div>
+        <h2 style="font-size: 18pt; font-weight: 900; color: #111827; text-transform: uppercase; margin: 0 0 6pt 0;">
+          ${escapeHtml(slide.title || `Slide ${slideNum}`)}
+        </h2>
+        ${slide.subtitle ? `<h4 style="font-size: 12pt; font-weight: 600; color: #6b7280; margin: 0 0 14pt 0;">${escapeHtml(slide.subtitle)}</h4>` : ''}
+
+        <ul style="font-size: 11.5pt; line-height: 1.8; color: #1f2937; margin: 12pt 0 16pt 18pt;">
+          ${bullets.map((b: string) => `<li>${escapeHtml(b)}</li>`).join('')}
+        </ul>
+
+        ${visual ? `
+          <div style="background-color: #f0fdf4; border-left: 4pt solid #10b981; padding: 8pt 12pt; border-radius: 4pt; margin-top: 12pt; font-size: 10pt; color: #065f46;">
+            <strong>Suggested Visual / Diagram:</strong> ${escapeHtml(visual)}
+          </div>
+        ` : ''}
+
+        ${prompt ? `
+          <div style="background-color: #eff6ff; border-left: 4pt solid #3b82f6; padding: 8pt 12pt; border-radius: 4pt; margin-top: 8pt; font-size: 10pt; color: #1e40af;">
+            <strong>Discussion & Engagement Prompt:</strong> ${escapeHtml(prompt)}
+          </div>
+        ` : ''}
+
+        ${notes ? `
+          <div style="background-color: #fafaf9; border: 1pt dashed #a8a29e; border-radius: 6pt; padding: 10pt 12pt; margin-top: 14pt; font-size: 10pt; color: #44403c;">
+            <strong>Speaker Notes:</strong> ${escapeHtml(notes)}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  });
+
+  if (format === 'print') {
+    printDocumentHtml(cleanTitle, html, meta);
+  } else {
+    downloadDocFile(meta.filenameBase, cleanTitle, html, meta);
+  }
+}
+
+/**
+ * Exports presentation slides as PDF
+ */
+export function downloadPresentationPdf(rawResource: any) {
+  const resource = rawResource?.data ? { ...rawResource.data, ...rawResource } : (rawResource || {});
+  const meta = resolveBuildResourceMeta(resource);
+  const cleanTitle = resource.title || meta.subject || 'Presentation Deck';
+  const slides = Array.isArray(resource.slides) && resource.slides.length > 0
+    ? resource.slides
+    : (Array.isArray(resource.sections) ? resource.sections.map((sec: any, idx: number) => ({
+        id: `s-${idx + 1}`,
+        slideNumber: idx + 1,
+        slideType: 'concept',
+        title: sec.heading || `Slide ${idx + 1}`,
+        subtitle: '',
+        bulletPoints: typeof sec.content === 'string' ? sec.content.split('\n').filter(Boolean) : [],
+        speakerNotes: 'Discuss key concepts with learners.',
+      })) : []);
+
+  const sections: PdfSection[] = [];
+  if (resource.subtitle || resource.description) {
+    sections.push({
+      heading: 'Presentation Overview',
+      content: resource.subtitle || resource.description,
+    });
+  }
+
+  slides.forEach((slide: any, idx: number) => {
+    const slideNum = slide.slideNumber || idx + 1;
+    const bullets = slide.bulletPoints || slide.bullets || [];
+    const visual = slide.suggestedVisualOrDiagram || slide.visualCue;
+    const prompt = slide.discussionOrEngagementPrompt;
+    const notes = slide.speakerNotes;
+
+    let calloutText = '';
+    if (visual) calloutText += `Visual Cue: ${visual}\n`;
+    if (prompt) calloutText += `Discussion Prompt: ${prompt}\n`;
+    if (notes) calloutText += `Speaker Notes: ${notes}`;
+
+    sections.push({
+      heading: `Slide ${slideNum}: ${slide.title} (${(slide.slideType || 'Content').toUpperCase()})`,
+      content: slide.subtitle || undefined,
+      bulletPoints: bullets.length > 0 ? bullets : undefined,
+      callout: calloutText.trim() ? calloutText.trim() : undefined,
+    });
+  });
+
+  downloadPdfFile(meta.filenameBase, cleanTitle, sections, meta);
+}
+
 export function exportBuildResource(rawResource: any, format: 'doc' | 'pdf' | 'print') {
   const resource = rawResource?.data ? { ...rawResource.data, ...rawResource } : (rawResource || {});
   const meta = resolveBuildResourceMeta(resource);
@@ -1790,6 +2303,22 @@ export function exportBuildResource(rawResource: any, format: 'doc' | 'pdf' | 'p
       exportWorksheetDoc(worksheetResource, 'print');
     } else {
       downloadWorksheetPdf(cleanTitle, worksheetResource);
+    }
+    return;
+  }
+
+  const isPresentation =
+    resource.toolType === 'presentation' ||
+    rawResource?.toolType === 'presentation' ||
+    (Array.isArray(resource.slides) && resource.slides.length > 0) ||
+    (resource.title && resource.title.toLowerCase().includes('presentation')) ||
+    (resource.title && resource.title.toLowerCase().includes('slide deck'));
+
+  if (isPresentation) {
+    if (format === 'doc' || format === 'print') {
+      exportPresentationDoc(resource, format);
+    } else {
+      downloadPresentationPdf(resource);
     }
     return;
   }

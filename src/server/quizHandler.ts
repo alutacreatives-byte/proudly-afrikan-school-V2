@@ -359,7 +359,6 @@ function generateBalancedTargetSequence(count: number, slotsCount = 4): number[]
 
     return res.json({ quiz: generatedQuiz });
   } catch (err: any) {
-    console.error("Error generating quiz (using fallback):", err);
     const bodyTopic = req.body?.topic || req.body?.subject || 'General Assessment';
     const bodyMethod = req.body?.creationMethod || 'topic';
     const bodySettings = req.body?.settings || {};

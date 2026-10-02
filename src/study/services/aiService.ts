@@ -19,13 +19,12 @@ import {
   EssayGraderResult,
   EssayImprovementItem,
   PdfQuizResult,
-  PresentationResult,
+  FocusQuestResult,
   CourseResult,
   LearningPathResult,
   StudyGuideSection,
   FlashcardCard,
   QuizQuestion,
-  PresentationSlide,
   CourseModule,
   LearningStage
 } from '../types';
@@ -242,24 +241,13 @@ export function validatePdfQuiz(result: PdfQuizResult): void {
   });
 }
 
-export function validatePresentation(result: PresentationResult): void {
+export function validateFocusQuest(result: FocusQuestResult): void {
   if (!result || typeof result !== 'object') {
-    throw new Error('Invalid presentation data received.');
+    throw new Error('Invalid focus quest data received.');
   }
-  if (!result.title || typeof result.title !== 'string' || !result.title.trim()) {
-    throw new Error('Presentation is missing a title.');
+  if (!result.topic || typeof result.topic !== 'string' || !result.topic.trim()) {
+    throw new Error('Focus quest is missing a topic.');
   }
-  if (!Array.isArray(result.slides) || result.slides.length === 0) {
-    throw new Error('No presentation slides were generated.');
-  }
-  result.slides.forEach((slide, idx) => {
-    if (!slide.title || typeof slide.title !== 'string' || !slide.title.trim()) {
-      slide.title = `Slide ${idx + 1}`;
-    }
-    if (!Array.isArray(slide.bullets) || slide.bullets.length === 0) {
-      slide.bullets = ['Key concept discussion point'];
-    }
-  });
 }
 
 export function validateCourse(result: CourseResult): void {
@@ -608,104 +596,21 @@ Return ONLY valid JSON matching this schema:
   return result;
 }
 
-export async function generatePresentation(input: StudyToolInput): Promise<PresentationResult> {
-  const topic = input.topic || 'Core Presentation';
-  const count = input.count || 6;
-  const sourceContext = input.sourceMaterial ? `\n\nSource material:\n${input.sourceMaterial}` : '';
-
-  const prompt = `
-Create a structured presentation slide deck outline for academic lectures or study groups.
-
-Topic:
-${topic}
-Slides Count: ${count}
-Subject / Category: ${input.category || 'Academic Subject'}
-Audience / Level: ${input.gradeLevel || 'Secondary / Higher Education'}${sourceContext}
-
-Return ONLY valid JSON matching this schema:
-{
-  "title": "Presentation: ${topic}",
-  "subtitle": "Comprehensive Academic Slide Deck",
-  "subject": "${input.category || 'Academic Subject'}",
-  "topic": "${topic}",
-  "audienceLevel": "${input.gradeLevel || 'Secondary / Higher Education'}",
-  "slides": [
-    {
-      "id": "s1",
-      "slideNumber": 1,
-      "title": "Introduction to ${topic}",
-      "bullets": [
-        "Overview and context of ${topic}",
-        "Core learning objectives for the session",
-        "Significance and practical impact"
-      ],
-      "speakerNotes": "Welcome participants and frame the central question.",
-      "visualCue": "Conceptual flowchart showing high-level relationship",
-      "discussionPrompt": "What prior experience or questions do you bring to this topic?"
-    }
-  ]
-}
-`;
-
-  try {
-    const result = await callAIAndParseJson<PresentationResult>(prompt);
-    result.toolType = 'presentation';
-    result.id = `pres-${Date.now()}`;
-    result.createdAt = new Date().toISOString();
-    validatePresentation(result);
-    return result;
-  } catch (err) {
-    console.warn('AI Presentation generation error, utilizing fallback deck:', err);
-    const fallbackResult: PresentationResult = {
-      id: `pres-${Date.now()}`,
-      toolType: 'presentation',
-      title: `Presentation: ${topic}`,
-      subtitle: 'Comprehensive Academic Lecture Slides',
-      subject: input.category || 'General Studies',
-      topic,
-      audienceLevel: input.gradeLevel || 'Secondary / Higher Education',
-      slides: [
-        {
-          id: 's1',
-          slideNumber: 1,
-          title: `Introduction to ${topic}`,
-          bullets: [`Overview and conceptual framework`, `Core objectives and principles`, `Real-world context and relevance`],
-          speakerNotes: `Welcome everyone. Today we examine the foundational principles of ${topic}.`,
-          visualCue: 'Title slide layout with high-contrast typography',
-          discussionPrompt: 'What key questions do you have about this topic?'
-        },
-        {
-          id: 's2',
-          slideNumber: 2,
-          title: 'Foundational Principles & Mechanics',
-          bullets: [`Core definitions and structural components`, `Historical and contextual background`, `Key terminology and operational dynamics`],
-          speakerNotes: `Let us explore the core mechanics and terminology governing this domain.`,
-          visualCue: 'Structured diagram showing component relationships',
-          discussionPrompt: 'How do these principles compare to what you expected?'
-        },
-        {
-          id: 's3',
-          slideNumber: 3,
-          title: 'Methodologies & Applied Analysis',
-          bullets: [`Analytical frameworks and problem-solving approaches`, `Case studies and practical applications`, `Evaluating trade-offs and edge cases`],
-          speakerNotes: `Now we transition from theoretical frameworks to practical application.`,
-          visualCue: 'Comparative matrix table',
-          discussionPrompt: 'Which methodology is most applicable in your context?'
-        },
-        {
-          id: 's4',
-          slideNumber: 4,
-          title: 'Advanced Synthesis & Future Outlook',
-          bullets: [`Cross-domain integration and synthesis`, `Emerging trends and future developments`, `Summary of key takeaways`],
-          speakerNotes: `To conclude, let us synthesize our insights and look at broader implications.`,
-          visualCue: 'Summary bullet points with accent highlight',
-          discussionPrompt: 'What future developments do you anticipate in this field?'
-        }
-      ]
-    };
-    validatePresentation(fallbackResult);
-    return fallbackResult;
-  }
+export async function generateFocusQuest(input: StudyToolInput): Promise<FocusQuestResult> {
+  const topic = input.topic || 'Core Study Focus';
+  const result: FocusQuestResult = {
+    id: `quest-${Date.now()}`,
+    toolType: 'focus-quest',
+    title: `Focus Quest: ${topic}`,
+    topic,
+    subject: input.category || 'General Studies',
+    durationMinutes: input.durationMinutes || 25,
+    worldType: 'bio-dome',
+    completedAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+  };
+  validateFocusQuest(result);
+  return result;
 }
 
 export async function generateCourse(input: StudyToolInput): Promise<CourseResult> {
@@ -906,8 +811,8 @@ export async function generateStudyTool(
     case 'pdf-quiz':
       return generatePdfQuiz(input);
 
-    case 'presentation':
-      return generatePresentation(input);
+    case 'focus-quest':
+      return generateFocusQuest(input);
 
     case 'course':
       return generateCourse(input);

@@ -4,10 +4,11 @@ import {
   Layers, 
   CheckSquare, 
   FileCheck2, 
-  Presentation, 
+  Compass, 
   GitBranch, 
   ArrowUpRight,
-  MessageSquare
+  MessageSquare,
+  Gamepad2
 } from 'lucide-react';
 import { StudyToolType } from '../types';
 
@@ -23,17 +24,8 @@ interface ToolItem {
 
 const STUDY_TOOLS: ToolItem[] = [
   {
-    id: 'learning-path',
-    toolNumber: '01',
-    tag: 'PROGRESSIVE ROADMAP',
-    title: 'LEARNING ROADMAP BUILDER',
-    subtitle: 'Construct step-by-step competency milestones and skill progression roadmaps tailored to your goals.',
-    icon: GitBranch,
-    btnText: 'CREATE ROADMAP →',
-  },
-  {
     id: 'study-guide',
-    toolNumber: '02',
+    toolNumber: '01',
     tag: 'STRUCTURED REVIEW',
     title: 'STUDY GUIDE GENERATOR',
     subtitle: 'Generate comprehensive revision notes with core principles, vocabulary breakdowns, and high-yield takeaways.',
@@ -42,12 +34,21 @@ const STUDY_TOOLS: ToolItem[] = [
   },
   {
     id: 'flashcards',
-    toolNumber: '03',
+    toolNumber: '02',
     tag: 'ACTIVE RECALL',
     title: 'FLASHCARD GENERATOR',
     subtitle: 'Build interactive active-recall flashcard decks with instant flip animations, spaced hints, and shuffle drills.',
     icon: Layers,
     btnText: 'CREATE FLASHCARDS →',
+  },
+  {
+    id: 'learning-path',
+    toolNumber: '03',
+    tag: 'PROGRESSIVE ROADMAP',
+    title: 'LEARNING ROADMAP BUILDER',
+    subtitle: 'Construct step-by-step competency milestones and skill progression roadmaps tailored to your goals.',
+    icon: GitBranch,
+    btnText: 'CREATE ROADMAP →',
   },
   {
     id: 'essay-grader',
@@ -68,13 +69,13 @@ const STUDY_TOOLS: ToolItem[] = [
     btnText: 'START TUTOR CHAT →',
   },
   {
-    id: 'presentation',
+    id: 'focus-quest',
     toolNumber: '06',
-    tag: 'SLIDES & LECTURE',
-    title: 'PRESENTATION GENERATOR',
-    subtitle: 'Generate structured slide decks with presenter notes, visual prompts, and interactive discussion starters.',
-    icon: Presentation,
-    btnText: 'CREATE SLIDE DECK →',
+    tag: 'ARCADE LEARNING MAZE',
+    title: 'PAC-STUDY',
+    subtitle: 'Classic Pac-Man arcade learning maze. Navigate corridors, evade 4 pursuing chasers, and collect illustrated visual concepts across 8 knowledge fields.',
+    icon: Gamepad2,
+    btnText: 'PLAY PAC-STUDY →',
   },
 ];
 
@@ -108,6 +109,7 @@ export const StudyGeneratorsSection: React.FC<StudyGeneratorsSectionProps> = ({
           return (
             <div
               key={gen.id}
+              id={`study-tool-card-${gen.id}`}
               onClick={() => onSelectTool(gen.id)}
               className="rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_18px_40px_rgba(230,57,86,0.12)] hover:border-[#E63956]/40 transition-all p-6 flex flex-col justify-between cursor-pointer group"
             >

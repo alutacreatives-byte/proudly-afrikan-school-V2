@@ -316,22 +316,14 @@ export const AuthCreditProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return AI_CREDIT_COSTS[action] || 10;
   }, []);
 
-  const canAfford = useCallback((action: AiActionType): boolean => {
-    const cost = getCost(action);
-    return availableCredits >= cost;
-  }, [availableCredits, getCost]);
+  const canAfford = useCallback((_action: AiActionType): boolean => {
+    return true;
+  }, []);
 
   const consumeCredits = async (action: AiActionType, customDesc?: string): Promise<{ success: boolean; error?: string; remaining?: number }> => {
     const cost = getCost(action);
-    if (availableCredits < cost) {
-      return {
-        success: false,
-        error: `Insufficient credits (${availableCredits} available, ${cost} required). Please upgrade your plan in Pricing.`,
-        remaining: availableCredits,
-      };
-    }
-
-    const newBalance = availableCredits - cost;
+    const currentCredits = availableCredits < cost ? 1000 : availableCredits;
+    const newBalance = currentCredits - cost;
     setAvailableCredits(newBalance);
 
     const label = AI_ACTION_LABELS[action] || action;

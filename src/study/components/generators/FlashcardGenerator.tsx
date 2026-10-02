@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Layers, 
   Sparkles, 
   Bookmark, 
-  ArrowLeft,
-  ArrowRight,
-  RotateCw,
-  Shuffle,
-  Eye,
-  Download
+  Shuffle, 
+  Download,
+  RotateCw
 } from 'lucide-react';
 import { FlashcardResult, StudyToolInput } from '../../types';
 import { generateStudyTool } from '../../services/aiService';
@@ -18,6 +15,7 @@ import { useAuthCredit } from '../../../context/AuthCreditContext';
 import { exportFlashcards } from '../../../utils/exportUtils';
 import { useScrollToResult } from '../../../utils/useScrollToResult';
 import { GlobalNavigationButtons } from '../../../components/GlobalNavigationButtons';
+import { StackedFlashcardDeck } from '../StackedFlashcardDeck';
 
 interface FlashcardGeneratorProps {
   onBack: () => void;
@@ -34,7 +32,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
 }) => {
   const { canAfford, consumeCredits, openAuthModal } = useAuthCredit();
 
-  // Form
+  // Form State
   const [topic, setTopic] = useState<string>(existingResource?.topic || existingResource?.title || '');
   const [category, setCategory] = useState<string>(existingResource?.subject || 'AFRICAN HISTORY');
   const [gradeLevel, setGradeLevel] = useState<string>('Secondary / High School');
@@ -42,16 +40,36 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   const [sourceMaterial, setSourceMaterial] = useState<string>(existingResource?.sourceSnippet || '');
   const [sourceFileName, setSourceFileName] = useState<string>(existingResource?.documentName || '');
 
-  // Generation & Active Play State
+  // Active Flashcards Deck State - always null initially when opened fresh from STUDY main page
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [flashcards, setFlashcards] = useState<FlashcardResult | null>(null);
+  const [flashcards, setFlashcards] = useState<FlashcardResult | null>(
+    existingResource && Array.isArray(existingResource.cards) && existingResource.cards.length > 0
+      ? existingResource
+      : null
+  );
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
-  const [showHint, setShowHint] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const resultRef = useScrollToResult(flashcards, isGenerating);
+
+  // Sync / reset when existingResource changes (e.g. navigated back to main page or selected fresh)
+  useEffect(() => {
+    if (existingResource && Array.isArray(existingResource.cards) && existingResource.cards.length > 0) {
+      setFlashcards(existingResource);
+      setTopic(existingResource.topic || existingResource.title || '');
+      setCategory(existingResource.subject || 'AFRICAN HISTORY');
+    } else {
+      setFlashcards(null);
+      setTopic('');
+      setCategory('AFRICAN HISTORY');
+      setSourceMaterial('');
+      setSourceFileName('');
+    }
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  }, [existingResource]);
 
   const handleGenerate = async () => {
     if (!topic.trim() && !sourceMaterial.trim()) {
@@ -67,9 +85,8 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
 
     setError(null);
     setIsGenerating(true);
-    setIsFlipped(false);
-    setShowHint(false);
     setCurrentIndex(0);
+    setIsFlipped(false);
 
     try {
       const input: StudyToolInput = {
@@ -92,27 +109,26 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
     }
   };
 
-  const handleNext = () => {
-    if (!flashcards || !Array.isArray(flashcards.cards) || flashcards.cards.length === 0) return;
-    setIsFlipped(false);
-    setShowHint(false);
-    setCurrentIndex((prev) => (prev + 1) % flashcards.cards.length);
-  };
-
-  const handlePrev = () => {
-    if (!flashcards || !Array.isArray(flashcards.cards) || flashcards.cards.length === 0) return;
-    setIsFlipped(false);
-    setShowHint(false);
-    setCurrentIndex((prev) => (prev - 1 + flashcards.cards.length) % flashcards.cards.length);
-  };
-
   const handleShuffle = () => {
-    if (!flashcards || !Array.isArray(flashcards.cards) || flashcards.cards.length === 0) return;
-    const shuffled = [...flashcards.cards].sort(() => Math.random() - 0.5);
-    setFlashcards({ ...flashcards, cards: shuffled });
+    if (!flashcards || !Array.isArray(flashcards.cards) || flashcards.cards.length <= 1) return;
+    const allCards = [...flashcards.cards];
+    const candidateIndices = allCards.map((_, i) => i).filter(i => i !== currentIndex);
+    const chosenIndex = candidateIndices[Math.floor(Math.random() * candidateIndices.length)];
+    const chosenCard = allCards[chosenIndex];
+
+    const remaining = allCards.filter((_, i) => i !== chosenIndex);
+    for (let i = remaining.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [remaining[i], remaining[j]] = [remaining[j], remaining[i]];
+    }
+
+    setFlashcards({ ...flashcards, cards: [chosenCard, ...remaining] });
     setCurrentIndex(0);
     setIsFlipped(false);
-    setShowHint(false);
+  };
+
+  const handleFlip = () => {
+    setIsFlipped((prev) => !prev);
   };
 
   const handleSave = () => {
@@ -141,8 +157,6 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
     exportFlashcards(flashcards, 'pdf');
   };
 
-  const currentCard = flashcards?.cards?.[currentIndex];
-
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
       {/* Top Header */}
@@ -150,25 +164,18 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs font-bold text-[#E63956] uppercase tracking-wider">
-              STUDY TOOL 03
+              STUDY TOOL 02
             </span>
           </div>
           <h1 className="font-display font-black text-2xl sm:text-3xl text-[#161616] uppercase tracking-tight">
-            FLASHCARD GENERATOR
+            Active Recall Flashcards
           </h1>
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end flex-wrap">
+        <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
           {flashcards && Array.isArray(flashcards.cards) && flashcards.cards.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap">
-              <button
-                type="button"
-                onClick={handleShuffle}
-                className="px-4 py-2 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-xs font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <Shuffle className="w-3.5 h-3.5" />
-                Shuffle
-              </button>
+
               <button
                 type="button"
                 onClick={handleExportDoc}
@@ -187,16 +194,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                 <Download className="w-3.5 h-3.5 text-[#D92B8A]" />
                 PDF
               </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                className="px-4 py-2 rounded-xl bg-[#18181B] hover:bg-[#27272A] text-white font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-              >
-                <Bookmark className="w-3.5 h-3.5" />
-                {saved ? 'Saved' : 'Save Set'}
-              </button>
+
             </div>
           )}
+
           <GlobalNavigationButtons
             onBack={onBack}
             onGoHome={onGoHome}
@@ -206,12 +207,11 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         </div>
       </div>
 
-      {/* Main Layout: Menu directly ABOVE generation area */}
-      <div className="space-y-8">
-        {/* Form Menu Column */}
+      {/* Main Layout: Generator / Menu directly ABOVE generation area */}
+      <div className="space-y-12 sm:space-y-16">
+        {/* Form Menu Column: Always open and ready in initial state */}
         <div className="w-full">
           <div className="p-6 sm:p-10 rounded-[2.5rem] bg-[#FAF4EC] border border-[#EFE5DA] shadow-[0_2px_10px_rgba(100,80,60,0.04),_0_12px_30px_rgba(100,80,60,0.08),_0_28px_56px_-6px_rgba(100,80,60,0.10),_0_45px_80px_-12px_rgba(100,80,60,0.08)] space-y-6">
-
             <div>
               <label className="block font-mono text-[11px] sm:text-xs font-bold text-stone-600 uppercase mb-2 tracking-wider">
                 Study Topic / Terminology *
@@ -220,7 +220,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                 type="text"
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                placeholder="e.g. Ancient Carthage Trade Networks"
+                placeholder="e.g. Ancient Carthage Trade Networks or Molecular Biology"
                 className="w-full bg-[#EFE8DE] border border-[#E4DCD0] rounded-2xl p-4 font-mono text-xs sm:text-sm text-stone-900 placeholder-stone-400/80 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.07),_inset_-2px_-2px_4px_rgba(255,255,255,0.8)] focus:outline-hidden focus:border-[#E62E6B] transition-all"
               />
             </div>
@@ -286,7 +286,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               type="button"
               disabled={isGenerating}
               onClick={handleGenerate}
-              className="w-full py-4 sm:py-4.5 bg-[#E62E6B] hover:bg-[#d8245f] text-white font-display text-sm sm:text-base font-black uppercase tracking-wider rounded-full shadow-[0_10px_28px_rgba(230,46,107,0.4)] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+              className="w-full py-4 bg-[#E62E6B] hover:bg-[#d8245f] text-white font-display text-sm font-black uppercase tracking-wider rounded-full shadow-[0_10px_28px_rgba(230,46,107,0.4)] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
             >
               <Sparkles className="w-5 h-5 text-white" />
               <span>{isGenerating ? 'Generating Flashcards...' : 'GENERATE FLASHCARDS'}</span>
@@ -294,117 +294,27 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           </div>
         </div>
 
-        {/* Generated Result Area */}
-        <div ref={resultRef} className="w-full scroll-mt-24">
-          {flashcards && currentCard && Array.isArray(flashcards.cards) && flashcards.cards.length > 0 ? (
+        {/* Generated Result Area: Appears ONLY after generating with clear gap */}
+        <div ref={resultRef} className="w-full scroll-mt-24 pt-6 sm:pt-10">
+          {flashcards && Array.isArray(flashcards.cards) && flashcards.cards.length > 0 && (
             <div className="space-y-6">
-              {/* Card Meta Bar */}
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs font-bold text-stone-500 uppercase">
-                  Card {currentIndex + 1} of {flashcards.cards.length}
-                </span>
-                <span className="px-3 py-1 bg-pink-50 border border-pink-200 text-[#E63956] text-[11px] font-mono font-bold uppercase rounded-full">
-                  {currentCard.category || flashcards.subject || category}
-                </span>
-              </div>
-
-              {/* Flip Card Container */}
-              <div
-                onClick={() => setIsFlipped(!isFlipped)}
-                className="relative w-full min-h-[360px] sm:min-h-[400px] p-8 sm:p-12 rounded-[2.5rem] bg-white border-2 border-stone-200/90 hover:border-[#E63956]/60 shadow-[0_15px_40px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 select-none group"
-              >
-                <span className="absolute top-6 right-6 px-3 py-1 rounded-full bg-stone-100 text-stone-500 text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1 group-hover:bg-[#E63956] group-hover:text-white transition-colors">
-                  <RotateCw className="w-3 h-3" />
-                  {isFlipped ? 'Answer (Click to flip)' : 'Question (Click to flip)'}
-                </span>
-
-                <div className="space-y-4 max-w-xl">
-                  {!isFlipped ? (
-                    <>
-                      <span className="text-xs font-mono font-bold text-[#E63956] uppercase tracking-wider block">
-                        PROMPT / QUESTION
-                      </span>
-                      <h3 className="font-display font-black text-xl sm:text-2xl text-[#161616] leading-snug">
-                        {currentCard.front}
-                      </h3>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-xs font-mono font-bold text-emerald-600 uppercase tracking-wider block">
-                        ANSWER / DEFINITION
-                      </span>
-                      <p className="text-stone-800 text-base sm:text-lg font-medium leading-relaxed">
-                        {currentCard.back}
-                      </p>
-                    </>
-                  )}
-                </div>
-
-                {currentCard.hint && !isFlipped && (
-                  <div className="absolute bottom-6 left-6 right-6">
-                    {showHint ? (
-                      <p className="text-xs font-mono text-stone-500 bg-stone-50 p-2.5 rounded-xl border border-stone-200 max-w-md mx-auto">
-                        💡 Hint: {currentCard.hint}
-                      </p>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowHint(true);
-                        }}
-                        className="text-[11px] font-mono font-bold text-stone-400 hover:text-stone-700 flex items-center justify-center gap-1 mx-auto"
-                      >
-                        <Eye className="w-3 h-3" />
-                        Show Hint
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Navigation Controls */}
-              <div className="flex items-center justify-between gap-4">
-                <button
-                  type="button"
-                  onClick={handlePrev}
-                  className="px-6 py-3 rounded-2xl bg-white border border-stone-200 hover:bg-stone-50 font-display font-black text-xs uppercase text-stone-800 flex items-center gap-2 transition-colors cursor-pointer"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Previous Card
-                </button>
-
-                {/* Dots indicator */}
-                <div className="hidden sm:flex items-center gap-1.5">
-                  {flashcards.cards.map((_, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => {
-                        setCurrentIndex(idx);
-                        setIsFlipped(false);
-                        setShowHint(false);
-                      }}
-                      className={`h-2 rounded-full transition-all cursor-pointer ${
-                        idx === currentIndex ? 'w-6 bg-[#E63956]' : 'w-2 bg-stone-200 hover:bg-stone-300'
-                      }`}
-                    />
-                  ))}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="px-6 py-3 rounded-2xl bg-[#18181B] hover:bg-[#27272A] text-white font-display font-black text-xs uppercase flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
-                >
-                  Next Card
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
+              <StackedFlashcardDeck
+                cards={flashcards.cards}
+                currentIndex={currentIndex}
+                onIndexChange={(idx) => {
+                  setCurrentIndex(idx);
+                  setIsFlipped(false);
+                }}
+                onShuffle={handleShuffle}
+                deckTitle={flashcards.title}
+                deckCategory={flashcards.subject || category}
+                isFlipped={isFlipped}
+                onFlipChange={setIsFlipped}
+              />
 
               {/* All Cards Overview Grid */}
               <div className="pt-8 border-t border-stone-200 space-y-4">
-                <h4 className="font-display font-black text-sm uppercase text-stone-900 tracking-wider">
+                <h4 className="font-display font-black text-base sm:text-lg uppercase text-stone-900 tracking-wider">
                   Full Set Overview ({flashcards.cards.length} Cards)
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -414,40 +324,27 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                       onClick={() => {
                         setCurrentIndex(idx);
                         setIsFlipped(false);
-                        setShowHint(false);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
                       className={`p-4 rounded-2xl border cursor-pointer transition-all space-y-2 ${
                         idx === currentIndex
-                          ? 'bg-pink-50/50 border-[#E63956]'
+                          ? 'bg-pink-50/50 border-[#E62E6B]'
                           : 'bg-white border-stone-200 hover:border-stone-300'
                       }`}
                     >
-                      <span className="font-mono text-[10px] font-bold text-stone-400 block uppercase">
+                      <span className="font-mono text-xs font-bold text-stone-400 block uppercase">
                         #{idx + 1}
                       </span>
-                      <p className="font-mono text-xs font-bold text-stone-900 line-clamp-2">
+                      <p className="font-mono text-sm sm:text-base font-bold text-stone-900 line-clamp-2">
                         {c.front}
                       </p>
-                      <p className="text-xs text-stone-600 line-clamp-2 font-normal">
+                      <p className="text-sm text-stone-600 line-clamp-2 font-normal">
                         {c.back}
                       </p>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="p-12 rounded-[2rem] bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.05)] text-center space-y-3 flex flex-col items-center justify-center min-h-[420px]">
-              <div className="w-12 h-12 rounded-full bg-stone-100 text-stone-400 flex items-center justify-center">
-                <Layers className="w-6 h-6" />
-              </div>
-              <h3 className="font-display font-black text-lg uppercase text-stone-900">
-                Ready to Generate Active Recall Cards
-              </h3>
-              <p className="text-xs sm:text-sm text-stone-500 max-w-md font-normal leading-relaxed">
-                Enter your study concepts and choose the deck size to create interactive active-recall flashcards with instant flip animations and hints.
-              </p>
             </div>
           )}
         </div>

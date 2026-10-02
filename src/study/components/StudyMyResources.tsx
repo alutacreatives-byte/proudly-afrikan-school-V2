@@ -8,7 +8,7 @@ import {
   Layers,
   CheckSquare,
   FileCheck2,
-  Presentation,
+  Compass,
   GraduationCap,
   GitBranch,
   Download
@@ -46,7 +46,7 @@ export const StudyMyResources: React.FC<StudyMyResourcesProps> = ({
       case 'essay-grader': return <FileCheck2 className="w-4 h-4 text-amber-600" />;
       case 'pdf-quiz': return <FileCheck2 className="w-4 h-4 text-purple-600" />;
       case 'tutor-chat': return <FileText className="w-4 h-4 text-purple-600" />;
-      case 'presentation': return <Presentation className="w-4 h-4 text-amber-600" />;
+      case 'focus-quest': return <Compass className="w-4 h-4 text-rose-600" />;
       case 'course': return <GraduationCap className="w-4 h-4 text-indigo-600" />;
       case 'learning-path': return <GitBranch className="w-4 h-4 text-teal-600" />;
       default: return <FileText className="w-4 h-4 text-stone-600" />;
@@ -104,7 +104,7 @@ export const StudyMyResources: React.FC<StudyMyResourcesProps> = ({
           { id: 'essay-grader', label: 'Essay Evaluations' },
           { id: 'quiz', label: 'Quizzes' },
           { id: 'pdf-quiz', label: 'Tutor Chats / Docs' },
-          { id: 'presentation', label: 'Presentations' },
+          { id: 'focus-quest', label: 'Focus Quests' },
           { id: 'course', label: 'Courses' },
           { id: 'learning-path', label: 'Roadmaps' },
         ].map((tab) => (

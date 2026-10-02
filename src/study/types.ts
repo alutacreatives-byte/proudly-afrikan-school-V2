@@ -287,7 +287,7 @@ export type StudyToolType =
   | 'essay-grader'
   | 'pdf-quiz'
   | 'tutor-chat'
-  | 'presentation'
+  | 'focus-quest'
   | 'course'
   | 'learning-path';
 
@@ -432,28 +432,19 @@ export interface PdfQuizResult {
   createdAt?: string;
 }
 
-export interface PresentationSlide {
-  id?: string;
-  slideNumber: number;
-  title: string;
-  bullets: string[];
-  speakerNotes: string;
-  visualCue?: string;
-  discussionPrompt?: string;
-}
-
-export interface PresentationResult {
+export interface FocusQuestResult {
   id?: string;
   title: string;
-  subtitle?: string;
+  topic: string;
   subject?: string;
-  topic?: string;
-  audienceLevel?: string;
-  sourceSnippet?: string;
-  documentName?: string;
-  capturedPhotoUrl?: string;
-  slides: PresentationSlide[];
-  toolType?: 'presentation';
+  durationMinutes?: number;
+  worldType?: string;
+  score?: number;
+  accuracy?: number;
+  levelReached?: number;
+  missedWords?: { word: string; definition: string }[];
+  completedAt: string;
+  toolType?: 'focus-quest';
   createdAt?: string;
 }
 
@@ -529,7 +520,7 @@ export type StudyToolResult =
   | EssayGraderResult
   | PdfQuizResult
   | TutorChatResult
-  | PresentationResult
+  | FocusQuestResult
   | CourseResult
   | LearningPathResult;
 
