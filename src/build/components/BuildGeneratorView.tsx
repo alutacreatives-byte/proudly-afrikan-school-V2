@@ -59,7 +59,7 @@ export const BuildGeneratorView: React.FC<BuildGeneratorViewProps> = ({
 
   // Active Tool selection
   const [activeToolId, setActiveToolId] = useState<BuildToolId>(
-    initialResource?.toolType || initialToolId || 'exam'
+    (initialResource?.toolType || initialToolId || 'exam') as BuildToolId
   );
 
   // Form Fields
@@ -100,7 +100,7 @@ export const BuildGeneratorView: React.FC<BuildGeneratorViewProps> = ({
   useEffect(() => {
     if (initialResource) {
       setGeneratedResource(initialResource);
-      setActiveToolId(initialResource.toolType || 'exam');
+      setActiveToolId((initialResource.toolType || 'exam') as BuildToolId);
       setTopic(initialResource.topic || initialResource.title || '');
       if (initialResource.subject) setSubject(initialResource.subject);
       if (initialResource.gradeLevel) setGradeLevel(initialResource.gradeLevel);
@@ -150,7 +150,6 @@ export const BuildGeneratorView: React.FC<BuildGeneratorViewProps> = ({
       topic: topic.trim() || sourceFileName || 'Educational Resource',
       gradeLevel,
       difficulty,
-      slidesCount: activeToolId === 'presentation' ? itemCount : undefined,
       questionCount: itemCount,
       durationMinutes,
       instructions: instructions.trim(),
@@ -401,26 +400,16 @@ export const BuildGeneratorView: React.FC<BuildGeneratorViewProps> = ({
                 <option value={90}>90 Minutes (Block Period)</option>
                 <option value={120}>120 Minutes (Workshop / Double)</option>
               </select>
-            ) : activeToolId === 'presentation' ? (
-              <select
-                value={itemCount}
-                onChange={(e) => setItemCount(Number(e.target.value))}
-                className="w-full bg-[#EFE8DE] border border-[#E4DCD0] rounded-2xl p-3.5 font-mono text-xs sm:text-sm text-stone-900 focus:outline-none focus:border-[#E05A2B]"
-              >
-                <option value={5}>5 Slides (Synopsis to Conclusion)</option>
-                <option value={10}>10 Slides (Comprehensive Breakdown)</option>
-                <option value={15}>15 Slides (Deep Dive Masterclass)</option>
-              </select>
             ) : (
               <select
                 value={itemCount}
                 onChange={(e) => setItemCount(Number(e.target.value))}
                 className="w-full bg-[#EFE8DE] border border-[#E4DCD0] rounded-2xl p-3.5 font-mono text-xs sm:text-sm text-stone-900 focus:outline-none focus:border-[#E05A2B]"
               >
-                <option value={5}>5 Items</option>
-                <option value={10}>10 Items (Standard)</option>
-                <option value={15}>15 Items</option>
-                <option value={20}>20 Items (Comprehensive)</option>
+                <option value={5}>5 Items / Slides</option>
+                <option value={10}>10 Items / Slides (Standard)</option>
+                <option value={15}>15 Items / Slides</option>
+                <option value={20}>20 Items / Slides (Comprehensive)</option>
               </select>
             )}
           </div>
@@ -570,87 +559,39 @@ function renderResourceContent(
 
   // 1. PRESENTATION / SLIDE DECK (Dynamic WebGL movement & Modern 3D Layout)
   if (toolType === 'presentation' || Array.isArray(data.slides)) {
-    const safeTopic = resource.title || data.topic || 'Curriculum Subject';
     const rawSlides = Array.isArray(data.slides) && data.slides.length > 0 ? data.slides : [
       {
         id: 's-1',
         slideNumber: 1,
         slideType: 'title',
-        conceptBadge: 'SYNOPSIS',
-        title: `Synopsis: Introduction to ${safeTopic}`,
-        subtitle: `Overview of Scope, Core Themes & Presentation Roadmap`,
-        bulletPoints: [
-          `Introducing ${safeTopic} as a critical subject of academic and practical study`,
-          `Core curriculum orientation and key questions addressed in this presentation`,
-          `Establishing scholarly frameworks and structured pathways for inquiry`
-        ],
-        speakerNotes: `Welcome learners to this session on ${safeTopic}. This synopsis outlines what we will cover and sets the stage for our inquiry.`,
-        suggestedVisualOrDiagram: `Introductory overview concept map for ${safeTopic}`,
-        discussionOrEngagementPrompt: `What do you already know about ${safeTopic}?`
+        title: resource.title || data.topic || 'Presentation Deck',
+        subtitle: data.subtitle || 'Comprehensive Educational Presentation',
+        bulletPoints: ['Core curriculum orientation', 'Key analytical perspectives', 'Discussion roadmap'],
+        speakerNotes: 'Welcome the learners and introduce the key inquiries.',
+        suggestedVisualOrDiagram: 'Visual title card layout',
+        discussionOrEngagementPrompt: 'Introductory inquiry question'
       },
       {
         id: 's-2',
         slideNumber: 2,
         slideType: 'concept',
-        conceptBadge: 'BACKGROUND',
-        title: `Background & Historical Foundations of ${safeTopic}`,
-        subtitle: `Essential Context, Genesis & Fundamental Principles`,
-        bulletPoints: [
-          `Documented historical context and origins of ${safeTopic}`,
-          `Baseline definitions, terminology, and foundational principles`,
-          `Evolution of thought and key milestones leading to modern understanding`
-        ],
-        speakerNotes: `Provide students with the necessary historical and conceptual grounding needed to understand ${safeTopic}.`,
-        suggestedVisualOrDiagram: `Historical foundation timeline or context diagram for ${safeTopic}`,
-        discussionOrEngagementPrompt: `How does understanding the background of ${safeTopic} alter our perspective on current debates?`
+        title: 'Core Principles & Mechanisms',
+        subtitle: 'Foundational framework',
+        bulletPoints: ['Foundational structural framework', 'Key governing principles', 'Applied examples'],
+        speakerNotes: 'Explain the core principles clearly.',
+        suggestedVisualOrDiagram: 'Structural diagram',
+        discussionOrEngagementPrompt: 'How does this mechanism operate in practice?'
       },
       {
         id: 's-3',
         slideNumber: 3,
-        slideType: 'case-study',
-        conceptBadge: 'KEY DEVELOPMENTS',
-        title: `Key Developments & Practical Dynamics in ${safeTopic}`,
-        subtitle: `Major Facts, Ideas, Events & Real-World Examples`,
-        bulletPoints: [
-          `The most important facts, ideas, and events shaping ${safeTopic} today`,
-          `Real-world examples, case studies, and empirical observations`,
-          `Mechanisms, operational frameworks, and critical structural dynamics`
-        ],
-        speakerNotes: `Examine the core developments and evidence that make ${safeTopic} practically relevant.`,
-        suggestedVisualOrDiagram: `Key developments analysis chart and case study framework`,
-        discussionOrEngagementPrompt: `Which recent development in ${safeTopic} has had the most profound impact?`
-      },
-      {
-        id: 's-4',
-        slideNumber: 4,
-        slideType: 'concept',
-        conceptBadge: 'KEY TAKEAWAY',
-        title: `Key Takeaway: Core Insights on ${safeTopic}`,
-        subtitle: `Synthesizing the Most Important Insight`,
-        bulletPoints: [
-          `The single most critical insight derived from studying ${safeTopic}`,
-          `Bridging theoretical principles with actionable analytical frameworks`,
-          `Core mental models to retain for independent problem solving and leadership`
-        ],
-        speakerNotes: `Emphasize the central insight of the lecture so learners grasp the ultimate takeaway.`,
-        suggestedVisualOrDiagram: `Central insight badge and conceptual summary graphic`,
-        discussionOrEngagementPrompt: `What is the most valuable insight you have gathered regarding ${safeTopic}?`
-      },
-      {
-        id: 's-5',
-        slideNumber: 5,
         slideType: 'summary',
-        conceptBadge: 'CONCLUSION',
-        title: `Conclusion & Future Horizons for ${safeTopic}`,
-        subtitle: `Final Synthesis, Implications & Ongoing Inquiries`,
-        bulletPoints: [
-          `Definitive concluding assessment based specifically on ${safeTopic}`,
-          `Broader implications for research, practice, and community leadership`,
-          `Future horizons, open questions, and recommended paths for further study`
-        ],
-        speakerNotes: `Conclude with a clear, authoritative summary connecting ${safeTopic} to broader intellectual horizons.`,
-        suggestedVisualOrDiagram: `Future horizon roadmap and conclusion checklist`,
-        discussionOrEngagementPrompt: `Based on today's conclusion, what question remains most urgent for future study on ${safeTopic}?`
+        title: 'Summary & Key Takeaways',
+        subtitle: 'Synthesis and reflection',
+        bulletPoints: ['Mastery of core concepts', 'Practical applications', 'Final discussion prompt'],
+        speakerNotes: 'Summarize key takeaways.',
+        suggestedVisualOrDiagram: 'Summary table',
+        discussionOrEngagementPrompt: 'What is your primary takeaway from today?'
       }
     ];
 
