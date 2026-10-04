@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   FileCheck2, 
-  Sparkles, 
   Bookmark, 
   Check, 
   Award,
@@ -265,7 +264,6 @@ export const EssayGraderGenerator: React.FC<EssayGraderGeneratorProps> = ({
                   : 'bg-[#E62E6B] hover:bg-[#d8245f] disabled:opacity-50'
               }`}
             >
-              {!isGenerating && <Sparkles className="w-5 h-5 text-white" />}
               <span>{isGenerating ? 'Generating Essay Review…' : 'GRADE ESSAY'}</span>
             </button>
           </div>

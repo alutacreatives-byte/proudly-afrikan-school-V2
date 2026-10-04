@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Layers, 
-  Sparkles, 
   Bookmark, 
   Shuffle, 
   Download,
@@ -292,7 +291,6 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                   : 'bg-[#E62E6B] hover:bg-[#d8245f] disabled:opacity-50'
               }`}
             >
-              {!isGenerating && <Sparkles className="w-5 h-5 text-white" />}
               <span>{isGenerating ? `Generating ${category ? `${category} Flashcards` : 'Flashcards'}…` : 'GENERATE FLASHCARDS'}</span>
             </button>
           </div>

@@ -255,7 +255,6 @@ export const PdfQuizGenerator: React.FC<PdfQuizGeneratorProps> = ({
                   : 'bg-[#E63956] hover:bg-[#D32F4C] disabled:bg-stone-300'
               }`}
             >
-              {!isGenerating && <Sparkles className="w-4 h-4" />}
               <span>{isGenerating ? 'Generating PDF Quiz…' : 'Generate PDF Quiz →'}</span>
             </button>
           </div>

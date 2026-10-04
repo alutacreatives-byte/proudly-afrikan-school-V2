@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   FileText, 
-  Sparkles, 
   Bookmark, 
   BookOpen,
   HelpCircle,
@@ -256,7 +255,6 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
                   : 'bg-[#E62E6B] hover:bg-[#d8245f] disabled:opacity-50'
               }`}
             >
-              {!isGenerating && <Sparkles className="w-5 h-5 text-white" />}
               <span>{isGenerating ? `Generating ${category ? `${category} Study Guide` : 'Study Guide'}…` : 'GENERATE STUDY GUIDE'}</span>
             </button>
           </div>

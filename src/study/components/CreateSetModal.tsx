@@ -745,7 +745,6 @@ export const CreateSetModal: React.FC<CreateSetModalProps> = ({
                     : 'bg-[#D92B8A] hover:bg-[#c02479] disabled:opacity-50'
                 }`}
               >
-                {!isGenerating && <Sparkles className="w-4 h-4" />}
                 <span>
                   {isGenerating
                     ? `Generating ${categoryInput ? `${categoryInput} Study Set` : 'Study Set'}…`

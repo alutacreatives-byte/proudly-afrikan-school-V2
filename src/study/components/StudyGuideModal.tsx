@@ -418,7 +418,6 @@ ${guide.reviewQuestions.map((q, i) => `${i + 1}. ${q.question}\nAnswer: ${q.answ
                   onClick={generateGuide}
                   className="px-5 py-2.5 bg-white border border-stone-200 rounded-full font-display text-xs font-bold uppercase hover:bg-stone-50 flex items-center gap-1.5 shadow-xs transition-all"
                 >
-                  <Sparkles className="w-4 h-4 text-[#D92B8A]" />
                   <span>Re-generate Guide</span>
                 </button>
 

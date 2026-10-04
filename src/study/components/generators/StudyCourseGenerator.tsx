@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   GraduationCap, 
-  Sparkles, 
   Bookmark, 
   BookOpen,
   Calendar,
@@ -253,7 +252,6 @@ export const StudyCourseGenerator: React.FC<StudyCourseGeneratorProps> = ({
                   : 'bg-[#E62E6B] hover:bg-[#d8245f] disabled:opacity-50'
               }`}
             >
-              {!isGenerating && <Sparkles className="w-5 h-5 text-white" />}
               <span>{isGenerating ? `Generating ${category ? `${category} Course` : 'Course'}…` : 'GENERATE COURSE SYLLABUS'}</span>
             </button>
           </div>

@@ -1075,7 +1075,6 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
                   : 'bg-[#18181B] hover:bg-stone-900 disabled:opacity-60'
               }`}
             >
-              {!isGeneratingCustomPlan && <Sparkles className="w-4 h-4 text-[#D92B8A]" />}
               <span>
                 {isGeneratingCustomPlan
                   ? 'Generating Study Plan…'

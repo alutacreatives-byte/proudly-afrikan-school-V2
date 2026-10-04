@@ -4,13 +4,11 @@ import {
   ClipboardCopy,
   FileUp,
   Camera,
-  ArrowRight,
   AlertCircle,
   FileText,
   Trash2,
   Loader2,
   Sliders,
-  Sparkles,
 } from 'lucide-react';
 import {
   CreationMethod,
@@ -762,13 +760,11 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
               : 'bg-[#E62E6B] hover:bg-[#d8245f]'
           }`}
         >
-          {!isGenerating && <Sparkles className="w-5 h-5 text-white" />}
           <span>
             {isGenerating
               ? `Generating ${selectedSubject ? `${selectedSubject} Quiz` : 'Quiz'}…`
               : 'GENERATE QUIZ'}
           </span>
-          {!isGenerating && <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />}
         </button>
       </div>
     </section>

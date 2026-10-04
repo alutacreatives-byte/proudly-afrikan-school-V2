@@ -314,7 +314,6 @@ export const StudyQuizGenerator: React.FC<StudyQuizGeneratorProps> = ({
                   : 'bg-[#E63956] hover:bg-[#D32F4C] disabled:bg-stone-300'
               }`}
             >
-              {!isGenerating && <Sparkles className="w-4 h-4" />}
               <span>{isGenerating ? `Generating ${category ? `${category} Quiz` : 'Quiz'}…` : 'Generate Practice Quiz →'}</span>
             </button>
           </div>

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   GitBranch, 
-  Sparkles, 
   Bookmark, 
   Check, 
   CheckCircle2, 
@@ -253,7 +252,6 @@ export const StudyLearningPathGenerator: React.FC<StudyLearningPathGeneratorProp
                   : 'bg-[#E62E6B] hover:bg-[#d8245f] disabled:opacity-50'
               }`}
             >
-              {!isGenerating && <Sparkles className="w-5 h-5 text-white" />}
               <span>{isGenerating ? `Generating ${category ? `${category} Learning Path` : 'Learning Path'}…` : 'GENERATE LEARNING ROADMAP'}</span>
             </button>
           </div>

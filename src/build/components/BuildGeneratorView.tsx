@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Sparkles,
   ArrowLeft,
   Download,
   Printer,
@@ -443,7 +442,6 @@ export const BuildGeneratorView: React.FC<BuildGeneratorViewProps> = ({
               : 'bg-gradient-to-r from-[#E05A2B] via-[#EA8B1C] to-[#D99B00] hover:opacity-95 disabled:opacity-50'
           }`}
         >
-          {!isGenerating && <Sparkles className="w-5 h-5 text-white" />}
           <span>
             {isGenerating
               ? `Generating ${currentToolConfig.title}…`
