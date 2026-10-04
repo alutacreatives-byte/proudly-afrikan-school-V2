@@ -758,7 +758,6 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
     setTimeout(() => setCopiedSuccess(false), 2000);
   };
 
-
   const bullets = currentSlide.bulletPoints || [];
   const prevSlideItem = activeSlideIndex > 0 ? slides[activeSlideIndex - 1] : null;
   const nextSlideItem = activeSlideIndex < totalSlides - 1 ? slides[activeSlideIndex + 1] : null;
@@ -767,7 +766,7 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
     <div
       className={`w-full transition-all select-none ${
         isFullscreen
-          ? 'fixed inset-0 z-[9999] bg-[#0A0A0C] text-white flex flex-col justify-between overflow-hidden'
+          ? 'fixed inset-0 z-[9999] bg-[#0A0A0C] text-white flex flex-col p-4 sm:p-6 space-y-4 overflow-y-auto'
           : 'space-y-6'
       }`}
     >
@@ -775,16 +774,16 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
       {/* Top Deck Navigation & Meta Header (Sleek Glass Lozenge)       */}
       {/* ============================================================== */}
       <div
-        className={`w-full flex items-center justify-between gap-4 px-4 py-3 rounded-2xl bg-white/95 border border-stone-200/90 shadow-sm transition-opacity duration-300 ${
+        className={`w-full flex items-center justify-between gap-4 px-4 py-3 rounded-2xl bg-white/95 border border-stone-200/90 shadow-sm transition-opacity duration-300 shrink-0 ${
           isFullscreen && !showControlsHud ? 'opacity-0 pointer-events-none' : 'opacity-100'
-        } ${isFullscreen ? 'absolute top-4 left-4 right-4 z-50 bg-[#161619]/90 border-stone-800 text-white' : ''}`}
+        } ${isFullscreen ? 'bg-[#161619]/90 border-stone-800 text-white' : ''}`}
       >
         {/* Left: Brand Kicker & Export Buttons */}
         <div className="flex items-center gap-3 min-w-0 flex-wrap">
           <div className="flex items-center gap-2 shrink-0">
             <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-[#E05A2B] to-[#D99B00] animate-pulse" />
-            <span className="font-mono text-xs font-bold text-stone-900 tracking-wider uppercase">
-              {isFullscreen ? 'FULLSCREEN 3D THEATER' : 'INTERACTIVE DECK'}
+            <span className="font-mono text-xs font-bold tracking-wider uppercase">
+              INTERACTIVE DECK
             </span>
           </div>
 
@@ -804,7 +803,7 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
                 <button
                   type="button"
                   onClick={onExportPdf}
-                  className="px-3 py-1.5 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-[11px] font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                  className="px-3.5 py-1.5 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-[11px] font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                 >
                   <Download className="w-3.5 h-3.5 text-[#E05A2B]" />
                   <span>EXPORT PDF</span>
@@ -920,7 +919,6 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
         </div>
       </div>
 
-
       {/* ============================================================== */}
       {/* Main 3D Presentation Arena Stage (Max Knight BaVveWM style)   */}
       {/* ============================================================== */}
@@ -932,15 +930,15 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
         onTouchEnd={handleTouchEnd}
         onWheel={handleWheel}
         style={{ perspective: '1200px' }}
-        className={`relative w-full rounded-[2.5rem] codepen-fluid-bg overflow-hidden flex items-center justify-center transition-all ${
-          isFullscreen ? 'h-full rounded-none' : 'min-h-[420px] sm:min-h-[460px] lg:min-h-[500px]'
+        className={`relative w-full rounded-[2.5rem] codepen-fluid-bg overflow-hidden flex items-center justify-center transition-all shrink-0 ${
+          isFullscreen ? 'min-h-[380px] sm:min-h-[440px] lg:min-h-[480px] rounded-2xl' : 'min-h-[420px] sm:min-h-[460px] lg:min-h-[500px]'
         }`}
       >
         {/* Animated Fluid Gradient Background matching CodePen wvzMexO reference */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-95 codepen-fluid-bg" />
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 codepen-fluid-bg" />
 
         {/* Ambient Topographical Overlay Grid & Subtle Contrast Mask */}
-        <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/50 pointer-events-none z-1" />
+        <div className="absolute inset-0 bg-radial from-transparent via-black/10 to-black/35 pointer-events-none z-1" />
 
         {/* Active Center Slide (Layered 3D Tilt Card with Parallax Depth) */}
         <div
@@ -1061,8 +1059,54 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
         </div>
       </div>
 
-      {/* PREVIOUS and NEXT navigation buttons directly underneath the presentation screen, centered horizontally */}
-      <div className="w-full flex items-center justify-center gap-4 py-2">
+      {/* ============================================================== */}
+      {/* Speaker Notes Drawer (Placed directly below presentation)      */}
+      {/* ============================================================== */}
+      {showSpeakerNotes && currentSlide.speakerNotes && (
+        <div
+          className={`p-5 sm:p-6 rounded-3xl border shadow-sm space-y-2 transition-all shrink-0 ${
+            isFullscreen
+              ? 'bg-[#161619]/90 border-stone-800 text-white'
+              : 'bg-amber-50/90 border-amber-200/90 text-amber-950'
+          }`}
+        >
+          <div
+            className={`flex items-center justify-between pb-2 border-b ${
+              isFullscreen ? 'border-stone-800' : 'border-amber-200/60'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <FileText className={`w-4 h-4 ${isFullscreen ? 'text-[#E05A2B]' : 'text-amber-700'}`} />
+              <span
+                className={`font-mono text-xs font-bold uppercase tracking-wider ${
+                  isFullscreen ? 'text-stone-300' : 'text-amber-900'
+                }`}
+              >
+                NOTES • Slide {currentSlide.slideNumber}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowSpeakerNotes(false)}
+              className={`font-mono text-xs font-bold ${
+                isFullscreen ? 'text-stone-400 hover:text-stone-200' : 'text-amber-800 hover:text-amber-950'
+              }`}
+            >
+              Hide Notes
+            </button>
+          </div>
+          <p
+            className={`font-sans text-xs sm:text-sm leading-relaxed ${
+              isFullscreen ? 'text-stone-200' : 'text-amber-950'
+            }`}
+          >
+            {currentSlide.speakerNotes}
+          </p>
+        </div>
+      )}
+
+      {/* PREVIOUS and NEXT navigation buttons directly below NOTES */}
+      <div className="w-full flex items-center justify-center gap-4 py-2 shrink-0">
         <button
           type="button"
           disabled={activeSlideIndex === 0}
@@ -1087,7 +1131,7 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
       {/* ============================================================== */}
       {/* Segmented Timeline Rail Bar                                    */}
       {/* ============================================================== */}
-      <div className="w-full space-y-2">
+      <div className="w-full space-y-2 shrink-0">
         <div className="w-full grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-1.5">
           {slides.map((s, idx) => {
             const isCurrent = idx === activeSlideIndex;
@@ -1110,32 +1154,6 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
           })}
         </div>
       </div>
-
-      {/* ============================================================== */}
-      {/* Speaker Notes Drawer (Collapsible & Pedagogically Formatted)   */}
-      {/* ============================================================== */}
-      {showSpeakerNotes && currentSlide.speakerNotes && (
-        <div className="p-5 sm:p-6 rounded-3xl bg-amber-50/90 border border-amber-200/90 shadow-sm space-y-2 transition-all">
-          <div className="flex items-center justify-between pb-2 border-b border-amber-200/60">
-            <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-amber-700" />
-              <span className="font-mono text-xs font-bold text-amber-900 uppercase tracking-wider">
-                Speaker & Lecture Guide • Slide {currentSlide.slideNumber}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowSpeakerNotes(false)}
-              className="text-amber-800 hover:text-amber-950 font-mono text-xs font-bold"
-            >
-              Hide Notes
-            </button>
-          </div>
-          <p className="font-sans text-xs sm:text-sm text-amber-950 leading-relaxed">
-            {currentSlide.speakerNotes}
-          </p>
-        </div>
-      )}
 
       {/* ============================================================== */}
       {/* Slide Overview Grid Modal (Triggered by 'G' or Grid Icon)      */}

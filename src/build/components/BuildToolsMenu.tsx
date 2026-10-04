@@ -8,6 +8,8 @@ export interface BuildToolConfig {
   icon: any;
   description: string;
   endpoint: string;
+  num?: string;
+  actionLabel?: string;
 }
 
 export const BUILD_TOOLS_LIST: BuildToolConfig[] = [

@@ -60,7 +60,7 @@ export const BuildGeneratorView: React.FC<BuildGeneratorViewProps> = ({
 
   // Active Tool selection
   const [activeToolId, setActiveToolId] = useState<BuildToolId>(
-    initialResource?.toolType || initialToolId || 'exam'
+    (initialResource?.toolType as BuildToolId) || initialToolId || 'exam'
   );
 
   // Form Fields
@@ -101,7 +101,7 @@ export const BuildGeneratorView: React.FC<BuildGeneratorViewProps> = ({
   useEffect(() => {
     if (initialResource) {
       setGeneratedResource(initialResource);
-      setActiveToolId(initialResource.toolType || 'exam');
+      setActiveToolId((initialResource.toolType as BuildToolId) || 'exam');
       setTopic(initialResource.topic || initialResource.title || '');
       if (initialResource.subject) setSubject(initialResource.subject);
       if (initialResource.gradeLevel) setGradeLevel(initialResource.gradeLevel);

@@ -1789,22 +1789,6 @@ export function downloadPresentationHtml(rawResource: any) {
       --text-muted: #a1a1aa;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    @keyframes codepenFluidBg {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    .codepen-fluid-bg {
-      background: 
-        radial-gradient(circle at 15% 25%, rgba(139, 92, 246, 0.75) 0%, transparent 45%),
-        radial-gradient(circle at 85% 15%, rgba(249, 115, 22, 0.75) 0%, transparent 45%),
-        radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.75) 0%, transparent 45%),
-        radial-gradient(circle at 90% 85%, rgba(59, 130, 246, 0.75) 0%, transparent 45%),
-        radial-gradient(circle at 30% 60%, rgba(234, 179, 8, 0.7) 0%, transparent 45%),
-        linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #09090b 100%);
-      background-size: 300% 300%;
-      animation: codepenFluidBg 20s ease infinite;
-    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg);
@@ -1874,6 +1858,7 @@ export function downloadPresentationHtml(rawResource: any) {
       width: 100%;
       max-width: 980px;
       min-height: 520px;
+      background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 1.5rem;
       padding: 2.5rem 3rem;
@@ -2011,7 +1996,7 @@ export function downloadPresentationHtml(rawResource: any) {
   </header>
 
   <main id="presentation-container">
-    <div class="slide-canvas codepen-fluid-bg">
+    <div class="slide-canvas">
       <div>
         <div class="slide-meta">
           <span id="slide-num-indicator">SLIDE 1 OF 1</span>

@@ -567,41 +567,74 @@
   }
 }
 
-@keyframes codepenFluidBg {
+/* =========================================================================
+   PRESENTATION SLIDES - ANIMATED FLUID GRADIENT BACKGROUND
+   CodePen wvzMexO recreation
+   - Multiple large radial gradients
+   - Violet, orange, green, blue, and yellow
+   - background-size: 300% 300%
+   - 20-second continuous infinite animation
+   ========================================================================= */
+
+@keyframes codepenFluidMovement {
   0% {
-    background-position: 0% 0%;
+    background-position: 
+      0% 15%,
+      100% 20%,
+      10% 90%,
+      95% 85%,
+      50% 50%,
+      0% 0%;
   }
-  33% {
-    background-position: 100% 50%;
+  25% {
+    background-position: 
+      65% 75%,
+      25% 95%,
+      95% 25%,
+      15% 45%,
+      80% 20%,
+      0% 0%;
   }
-  66% {
-    background-position: 50% 100%;
+  50% {
+    background-position: 
+      100% 90%,
+      10% 60%,
+      75% 10%,
+      30% 15%,
+      20% 80%,
+      0% 0%;
+  }
+  75% {
+    background-position: 
+      25% 35%,
+      85% 15%,
+      30% 95%,
+      85% 35%,
+      60% 15%,
+      0% 0%;
   }
   100% {
-    background-position: 0% 0%;
+    background-position: 
+      0% 15%,
+      100% 20%,
+      10% 90%,
+      95% 85%,
+      50% 50%,
+      0% 0%;
   }
 }
 
 .codepen-fluid-bg {
-  background: 
-    radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.85) 0%, transparent 55%),
-    radial-gradient(circle at 80% 20%, rgba(249, 115, 22, 0.85) 0%, transparent 55%),
-    radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.85) 0%, transparent 55%),
-    radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.85) 0%, transparent 55%),
-    radial-gradient(circle at 30% 50%, rgba(234, 179, 8, 0.8) 0%, transparent 55%),
-    linear-gradient(135deg, #09090b 0%, #1e1b4b 50%, #0f172a 100%);
-  background-size: 300% 300%;
-  animation: codepenFluidBg 20s ease infinite;
+  background-color: #0c0c12;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(138, 43, 226, 0.95) 0%, rgba(138, 43, 226, 0) 50%),    /* Violet */
+    radial-gradient(circle at 80% 25%, rgba(255, 115, 0, 0.95) 0%, rgba(255, 115, 0, 0) 50%),     /* Orange */
+    radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.95) 0%, rgba(16, 185, 129, 0) 50%),    /* Green */
+    radial-gradient(circle at 80% 80%, rgba(37, 99, 235, 0.95) 0%, rgba(37, 99, 235, 0) 50%),     /* Blue */
+    radial-gradient(circle at 50% 50%, rgba(250, 204, 21, 0.92) 0%, rgba(250, 204, 21, 0) 48%),    /* Yellow */
+    linear-gradient(135deg, #0d0d14 0%, #13131c 100%);
+  background-size: 300% 300% !important;
+  animation: codepenFluidMovement 20s ease-in-out infinite !important;
+  background-repeat: no-repeat;
 }
 
-@keyframes fluidBtnGradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.animate-fluid-btn {
-  background: linear-gradient(135deg, #8b5cf6, #f97316, #10b981, #3b82f6, #eab308);
-  background-size: 300% 300%;
-  animation: fluidBtnGradient 4s ease infinite;
-}
