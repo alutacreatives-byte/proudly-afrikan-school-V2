@@ -1124,7 +1124,7 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
         onWheel={handleWheel}
         style={{ perspective: '1200px' }}
         className={`relative w-full rounded-[2.5rem] codepen-fluid-bg overflow-hidden flex items-center justify-center transition-all ${
-          isFullscreen ? 'h-full rounded-none' : 'min-h-[520px] sm:min-h-[580px] lg:min-h-[640px]'
+          isFullscreen ? 'h-full rounded-none' : 'min-h-[420px] sm:min-h-[460px] lg:min-h-[500px]'
         }`}
       >
         {/* Animated Fluid Gradient Background matching CodePen wvzMexO reference */}
@@ -1140,14 +1140,14 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
             transformStyle: 'preserve-3d',
             transition: 'transform 0.14s ease-out',
           }}
-          className={`relative z-20 w-full max-w-4xl mx-auto px-4 sm:px-8 py-6 sm:py-10 flex flex-col justify-between min-h-[460px] sm:min-h-[520px] transition-opacity duration-300 ${
+          className={`relative z-20 w-full max-w-4xl mx-auto px-4 sm:px-8 py-4 sm:py-6 flex flex-col justify-between min-h-[380px] sm:min-h-[420px] transition-opacity duration-300 ${
             isTransitioning ? 'opacity-70 scale-[0.98]' : 'opacity-100 scale-100'
           }`}
         >
           {/* Card Top: Metadata and Concept Kicker with 3D Depth */}
           <div
             style={{ transform: 'translateZ(30px)' }}
-            className="flex items-center justify-between gap-4 pb-4 border-b border-white/10"
+            className="flex items-center justify-between gap-4 pb-3 border-b border-white/10"
           >
             <div className="flex items-center gap-2.5 flex-wrap">
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#D99B00] px-3 py-1 rounded-full bg-[#D99B00]/15 border border-[#D99B00]/30 shadow-xs">
@@ -1182,15 +1182,15 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
           {/* Card Middle: Main Pedagogical Content & Visuals */}
           <div
             style={{ transform: 'translateZ(50px)' }}
-            className="my-auto py-6 sm:py-8 space-y-6"
+            className="my-auto py-4 sm:py-6 space-y-4"
           >
             {/* Slide Title with Brand Accent */}
-            <div className="space-y-3">
-              <h2 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-white leading-[1.05] drop-shadow-md">
+            <div className="space-y-2">
+              <h2 className="font-display font-black text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-white leading-[1.05] drop-shadow-md">
                 {currentSlide.title}
               </h2>
               {currentSlide.subtitle && (
-                <p className="font-sans text-base sm:text-xl text-stone-300 max-w-2xl font-normal leading-relaxed">
+                <p className="font-sans text-sm sm:text-lg text-stone-300 max-w-2xl font-normal leading-relaxed">
                   {currentSlide.subtitle}
                 </p>
               )}
@@ -1198,8 +1198,8 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
 
             {/* Slide Content (Paragraphs) */}
             {currentSlide.slideContent && (
-              <div className="pt-4 space-y-4">
-                <p className="font-sans text-lg text-stone-100 font-normal leading-relaxed">
+              <div className="pt-2 space-y-3">
+                <p className="font-sans text-base text-stone-100 font-normal leading-relaxed">
                   {currentSlide.slideContent}
                 </p>
               </div>
@@ -1207,9 +1207,9 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
             
             {/* Fallback rendering for older content without slideContent */}
             {!currentSlide.slideContent && currentSlide.bulletPoints && currentSlide.bulletPoints.length > 0 && (
-              <div className="pt-4 space-y-4">
+              <div className="pt-2 space-y-3">
                 {currentSlide.bulletPoints.map((point: string, idx: number) => (
-                  <p key={idx} className="font-sans text-lg text-stone-100 font-normal leading-relaxed">
+                  <p key={idx} className="font-sans text-base text-stone-100 font-normal leading-relaxed">
                     {point}
                   </p>
                 ))}
@@ -1220,7 +1220,7 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
             {currentSlide.visualCue && (
               <div
                 style={{ transform: 'translateZ(25px)' }}
-                className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-200/90 font-mono text-xs flex items-center gap-2.5 backdrop-blur-sm"
+                className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-200/90 font-mono text-xs flex items-center gap-2.5 backdrop-blur-sm"
               >
                 <Sparkles className="w-4 h-4 text-[#D99B00] shrink-0" />
                 <span className="truncate">
@@ -1233,7 +1233,7 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
           {/* Card Bottom: Navigation Hints and Slide Dots Progress */}
           <div
             style={{ transform: 'translateZ(20px)' }}
-            className="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-stone-400"
+            className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono text-stone-400"
           >
             <div className="hidden sm:flex items-center gap-2">
               <span className="px-2 py-0.5 rounded bg-white/10 text-stone-300 font-bold">←</span>
@@ -1263,26 +1263,28 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Floating Lateral Navigation Arrows */}
+      {/* PREVIOUS and NEXT navigation buttons directly underneath the presentation screen, centered horizontally */}
+      <div className="w-full flex items-center justify-center gap-4 py-2">
         <button
           type="button"
           disabled={activeSlideIndex === 0}
           onClick={prevSlide}
-          aria-label="Previous Slide"
-          className="hidden absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-stone-900/80 backdrop-blur-md border border-white/15 text-white flex items-center justify-center hover:scale-110 hover:border-[#E05A2B] active:scale-95 disabled:opacity-20 disabled:hover:scale-100 transition-all z-30 cursor-pointer shadow-xl"
+          className="px-6 py-2.5 rounded-2xl bg-stone-900/95 hover:bg-stone-800 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg cursor-pointer transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-white/15 backdrop-blur-sm"
         >
-          <ChevronLeft className="w-6 h-6 text-white" />
+          <ChevronLeft className="w-4 h-4 text-[#E05A2B]" />
+          <span>PREVIOUS</span>
         </button>
 
         <button
           type="button"
           disabled={activeSlideIndex >= totalSlides - 1}
           onClick={nextSlide}
-          aria-label="Next Slide"
-          className="hidden absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-stone-900/80 backdrop-blur-md border border-white/15 text-white flex items-center justify-center hover:scale-110 hover:border-[#D99B00] active:scale-95 disabled:opacity-20 disabled:hover:scale-100 transition-all z-30 cursor-pointer shadow-xl"
+          className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-[#E05A2B] to-[#D99B00] hover:opacity-95 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg cursor-pointer transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-white/15"
         >
-          <ChevronRight className="w-6 h-6 text-white" />
+          <span>NEXT</span>
+          <ChevronRight className="w-4 h-4 text-white" />
         </button>
       </div>
 
