@@ -758,197 +758,6 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
     setTimeout(() => setCopiedSuccess(false), 2000);
   };
 
-  // Download standalone interactive HTML deck
-  const handleDownloadStandaloneHtml = () => {
-    const htmlContent = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>${resource.title || 'Proudly Afrikan Presentation'}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: #0f0f12;
-      color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      overflow: hidden;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    header {
-      padding: 20px 32px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      background: rgba(15,15,18,0.85);
-      backdrop-filter: blur(10px);
-    }
-    .brand {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      color: #E05A2B;
-      text-transform: uppercase;
-      font-family: monospace;
-    }
-    .topic {
-      font-size: 14px;
-      font-weight: 600;
-      color: #e2e8f0;
-    }
-    .stage {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px;
-      position: relative;
-    }
-    .slide-card {
-      width: 100%;
-      max-width: 960px;
-      min-height: 480px;
-      background: linear-gradient(145deg, #18181d, #121215);
-      border: 1px solid rgba(224,90,43,0.25);
-      border-radius: 28px;
-      padding: 48px;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
-    }
-    .badge {
-      font-size: 11px;
-      font-weight: 700;
-      color: #D99B00;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      font-family: monospace;
-      margin-bottom: 12px;
-    }
-    h1 {
-      font-size: 38px;
-      font-weight: 900;
-      line-height: 1.15;
-      text-transform: uppercase;
-      background: linear-gradient(to right, #ffffff, #e2e8f0);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 12px;
-    }
-    p.subtitle {
-      font-size: 18px;
-      color: #94a3b8;
-      margin-bottom: 28px;
-      line-height: 1.5;
-    }
-    ul.bullets {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    ul.bullets li {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      font-size: 17px;
-      color: #cbd5e1;
-      line-height: 1.5;
-    }
-    ul.bullets li::before {
-      content: "•";
-      color: #E05A2B;
-      font-size: 24px;
-      line-height: 1;
-    }
-    footer {
-      padding: 16px 32px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      background: rgba(15,15,18,0.85);
-    }
-    .nav-btn {
-      background: #E05A2B;
-      color: #fff;
-      border: none;
-      padding: 10px 22px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: uppercase;
-      cursor: pointer;
-      font-family: monospace;
-    }
-    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .counter { font-family: monospace; font-size: 13px; color: #94a3b8; }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="brand">PROUDLY AFRIKAN • INTERACTIVE DECK</div>
-    <div class="topic">${resource.title || 'Curriculum Deck'}</div>
-  </header>
-  <main class="stage">
-    <div class="slide-card" id="slideBox">
-      <div>
-        <div class="badge" id="slideBadge"></div>
-        <h1 id="slideTitle"></h1>
-        <p class="subtitle" id="slideSubtitle"></p>
-        <ul class="bullets" id="slideBullets"></ul>
-      </div>
-    </div>
-  </main>
-  <footer>
-    <button class="nav-btn" id="prevBtn">← PREV</button>
-    <div class="counter" id="slideCounter"></div>
-    <button class="nav-btn" id="nextBtn">NEXT →</button>
-  </footer>
-  <script>
-    const slides = ${JSON.stringify(slides)};
-    let cur = 0;
-    function render() {
-      const s = slides[cur];
-      document.getElementById('slideBadge').textContent = 'SLIDE ' + s.slideNumber + ' OF ' + slides.length;
-      document.getElementById('slideTitle').textContent = s.title;
-      document.getElementById('slideSubtitle').textContent = s.subtitle || '';
-      const bContainer = document.getElementById('slideBullets');
-      bContainer.innerHTML = '';
-      (s.bulletPoints || []).forEach(pt => {
-        const li = document.createElement('li');
-        li.textContent = pt;
-        bContainer.appendChild(li);
-      });
-      document.getElementById('slideCounter').textContent = (cur + 1) + ' / ' + slides.length;
-      document.getElementById('prevBtn').disabled = cur === 0;
-      document.getElementById('nextBtn').disabled = cur === slides.length - 1;
-    }
-    document.getElementById('prevBtn').onclick = () => { if(cur > 0) { cur--; render(); } };
-    document.getElementById('nextBtn').onclick = () => { if(cur < slides.length - 1) { cur++; render(); } };
-    window.onkeydown = (e) => {
-      if(e.key === 'ArrowRight' || e.key === ' ') { if(cur < slides.length - 1) { cur++; render(); } }
-      else if(e.key === 'ArrowLeft') { if(cur > 0) { cur--; render(); } }
-    };
-    render();
-  </script>
-</body>
-</html>`;
-
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${(resource.title || 'presentation').toLowerCase().replace(/\s+/g, '-')}-interactive-deck.html`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
 
   const bullets = currentSlide.bulletPoints || [];
   const prevSlideItem = activeSlideIndex > 0 ? slides[activeSlideIndex - 1] : null;
@@ -970,8 +779,8 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
           isFullscreen && !showControlsHud ? 'opacity-0 pointer-events-none' : 'opacity-100'
         } ${isFullscreen ? 'absolute top-4 left-4 right-4 z-50 bg-[#161619]/90 border-stone-800 text-white' : ''}`}
       >
-        {/* Left: Brand Kicker & Slide Progress Segment */}
-        <div className="flex items-center gap-3 min-w-0">
+        {/* Left: Brand Kicker & Export Buttons */}
+        <div className="flex items-center gap-3 min-w-0 flex-wrap">
           <div className="flex items-center gap-2 shrink-0">
             <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-[#E05A2B] to-[#D99B00] animate-pulse" />
             <span className="font-mono text-xs font-bold text-stone-900 tracking-wider uppercase">
@@ -979,20 +788,30 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
             </span>
           </div>
 
-          <span className="text-stone-300 font-mono hidden sm:inline">•</span>
-
-          <div className="hidden md:flex items-center gap-1.5 min-w-0">
-            <span className="font-mono text-xs font-bold text-[#E05A2B] shrink-0">
-              {String(activeSlideIndex + 1).padStart(2, '0')}
-            </span>
-            <span className="font-mono text-xs text-stone-400">/</span>
-            <span className="font-mono text-xs text-stone-500 shrink-0">
-              {String(totalSlides).padStart(2, '0')}
-            </span>
-            <span className="text-stone-700 text-xs truncate max-w-[200px] lg:max-w-xs font-medium ml-1">
-              — {currentSlide.title}
-            </span>
-          </div>
+          {(onExportDoc || onExportPdf) && !isFullscreen && (
+            <div className="flex items-center gap-2 ml-2">
+              {onExportDoc && (
+                <button
+                  type="button"
+                  onClick={onExportDoc}
+                  className="px-3 py-1.5 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-[11px] font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                >
+                  <Download className="w-3.5 h-3.5 text-[#E05A2B]" />
+                  <span>EXPORT DOC</span>
+                </button>
+              )}
+              {onExportPdf && (
+                <button
+                  type="button"
+                  onClick={onExportPdf}
+                  className="px-3 py-1.5 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 font-mono text-[11px] font-bold uppercase text-stone-800 flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                >
+                  <Download className="w-3.5 h-3.5 text-[#E05A2B]" />
+                  <span>EXPORT PDF</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Right: Quick Action Controls */}
@@ -1056,17 +875,6 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
             {copiedSuccess ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
           </button>
 
-          {/* Standalone HTML Deck Download */}
-          <button
-            type="button"
-            onClick={handleDownloadStandaloneHtml}
-            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 border border-stone-200 text-stone-800 font-mono text-xs font-bold cursor-pointer transition-colors"
-            title="Download offline HTML presentation deck"
-          >
-            <Download className="w-3.5 h-3.5 text-[#E05A2B]" />
-            <span>EXPORT HTML</span>
-          </button>
-
           {/* WebGL Fluid Toggle */}
           <button
             type="button"
@@ -1111,6 +919,7 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
           </button>
         </div>
       </div>
+
 
       {/* ============================================================== */}
       {/* Main 3D Presentation Arena Stage (Max Knight BaVveWM style)   */}
