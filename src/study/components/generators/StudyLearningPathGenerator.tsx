@@ -249,12 +249,12 @@ export const StudyLearningPathGenerator: React.FC<StudyLearningPathGeneratorProp
               onClick={handleGenerate}
               className={`w-full py-4 sm:py-4.5 text-white font-display text-sm sm:text-base font-black uppercase tracking-wider rounded-full shadow-[0_10px_28px_rgba(230,46,107,0.4)] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50 ${
                 isGenerating
-                  ? 'bg-gradient-to-r from-[#E62E6B] via-[#FF5C8A] to-[#C9245F] bg-[length:200%_200%] animate-gradient-flow'
+                  ? 'animate-fluid-btn'
                   : 'bg-[#E62E6B] hover:bg-[#d8245f]'
               }`}
             >
-              <Sparkles className="w-5 h-5 text-white" />
-              <span>{isGenerating ? 'Mapping Pathway...' : 'GENERATE LEARNING ROADMAP'}</span>
+              {!isGenerating && <Sparkles className="w-5 h-5 text-white" />}
+              <span>{isGenerating ? 'Generating Learning Roadmap…' : 'GENERATE LEARNING ROADMAP'}</span>
             </button>
           </div>
         </div>

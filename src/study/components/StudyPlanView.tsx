@@ -1071,14 +1071,14 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
               disabled={isGeneratingCustomPlan}
               className={`w-full py-3.5 px-6 text-white font-display text-xs sm:text-sm font-black uppercase tracking-wider rounded-2xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-60 ${
                 isGeneratingCustomPlan
-                  ? 'bg-gradient-to-r from-[#18181B] via-[#D92B8A] to-[#2C2C2A] bg-[length:200%_200%] animate-gradient-flow'
+                  ? 'animate-fluid-btn'
                   : 'bg-[#18181B] hover:bg-stone-900'
               }`}
             >
-              <Sparkles className="w-4 h-4 text-[#D92B8A]" />
+              {!isGeneratingCustomPlan && <Sparkles className="w-4 h-4 text-[#D92B8A]" />}
               <span>
                 {isGeneratingCustomPlan
-                  ? 'Generating Study Plan From Your Input...'
+                  ? 'Generating Study Plan…'
                   : `Curate Study Plan for this Specific ${inputMethod === 'type' ? 'Topic' : inputMethod === 'paste' ? 'Notes' : inputMethod === 'upload' ? 'Document' : 'Captured Material'} →`}
               </span>
             </button>

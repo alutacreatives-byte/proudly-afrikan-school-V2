@@ -593,3 +593,15 @@
   background-size: 300% 300%;
   animation: codepenFluidBg 20s ease infinite;
 }
+
+@keyframes fluidBtnGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-fluid-btn {
+  background: linear-gradient(135deg, #8b5cf6, #f97316, #10b981, #3b82f6, #eab308);
+  background-size: 300% 300%;
+  animation: fluidBtnGradient 4s ease infinite;
+}
