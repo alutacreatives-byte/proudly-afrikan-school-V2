@@ -638,3 +638,36 @@
   background-repeat: no-repeat;
 }
 
+/* =========================================================================
+   GENERATE BUTTON - CONTINUOUS FLUID MULTI-COLOUR GRADIENT MOTION
+   - Smooth continuous fluid gradient flow across the button
+   - Multi-colour: coral orange, magenta, violet, ocean blue, emerald, amber
+   - Visibly flowing across the button, not pulsing or fading
+   - Perfectly preserves exact dimensions, shape, and structure
+   ========================================================================= */
+
+@keyframes buttonFluidGradientFlow {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 0%;
+  }
+}
+
+.animate-btn-fluid-generating {
+  background-image: linear-gradient(
+    90deg,
+    #E05A2B 0%,
+    #D92B8A 18%,
+    #8B5CF6 36%,
+    #0284C7 54%,
+    #10B981 72%,
+    #F59E0B 90%,
+    #E05A2B 100%
+  ) !important;
+  background-size: 200% 100% !important;
+  animation: buttonFluidGradientFlow 3.5s linear infinite !important;
+}
+
+
