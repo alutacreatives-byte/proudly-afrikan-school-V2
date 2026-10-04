@@ -807,7 +807,7 @@ ${differentiatedResult.content}
 
               {isDifferentiating ? (
                 <div className="py-8 text-center font-mono text-sm text-stone-500 flex flex-col items-center justify-center gap-3">
-                  <Sparkles className="w-6 h-6 text-[#D92B8A] animate-spin" />
+                  <Sparkles className="w-6 h-6 text-[#D92B8A]" />
                   <span className="font-bold text-stone-900">Adapting lesson material to "{differentiatedMode}" mode...</span>
                   <span className="text-xs text-stone-500">Working on it…</span>
                 </div>
@@ -864,19 +864,15 @@ ${differentiatedResult.content}
               <button
                 onClick={handleEvaluateSelfExplanation}
                 disabled={!selfExplanationText.trim() || isEvaluatingSelf}
-                className="px-6 py-2.5 bg-stone-800 hover:bg-stone-900 text-white font-display text-xs sm:text-sm font-bold uppercase rounded-full disabled:opacity-50 flex items-center gap-2 shadow-sm transition-all"
+                className={`px-6 py-2.5 text-white font-display text-xs sm:text-sm font-bold uppercase rounded-full disabled:opacity-50 flex items-center gap-2 shadow-sm transition-all ${
+                  isEvaluatingSelf
+                    ? 'bg-gradient-to-r from-stone-800 via-[#D92B8A] to-stone-900 bg-[length:200%_200%] animate-gradient-flow'
+                    : 'bg-stone-800 hover:bg-stone-900'
+                }`}
               >
-                {isEvaluatingSelf ? (
-                  <>
-                    <Sparkles className="w-4 h-4 animate-spin" />
-                    <span>Reviewing your explanation...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Check My Understanding</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
+                <Sparkles className="w-4 h-4" />
+                <span>{isEvaluatingSelf ? 'Reviewing your understanding...' : 'Check My Understanding'}</span>
+                {!isEvaluatingSelf && <ArrowRight className="w-4 h-4" />}
               </button>
             </div>
           </div>

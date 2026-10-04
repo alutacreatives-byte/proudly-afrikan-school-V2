@@ -341,7 +341,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
             <div className="text-center p-6 space-y-4 max-w-md">
               {isInitializing ? (
                 <div className="flex flex-col items-center gap-3 text-stone-300">
-                  <RefreshCw className="w-8 h-8 text-[#D92B8A] animate-spin" />
+                  <RefreshCw className="w-8 h-8 text-[#D92B8A]" />
                   <p className="font-mono text-xs font-bold uppercase tracking-wider">
                     Requesting camera access & opening camera...
                   </p>

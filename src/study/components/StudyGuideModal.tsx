@@ -211,7 +211,7 @@ ${guide.reviewQuestions.map((q, i) => `${i + 1}. ${q.question}\nAnswer: ${q.answ
         <div className="flex-1 p-5 sm:p-8 overflow-y-auto space-y-8 bg-stone-50/40">
           {isLoading ? (
             <div className="py-20 text-center space-y-4">
-              <Sparkles className="w-10 h-10 text-[#D92B8A] animate-spin mx-auto" />
+              <Sparkles className="w-10 h-10 text-[#D92B8A] mx-auto" />
               <div className="space-y-1">
                 <h3 className="font-display font-black text-xl text-stone-900">
                   Working on it…

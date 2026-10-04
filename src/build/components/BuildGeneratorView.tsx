@@ -38,6 +38,7 @@ import { AiActionType } from '../../types/authCredit';
 import { exportBuildResource, exportUnifiedItem } from '../../utils/exportUtils';
 import { GlobalNavigationButtons } from '../../components/GlobalNavigationButtons';
 import { useScrollToResult } from '../../utils/useScrollToResult';
+import { buildDynamicTopicSlides } from '../utils/presentationBuilder';
 import { BuildInteractivePresentation } from './BuildInteractivePresentation';
 
 interface BuildGeneratorViewProps {
@@ -59,7 +60,7 @@ export const BuildGeneratorView: React.FC<BuildGeneratorViewProps> = ({
 
   // Active Tool selection
   const [activeToolId, setActiveToolId] = useState<BuildToolId>(
-    (initialResource?.toolType || initialToolId || 'exam') as BuildToolId
+    (initialResource?.toolType as BuildToolId) || initialToolId || 'exam'
   );
 
   // Form Fields
@@ -100,7 +101,7 @@ export const BuildGeneratorView: React.FC<BuildGeneratorViewProps> = ({
   useEffect(() => {
     if (initialResource) {
       setGeneratedResource(initialResource);
-      setActiveToolId((initialResource.toolType || 'exam') as BuildToolId);
+      setActiveToolId((initialResource.toolType as BuildToolId) || 'exam');
       setTopic(initialResource.topic || initialResource.title || '');
       if (initialResource.subject) setSubject(initialResource.subject);
       if (initialResource.gradeLevel) setGradeLevel(initialResource.gradeLevel);
@@ -168,19 +169,29 @@ export const BuildGeneratorView: React.FC<BuildGeneratorViewProps> = ({
         throw new Error(`Server returned ${response.status}: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const responseJson = await response.json();
       await consumeCredits(actionType, `Generated ${currentToolConfig.title}`);
+
+      const actualData = (responseJson && typeof responseJson === 'object' && responseJson.data && typeof responseJson.data === 'object' && !Array.isArray(responseJson.data))
+        ? responseJson.data
+        : responseJson;
+
+      // If presentation and slides are missing or empty, build dynamic topic slides matching questionCount
+      if (activeToolId === 'presentation' && (!Array.isArray(actualData.slides) || actualData.slides.length === 0)) {
+        actualData.slides = buildDynamicTopicSlides(payload.topic, payload.subject, gradeLevel, payload.questionCount);
+        actualData.slidesCount = actualData.slides.length;
+      }
 
       const newResource: SavedResource = {
         id: `res-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
         toolType: activeToolId,
-        title: data.title || `${currentToolConfig.title}: ${payload.topic}`,
-        subject: data.subject || subject,
-        topic: payload.topic,
+        title: actualData.title || `${currentToolConfig.title}: ${payload.topic}`,
+        subject: actualData.subject || subject,
+        topic: actualData.topic || payload.topic,
         gradeLevel,
         difficulty,
         createdAt: new Date().toISOString(),
-        data,
+        data: actualData,
       };
 
       setGeneratedResource(newResource);
@@ -406,10 +417,9 @@ export const BuildGeneratorView: React.FC<BuildGeneratorViewProps> = ({
                 onChange={(e) => setItemCount(Number(e.target.value))}
                 className="w-full bg-[#EFE8DE] border border-[#E4DCD0] rounded-2xl p-3.5 font-mono text-xs sm:text-sm text-stone-900 focus:outline-none focus:border-[#E05A2B]"
               >
-                <option value={5}>5 Items / Slides</option>
-                <option value={10}>10 Items / Slides (Standard)</option>
-                <option value={15}>15 Items / Slides</option>
-                <option value={20}>20 Items / Slides (Comprehensive)</option>
+                <option value={5}>5 Slides</option>
+                <option value={10}>10 Slides</option>
+                <option value={15}>15 Slides</option>
               </select>
             )}
           </div>
@@ -458,11 +468,24 @@ export const BuildGeneratorView: React.FC<BuildGeneratorViewProps> = ({
           type="button"
           disabled={isGenerating}
           onClick={handleGenerate}
-          className="w-full py-4.5 bg-gradient-to-r from-[#E05A2B] via-[#EA8B1C] to-[#D99B00] hover:opacity-95 text-white font-display text-sm sm:text-base font-black uppercase tracking-wider rounded-full shadow-[0_10px_28px_rgba(224,90,43,0.35)] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+          className={`w-full py-4.5 text-white font-display text-sm sm:text-base font-black uppercase tracking-wider rounded-full shadow-[0_10px_28px_rgba(224,90,43,0.35)] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50 ${
+            isGenerating ? 'fluid-gradient-bg opacity-95' : 'bg-gradient-to-r from-[#E05A2B] via-[#EA8B1C] to-[#D99B00] hover:opacity-95'
+          }`}
         >
           <Sparkles className="w-5 h-5 text-white" />
-          <span>{isGenerating ? `Generating ${currentToolConfig.title}...` : `GENERATE ${currentToolConfig.title.toUpperCase()}`}</span>
+          <span>
+            {isGenerating
+              ? activeToolId === 'presentation'
+                ? `RESEARCHING "${(topic || 'TOPIC').slice(0, 20).toUpperCase()}" ONLINE & VERIFYING FACTS...`
+                : `GENERATING ${currentToolConfig.title.toUpperCase()}...`
+              : `GENERATE ${currentToolConfig.title.toUpperCase()}`}
+          </span>
         </button>
+        {isGenerating && activeToolId === 'presentation' && (
+          <p className="text-center font-mono text-xs text-stone-600 animate-pulse">
+            Researching live web archives & verifying facts, dates, names, and statistics before authoring slides...
+          </p>
+        )}
       </div>
 
       {/* Generated Result Display Area */}
@@ -558,63 +581,38 @@ function renderResourceContent(
   const toolType = resource.toolType;
 
   // 1. PRESENTATION / SLIDE DECK (Dynamic WebGL movement & Modern 3D Layout)
-  if (toolType === 'presentation' || Array.isArray(data.slides)) {
-    const rawSlides = Array.isArray(data.slides) && data.slides.length > 0 ? data.slides : [
-      {
-        id: 's-1',
-        slideNumber: 1,
-        slideType: 'title',
-        title: resource.title || data.topic || 'Presentation Deck',
-        subtitle: data.subtitle || 'Comprehensive Educational Presentation',
-        bulletPoints: ['Core curriculum orientation', 'Key analytical perspectives', 'Discussion roadmap'],
-        speakerNotes: 'Welcome the learners and introduce the key inquiries.',
-        suggestedVisualOrDiagram: 'Visual title card layout',
-        discussionOrEngagementPrompt: 'Introductory inquiry question'
-      },
-      {
-        id: 's-2',
-        slideNumber: 2,
-        slideType: 'concept',
-        title: 'Core Principles & Mechanisms',
-        subtitle: 'Foundational framework',
-        bulletPoints: ['Foundational structural framework', 'Key governing principles', 'Applied examples'],
-        speakerNotes: 'Explain the core principles clearly.',
-        suggestedVisualOrDiagram: 'Structural diagram',
-        discussionOrEngagementPrompt: 'How does this mechanism operate in practice?'
-      },
-      {
-        id: 's-3',
-        slideNumber: 3,
-        slideType: 'summary',
-        title: 'Summary & Key Takeaways',
-        subtitle: 'Synthesis and reflection',
-        bulletPoints: ['Mastery of core concepts', 'Practical applications', 'Final discussion prompt'],
-        speakerNotes: 'Summarize key takeaways.',
-        suggestedVisualOrDiagram: 'Summary table',
-        discussionOrEngagementPrompt: 'What is your primary takeaway from today?'
-      }
-    ];
+  if (toolType === 'presentation' || Array.isArray(data.slides) || data.topic || resource.title) {
+    const rawData = (data.data && typeof data.data === 'object' && !Array.isArray(data.data)) ? data.data : data;
+    let slides: any[] = Array.isArray(rawData.slides) && rawData.slides.length > 0
+      ? rawData.slides
+      : Array.isArray((resource as any).slides) && (resource as any).slides.length > 0
+        ? (resource as any).slides
+        : [];
+    let finalResource = resource;
 
-    const presentationResource = Array.isArray(data.slides) && data.slides.length > 0
-      ? resource
-      : { ...resource, data: { ...data, slides: rawSlides } };
+    if (slides.length === 0) {
+      const topicName = resource.topic || rawData.topic || resource.title || 'Core Curriculum Study';
+      const subjectName = resource.subject || rawData.subject || 'Academic Inquiry';
+      const grade = resource.gradeLevel || rawData.gradeLevel || 'Secondary Education';
+      const targetCount = rawData.slidesCount || 5;
+      slides = buildDynamicTopicSlides(topicName, subjectName, grade, targetCount);
+      finalResource = { ...resource, data: { ...rawData, slides: slides, slidesCount: slides.length } };
+    }
 
     return (
       <BuildInteractivePresentation
-        resource={presentationResource}
+        resource={finalResource}
         activeSlideIndex={activeSlideIndex}
         setActiveSlideIndex={setActiveSlideIndex}
         showSpeakerNotes={showSpeakerNotes}
         setShowSpeakerNotes={setShowSpeakerNotes}
         isFullscreen={isFullscreenPresentation}
         setIsFullscreen={setIsFullscreenPresentation}
-        onExportDoc={() => exportBuildResource(resource, 'doc')}
-        onExportPdf={() => exportBuildResource(resource, 'pdf')}
+        onExportDoc={() => exportBuildResource(finalResource, 'doc')}
+        onExportPdf={() => exportBuildResource(finalResource, 'pdf')}
       />
     );
   }
-
-  // 2. EXAM & TEST PAPER
   if (toolType === 'exam' || Array.isArray(data.sections) || Array.isArray(data.questions)) {
     const sections = Array.isArray(data.sections) ? data.sections : [];
     const questions = Array.isArray(data.questions) ? data.questions : [];
@@ -798,6 +796,8 @@ function createFallbackResource(toolType: BuildToolId, payload: any): SavedResou
   const isWorksheet = toolType === 'worksheet';
 
   if (isPresentation) {
+    const slideCount = payload.questionCount === 15 ? 15 : payload.questionCount === 10 ? 10 : 5;
+    const dynamicSlides = buildDynamicTopicSlides(payload.topic, payload.subject, payload.gradeLevel, slideCount);
     return {
       id: `res-${Date.now()}`,
       toolType: 'presentation',
@@ -808,43 +808,13 @@ function createFallbackResource(toolType: BuildToolId, payload: any): SavedResou
       difficulty: payload.difficulty,
       createdAt: new Date().toISOString(),
       data: {
-        title: `Mastery Presentation: ${payload.topic}`,
+        title: `Presentation: ${payload.topic}`,
+        subtitle: `Master Slide Deck on ${payload.topic}`,
         subject: payload.subject,
-        slides: [
-          {
-            slideNumber: 1,
-            title: payload.topic,
-            subtitle: `Foundations and Core Principles • ${payload.gradeLevel}`,
-            bulletPoints: [
-              'Overview of foundational curriculum concepts',
-              'Critical historical and theoretical context',
-              'Real-world African and global relevance',
-            ],
-            speakerNotes: 'Welcome students and introduce the overarching inquiry question for this session.',
-          },
-          {
-            slideNumber: 2,
-            title: 'Core Mechanisms & Key Analysis',
-            subtitle: 'Breaking down the fundamental mechanics',
-            bulletPoints: [
-              'Detailed definition of governing terminology',
-              'Systematic problem-solving methodology',
-              'Common misconceptions and how to avoid them',
-            ],
-            speakerNotes: 'Pause here to solicit examples from learners before advancing.',
-          },
-          {
-            slideNumber: 3,
-            title: 'Synthesis & Evaluative Review',
-            subtitle: 'Higher-order application and summary',
-            bulletPoints: [
-              'Connecting the core topic to multidisciplinary scenarios',
-              'Summary of key takeaways for exam mastery',
-              'Next steps for independent inquiry and drill practice',
-            ],
-            speakerNotes: 'Conclude with the exit ticket question to verify retention.',
-          },
-        ],
+        topic: payload.topic,
+        gradeLevel: payload.gradeLevel,
+        slidesCount: dynamicSlides.length,
+        slides: dynamicSlides,
       },
     };
   }

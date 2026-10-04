@@ -753,45 +753,19 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
 
       {/* SECTION 4: THE BIG GENERATE BUTTON & GENERATING ANIMATED STATE */}
       <div className="mt-8">
-        {!isGenerating ? (
-          <button
-            onClick={handleGenerateClick}
-            className="w-full py-4.5 bg-[#E62E6B] hover:bg-[#d8245f] text-white font-display text-base font-black uppercase tracking-wider rounded-full shadow-[0_10px_28px_rgba(230,46,107,0.4)] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer group"
-          >
-            <Sparkles className="w-5 h-5 text-white" />
-            <span>GENERATE QUIZ</span>
-            <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
-          </button>
-        ) : (
-          <div className="w-full py-8 md:py-12 bg-[#292929] text-[#F5F0E6] rounded-[2rem] shadow-xl p-6 flex flex-col items-center justify-center gap-4">
-            <div className="flex items-center gap-3">
-              <Loader2 className="w-8 h-8 text-[#E52E5E] animate-spin" />
-              <span className="font-display font-black text-xl sm:text-3xl md:text-4xl uppercase tracking-tight text-white transition-all duration-300">
-                {LOADING_STEPS[loadingStepIndex]}
-              </span>
-            </div>
-
-            {/* Stepper Dots / Stage Indicators */}
-            <div className="flex items-center gap-2 mt-2">
-              {LOADING_STEPS.map((step, idx) => (
-                <div
-                  key={step}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    idx === loadingStepIndex
-                      ? 'w-8 bg-[#E52E5E]'
-                      : idx < loadingStepIndex
-                      ? 'w-4 bg-white/60'
-                      : 'w-2 bg-white/20'
-                  }`}
-                />
-              ))}
-            </div>
-
-            <div className="font-mono-code text-xs sm:text-sm text-[#A39E93] text-center max-w-lg mt-1">
-              Creating your quiz, putting your knowledge to the test.
-            </div>
-          </div>
-        )}
+        <button
+          onClick={handleGenerateClick}
+          disabled={isGenerating}
+          className={`w-full py-4.5 text-white font-display text-base font-black uppercase tracking-wider rounded-full shadow-[0_10px_28px_rgba(230,46,107,0.4)] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer group ${
+            isGenerating
+              ? 'bg-gradient-to-r from-[#E62E6B] via-[#FF5C8A] to-[#C9245F] bg-[length:200%_200%] animate-gradient-flow'
+              : 'bg-[#E62E6B] hover:bg-[#d8245f]'
+          }`}
+        >
+          <Sparkles className="w-5 h-5 text-white" />
+          <span>{isGenerating ? 'GENERATING QUIZ...' : 'GENERATE QUIZ'}</span>
+          {!isGenerating && <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />}
+        </button>
       </div>
     </section>
   );
