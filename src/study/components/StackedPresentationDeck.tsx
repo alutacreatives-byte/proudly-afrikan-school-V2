@@ -77,7 +77,7 @@ export const StackedPresentationDeck: React.FC<StackedPresentationDeckProps> = (
       </div>
 
       {/* Slide Arena */}
-      <div className="relative w-full h-[460px] sm:h-[500px] md:h-[540px] rounded-[2.5rem] bg-gradient-to-br from-stone-900 to-stone-950 text-white p-8 sm:p-12 flex flex-col justify-between shadow-2xl border border-stone-800">
+      <div className="relative w-full h-[460px] sm:h-[500px] md:h-[540px] rounded-[2.5rem] codepen-fluid-bg text-white p-8 sm:p-12 flex flex-col justify-between shadow-2xl border border-stone-800">
         <div className="flex items-center justify-between text-stone-400 font-mono text-xs uppercase tracking-widest">
           <span>{themeMood} deck</span>
           <span>Slide {currentSlide.slideNumber}</span>

@@ -428,9 +428,9 @@ function useWebGLShaderCanvas(
       if (uDistStrengthLoc) gl.uniform1f(uDistStrengthLoc, (isTransitioningRef.current ? 1.6 : 0.8) * distortionLevelRef.current);
       if (uSlideSeedLoc) gl.uniform1f(uSlideSeedLoc, currentSlideIndexRef.current * 1.37);
 
-      // Alternating BUILD orange-to-mustard-yellow color treatments
-      const prevPalette = BUILD_PALETTES[prevSlideIndexRef.current % BUILD_PALETTES.length];
-      const curPalette = BUILD_PALETTES[currentSlideIndexRef.current % BUILD_PALETTES.length];
+      // Apply the same fluid background effect across every slide
+      const prevPalette = BUILD_PALETTES[0];
+      const curPalette = BUILD_PALETTES[0];
 
       if (uColorALoc) gl.uniform3fv(uColorALoc, curPalette.primary);
       if (uColorBLoc) gl.uniform3fv(uColorBLoc, curPalette.secondary);
@@ -1123,15 +1123,15 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
         onTouchEnd={handleTouchEnd}
         onWheel={handleWheel}
         style={{ perspective: '1200px' }}
-        className={`relative w-full rounded-[2.5rem] bg-[#0E0E12] overflow-hidden flex items-center justify-center transition-all ${
+        className={`relative w-full rounded-[2.5rem] codepen-fluid-bg overflow-hidden flex items-center justify-center transition-all ${
           isFullscreen ? 'h-full rounded-none' : 'min-h-[520px] sm:min-h-[580px] lg:min-h-[640px]'
         }`}
       >
-        {/* Animated Fluid Gradient Background from https://codepen.io/BlogFire/pen/wvzMexO */}
-        <div className="absolute inset-0 w-full h-full pointer-events-none z-0 fluid-gradient-bg opacity-90" />
+        {/* Animated Fluid Gradient Background matching CodePen wvzMexO reference */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-95 codepen-fluid-bg" />
 
         {/* Ambient Topographical Overlay Grid & Subtle Contrast Mask */}
-        <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/55 pointer-events-none z-1" />
+        <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/50 pointer-events-none z-1" />
 
         {/* Active Center Slide (Layered 3D Tilt Card with Parallax Depth) */}
         <div

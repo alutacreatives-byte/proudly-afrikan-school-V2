@@ -566,3 +566,30 @@
     opacity: 1;
   }
 }
+
+@keyframes codepenFluidBg {
+  0% {
+    background-position: 0% 0%;
+  }
+  33% {
+    background-position: 100% 50%;
+  }
+  66% {
+    background-position: 50% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+.codepen-fluid-bg {
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.85) 0%, transparent 55%),
+    radial-gradient(circle at 80% 20%, rgba(249, 115, 22, 0.85) 0%, transparent 55%),
+    radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.85) 0%, transparent 55%),
+    radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.85) 0%, transparent 55%),
+    radial-gradient(circle at 30% 50%, rgba(234, 179, 8, 0.8) 0%, transparent 55%),
+    linear-gradient(135deg, #09090b 0%, #1e1b4b 50%, #0f172a 100%);
+  background-size: 300% 300%;
+  animation: codepenFluidBg 20s ease infinite;
+}
