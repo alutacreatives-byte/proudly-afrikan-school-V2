@@ -233,7 +233,7 @@ ${currentSummary.keyTakeaways.map(t => `• ${t}`).join('\n')}
         <div className="flex-1 p-5 sm:p-7 overflow-y-auto space-y-6 bg-stone-50/40">
           {isLoading ? (
             <div className="py-20 text-center space-y-3">
-              <Sparkles className="w-8 h-8 text-[#D92B8A] mx-auto" />
+              <Sparkles className="w-8 h-8 text-[#D92B8A] animate-spin mx-auto" />
               <p className="font-display font-black text-lg text-stone-900">
                 Generating {selectedType} Summary...
               </p>

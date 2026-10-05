@@ -716,7 +716,7 @@ export const StudyTutorModal: React.FC<StudyTutorModalProps> = ({
           {isLoading && (
             <div className="flex flex-col items-start space-y-1.5 animate-fadeIn">
               <div className="p-4 bg-white border border-stone-200 rounded-2xl shadow-sm text-xs font-mono flex items-center gap-2.5 text-stone-800">
-                <Sparkles className="w-4 h-4 text-[#D92B8A] shrink-0" />
+                <Sparkles className="w-4 h-4 text-[#D92B8A] animate-spin shrink-0" />
                 <span className="font-bold">Working on it…</span>
               </div>
             </div>

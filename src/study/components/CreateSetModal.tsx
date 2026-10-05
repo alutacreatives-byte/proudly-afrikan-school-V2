@@ -739,17 +739,14 @@ export const CreateSetModal: React.FC<CreateSetModalProps> = ({
                 id="generate-study-set-submit-btn"
                 disabled={isContinueDisabled}
                 onClick={handleGenerate}
-                className={`w-full sm:w-auto px-7 py-3.5 text-white font-display text-xs sm:text-sm font-black uppercase tracking-wider rounded-full shadow-[0_4px_16px_rgba(217,43,138,0.35)] flex items-center justify-center gap-2 transition-all active:scale-95 ${
+                className={`w-full sm:w-auto px-7 py-3.5 text-white font-display text-xs sm:text-sm font-black uppercase tracking-wider rounded-full shadow-[0_4px_16px_rgba(217,43,138,0.35)] flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 ${
                   isGenerating
-                    ? 'animate-btn-fluid-generating disabled:opacity-100 disabled:cursor-wait'
-                    : 'bg-[#D92B8A] hover:bg-[#c02479] disabled:opacity-50'
+                    ? 'bg-gradient-to-r from-[#D92B8A] via-[#FF5CBA] to-[#9E125D] bg-[length:200%_200%] animate-gradient-flow'
+                    : 'bg-[#D92B8A] hover:bg-[#c02479]'
                 }`}
               >
-                <span>
-                  {isGenerating
-                    ? `Generating ${categoryInput ? `${categoryInput} Study Set` : 'Study Set'}…`
-                    : 'Continue & Generate ↗'}
-                </span>
+                <Sparkles className="w-4 h-4" />
+                <span>{isGenerating ? 'Working on it…' : 'Continue & Generate ↗'}</span>
               </button>
             </>
           ) : (

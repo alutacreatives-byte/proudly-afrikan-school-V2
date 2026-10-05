@@ -249,13 +249,14 @@ export const PdfQuizGenerator: React.FC<PdfQuizGeneratorProps> = ({
               type="button"
               disabled={isGenerating || !sourceMaterial.trim()}
               onClick={handleGenerate}
-              className={`w-full py-3.5 rounded-xl text-white font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm ${
+              className={`w-full py-3.5 rounded-xl text-white font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm disabled:bg-stone-300 ${
                 isGenerating
-                  ? 'animate-btn-fluid-generating disabled:opacity-100 disabled:cursor-wait'
-                  : 'bg-[#E63956] hover:bg-[#D32F4C] disabled:bg-stone-300'
+                  ? 'bg-gradient-to-r from-[#E63956] via-[#FF607C] to-[#C0203D] bg-[length:200%_200%] animate-gradient-flow'
+                  : 'bg-[#E63956] hover:bg-[#D32F4C]'
               }`}
             >
-              <span>{isGenerating ? 'Generating PDF Quiz…' : 'Generate PDF Quiz →'}</span>
+              <Sparkles className="w-4 h-4" />
+              {isGenerating ? 'Extracting & Generating...' : 'Generate PDF Quiz →'}
             </button>
           </div>
         </div>
