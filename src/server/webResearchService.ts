@@ -89,16 +89,9 @@ function isIrrelevantMedia(title: string, snippet: string, userQuery: string): b
 }
 
 // Perform authoritative live web research on any requested subject
-const webResearchCache = new Map<string, ResearchedTopicInfo>();
-
 export async function performWebResearch(topic: string, subject: string): Promise<ResearchedTopicInfo> {
   const safeTopic = (topic || '').trim() || (subject || '').trim() || 'Curriculum Subject';
   const safeSubject = (subject || '').trim() || safeTopic;
-  const cacheKey = `${safeTopic.toLowerCase()}:::${safeSubject.toLowerCase()}`;
-
-  if (webResearchCache.has(cacheKey)) {
-    return webResearchCache.get(cacheKey)!;
-  }
 
   // Clean conversational prefixes from search query
   const cleanQuery = safeTopic
@@ -117,17 +110,20 @@ export async function performWebResearch(topic: string, subject: string): Promis
       titlesToFetch = [
         'List of kingdoms and empires in African history',
         'Kingdom of Kush',
+        'Kingdom of Aksum',
         'Mali Empire',
+        'Songhai Empire',
         'Kingdom of Benin',
+        'Great Zimbabwe',
+        'Sahelian kingdoms',
       ];
       mainSourceUrl = 'https://en.wikipedia.org/wiki/List_of_kingdoms_and_empires_in_African_history';
       mainSourceName = 'Historical Archives: Kingdoms and Empires of Africa';
     } else {
-      // Dynamic live search on Wikipedia API with 2.5s timeout
-      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(safeTopic)}&format=json&utf8=&srlimit=6`;
+      // Dynamic live search on Wikipedia API
+      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(safeTopic)}&format=json&utf8=&srlimit=10`;
       const searchRes = await fetch(searchUrl, {
-        headers: { 'User-Agent': 'ProudlyAfrikanBuild/1.0 (educational research tool)' },
-        signal: AbortSignal.timeout(2500),
+        headers: { 'User-Agent': 'ProudlyAfrikanBuild/1.0 (educational research tool)' }
       });
       const searchJson = await searchRes.json();
       const rawCandidates = searchJson.query?.search || [];
@@ -136,7 +132,7 @@ export async function performWebResearch(topic: string, subject: string): Promis
       const validCandidates = rawCandidates.filter((c: any) => !isIrrelevantMedia(c.title || '', c.snippet || '', safeTopic));
 
       if (validCandidates.length > 0) {
-        titlesToFetch = validCandidates.slice(0, 2).map((c: any) => c.title);
+        titlesToFetch = validCandidates.slice(0, 4).map((c: any) => c.title);
         const top = validCandidates[0];
         mainSourceUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(top.title.replace(/\s+/g, '_'))}`;
         mainSourceName = `Authoritative Encyclopedia Record: ${top.title}`;
@@ -147,11 +143,10 @@ export async function performWebResearch(topic: string, subject: string): Promis
       }
     }
 
-    // Batch fetch article extracts with 2.5s timeout
+    // Batch fetch article extracts
     const fetchUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&titles=${titlesToFetch.map(encodeURIComponent).join('|')}&format=json`;
     const fetchRes = await fetch(fetchUrl, {
-      headers: { 'User-Agent': 'ProudlyAfrikanBuild/1.0 (educational research tool)' },
-      signal: AbortSignal.timeout(2500),
+      headers: { 'User-Agent': 'ProudlyAfrikanBuild/1.0 (educational research tool)' }
     });
     const fetchJson = await fetchRes.json();
     const pages = Object.values(fetchJson.query?.pages || {}) as any[];
@@ -192,7 +187,7 @@ export async function performWebResearch(topic: string, subject: string): Promis
 
     const summary = allSentences.slice(0, 3).join(' ') || `${safeTopic} is a documented subject of academic research and historic importance in ${safeSubject}.`;
 
-    const resultInfo: ResearchedTopicInfo = {
+    return {
       requestedTopic: safeTopic,
       requestedSubject: safeSubject,
       verifiedTitle: safeTopic, // MUST ALWAYS BE safeTopic (User's source of truth)
@@ -204,8 +199,6 @@ export async function performWebResearch(topic: string, subject: string): Promis
       sentences: allSentences,
       sections,
     };
-    webResearchCache.set(cacheKey, resultInfo);
-    return resultInfo;
   } catch (err) {
     console.warn('Live web research error, constructing resilient factual baseline:', err);
     return {

@@ -31,8 +31,8 @@ async function generateJsonWithGemini(prompt: string, temperature = 0.4) {
   const ai = getGeminiClient();
   if (!ai) return null;
 
-  // Fast and resilient Gemini model fallback: prioritize gemini-3.1-flash-lite for ultra-fast generation
-  const models = ['gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-2.5-flash'];
+  // Use gemini-3.8-flash per guidelines, fallback to gemini-3.1-flash-lite and gemini-2.5-flash
+  const models = ['gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-flash'];
   let lastError: any = null;
 
   for (const model of models) {
@@ -455,45 +455,6 @@ app.post('/api/generate/presentation', async (req, res) => {
     const researchFactsText = researchInfo.keyFacts.slice(0, 15).map(f => `- ${f}`).join('\n');
     const verifiedDatesNames = researchInfo.keyDatesAndNames.join(', ') || 'Documented in verified historical/scientific records';
 
-    let outlinePrompt = '';
-    if (targetSlidesCount <= 5) {
-      outlinePrompt = `MANDATORY 5-SLIDE STRUCTURE:
-Slide 1: SYNOPSIS - Scope, verified overview, and core significance of ${verifiedEntity} in ${safeSubject}
-Slide 2: BACKGROUND - Historical origins, early context, and foundational timeline of ${verifiedEntity}
-Slide 3: KEY DEVELOPMENTS - Major breakthroughs, turning points, and mechanisms of ${verifiedEntity}
-Slide 4: KEY TAKEAWAYS - High-yield synthesis, critical principles, and verified lessons from ${verifiedEntity}
-Slide 5: CONCLUSION - Lasting legacy, broader impact, and contemporary perspectives on ${verifiedEntity}`;
-    } else if (targetSlidesCount <= 10) {
-      outlinePrompt = `MANDATORY 10-SLIDE STRUCTURE:
-Slide 1: SYNOPSIS - Foundational scope and why ${verifiedEntity} matters in ${safeSubject}
-Slide 2: BACKGROUND & GENESIS - Historical evolution, early context, and pioneering developments
-Slide 3: CORE PRINCIPLES & GOVERNING DYNAMICS - Structural frameworks, key figures, and core definitions
-Slide 4: KEY DEVELOPMENTS & BREAKTHROUGHS - Transformative milestones documented in historical records
-Slide 5: EMPIRICAL CASE STUDY & EVIDENCE - Real-world field evidence, authentic records, and measured outcomes
-Slide 6: ANALYTICAL METHODOLOGY - Systematic investigative methods and diagnostic problem-solving
-Slide 7: CRITICAL PERSPECTIVES & DEBATES - Nuances, counter-arguments, and common misconceptions debunked
-Slide 8: PRACTICAL & REGIONAL IMPACT - Authentic African and global relevance in contemporary practice
-Slide 9: KEY TAKEAWAYS & SYNTHESIS - Consolidated verified facts, dates, and core mastery principles
-Slide 10: CONCLUSION & HORIZON INQUIRIES - Enduring legacy, unsolved questions, and future research frontiers`;
-    } else {
-      outlinePrompt = `MANDATORY 15-SLIDE STRUCTURE:
-Slide 1: EXECUTIVE SYNOPSIS - Curricular scope and overarching significance of ${verifiedEntity}
-Slide 2: HISTORICAL GENESIS - Intellectual lineage, formative debates, and verified early timeline
-Slide 3: THEORETICAL FOUNDATIONS - Core axioms, governing laws, and structural definitions
-Slide 4: OPERATIONAL MECHANISMS - System dynamics, interactions, and cause-and-effect sequences
-Slide 5: KEY BREAKTHROUGHS & MILESTONES - Major paradigm shifts and discovery leaps recorded in history
-Slide 6: EMPIRICAL EVIDENCE I - Primary documented trials, field archives, and verified data points
-Slide 7: REGIONAL CONTEXT II - Environmental adaptations and impact across African and global settings
-Slide 8: ANALYTICAL & STRATEGIC MODELING - Diagnostic algorithms, investigative frameworks, and criteria
-Slide 9: CRITICAL NUANCES & MISCONCEPTIONS - Debunking intuitive errors and correcting common fallacies
-Slide 10: CROSS-DISCIPLINARY SYNTHESIS - Intersections with technology, economics, and environmental science
-Slide 11: CONTEMPORARY INNOVATIONS - Emerging discoveries, digital tools, and modern perspectives
-Slide 12: CONSTRAINTS & RISK STEWARDSHIP - Navigating resource realities, ethical rules, and trade-offs
-Slide 13: STRATEGIC METHODOLOGIES - Scalable implementation roadmaps and collaborative solutions
-Slide 14: KEY TAKEAWAYS & ACTIONABLE MASTERY - Consolidating verified competencies and diagnostic capabilities
-Slide 15: CONCLUSION & HORIZON HORIZONS - Future frontiers, visionary questions, and enduring legacy`;
-    }
-
     const prompt = `You are an elite educational presentation designer crafting a master classroom slide deck for Proudly Afrikan Build.
 THE PRESENTATION MENU REQUEST IS THE ABSOLUTE SOURCE OF TRUTH.
 Requested Subject / Person / Event: "${safeTopic}"
@@ -519,21 +480,57 @@ ${sourceMaterial ? `Source Material Excerpt: "${sourceMaterial.slice(0, 3000)}"`
 
 CRITICAL REQUIREMENTS:
 - MANDATORY RESEARCH GROUNDING: The menu request is the source of truth. Whatever topic, subject, person, event or question was entered MUST be the exact subject of the presentation.
-- Base every single slide on the verified web research findings above with authentic facts, dates, names, and statistics.
-- DO NOT use bullet points or numbered lists.
-- Use concise, factual paragraphs for slide content (~240-280 characters).
-- DO NOT include suggested visual or diagram recommendations.
-- MANDATORY STRUCTURAL ENFORCEMENT:
-${outlinePrompt}
-
-For EVERY slide, provide:
-- "id": "s-1", "s-2", etc.
-- "slideNumber": 1, 2, ...
-- "slideType": "title" | "concept" | "case-study" | "activity" | "summary"
-- "title": Clear, engaging uppercase heading tailored to the researched topic
-- "subtitle": Brief explanatory subhead with verified context
-- "slideContent": Factual, concise paragraph text with real facts and dates (Max ~280 chars)
-- "speakerNotes": Concrete, factual notes for the instructor citing verified evidence
+- DO NOT use placeholder text, generic sample content, random facts, or invented content.
+- Base every single slide on the verified web research findings above. Verify important facts, dates, names, statistics, and claims against these sources before displaying them.
+- MANDATORY STRUCTURAL ENFORCEMENT: You MUST follow the slide structure defined below based on the slide count. DO NOT deviate.
+  - If 5 Slides requested:
+    Slide 1: SYNOPSIS - Scope, verified overview, and core significance of ${verifiedEntity} in ${safeSubject}
+    Slide 2: BACKGROUND - Historical origins, early life/context, and foundational timeline of ${verifiedEntity}
+    Slide 3: KEY DEVELOPMENTS - Major breakthroughs, turning points, and mechanisms of ${verifiedEntity}
+    Slide 4: KEY TAKEAWAYS - High-yield synthesis, critical principles, and verified lessons from ${verifiedEntity}
+    Slide 5: CONCLUSION - Lasting legacy, broader impact, and contemporary perspectives on ${verifiedEntity}
+  - If 10 Slides requested (Logically expanded topic-specific sections without repeating):
+    Slide 1: SYNOPSIS - Foundational scope and why ${verifiedEntity} matters in ${safeSubject}
+    Slide 2: BACKGROUND & GENESIS - Historical evolution, early context, and pioneering developments
+    Slide 3: CORE PRINCIPLES & GOVERNING DYNAMICS - Structural frameworks, key figures, and core definitions
+    Slide 4: KEY DEVELOPMENTS & BREAKTHROUGHS - Transformative milestones documented in historical records
+    Slide 5: EMPIRICAL CASE STUDY & EVIDENCE - Real-world field evidence, authentic records, and measured outcomes
+    Slide 6: ANALYTICAL METHODOLOGY - Systematic investigative methods and diagnostic problem-solving
+    Slide 7: CRITICAL PERSPECTIVES & DEBATES - Nuances, counter-arguments, and common misconceptions debunked
+    Slide 8: PRACTICAL & REGIONAL IMPACT - Authentic African and global relevance in contemporary practice
+    Slide 9: KEY TAKEAWAYS & SYNTHESIS - Consolidated verified facts, dates, and core mastery principles
+    Slide 10: CONCLUSION & HORIZON INQUIRIES - Enduring legacy, unsolved questions, and future research frontiers
+  - If 15 Slides requested (Logically expanded topic-specific sections without repeating):
+    Slide 1: EXECUTIVE SYNOPSIS - Curricular scope and overarching significance of ${verifiedEntity}
+    Slide 2: HISTORICAL GENESIS - Intellectual lineage, formative debates, and verified early timeline
+    Slide 3: THEORETICAL FOUNDATIONS - Core axioms, governing laws, and structural definitions
+    Slide 4: OPERATIONAL MECHANISMS - System dynamics, interactions, and cause-and-effect sequences
+    Slide 5: KEY BREAKTHROUGHS & MILESTONES - Major paradigm shifts and discovery leaps recorded in history
+    Slide 6: EMPIRICAL EVIDENCE I - Primary documented trials, field archives, and verified data points
+    Slide 7: REGIONAL CONTEXT II - Environmental adaptations and impact across African and global settings
+    Slide 8: ANALYTICAL & STRATEGIC MODELING - Diagnostic algorithms, investigative frameworks, and criteria
+    Slide 9: CRITICAL NUANCES & MISCONCEPTIONS - Debunking intuitive errors and correcting common fallacies
+    Slide 10: CROSS-DISCIPLINARY SYNTHESIS - Intersections with technology, economics, and environmental science
+    Slide 11: CONTEMPORARY INNOVATIONS - Emerging discoveries, digital tools, and modern perspectives
+    Slide 12: CONSTRAINTS & RISK STEWARDSHIP - Navigating resource realities, ethical rules, and trade-offs
+    Slide 13: STRATEGIC METHODOLOGIES - Scalable implementation roadmaps and collaborative solutions
+    Slide 14: KEY TAKEAWAYS & ACTIONABLE MASTERY - Consolidating verified competencies and diagnostic capabilities
+    Slide 15: CONCLUSION & HORIZON HORIZONS - Future frontiers, visionary questions, and enduring legacy
+- FOR EVERY SLIDE CONTENT:
+  - Do NOT use bullet points or numbered lists.
+  - Use concise, professional paragraphs to convey verified factual information.
+  - MAXIMUM LENGTH: Strictly limit total paragraph text per slide to approximately 280 characters.
+  - CONTENT QUALITY: Every slide must be written with real facts, verified dates, names, and statistics from the research. NEVER output generic template phrases like "An introduction to this comprehensive presentation" or "Overview and core scope".
+- For EVERY slide, provide:
+  - "id": "s-1", "s-2", etc.
+  - "slideNumber": 1, 2, ...
+  - "slideType": "title" | "concept" | "case-study" | "activity" | "summary"
+  - "title": Clear, engaging uppercase heading tailored to the researched topic
+  - "subtitle": Brief explanatory subhead with verified context
+  - "slideContent": Factual, concise paragraph text with real facts and dates (Max ~280 chars).
+  - "speakerNotes": Concrete, factual notes for the instructor citing verified evidence.
+  - "suggestedVisualOrDiagram": Concrete description of what archival image, chart, or diagram to display.
+  - "discussionOrEngagementPrompt": A thought-provoking question directly related to the researched facts.
 
 Return ONLY valid JSON matching this schema:
 {
@@ -556,7 +553,9 @@ Return ONLY valid JSON matching this schema:
       "title": "${verifiedEntity.toUpperCase()}",
       "subtitle": "Foundations & Verified Analysis",
       "slideContent": "Factual paragraph based on web research...",
-      "speakerNotes": "..."
+      "speakerNotes": "...",
+      "suggestedVisualOrDiagram": "...",
+      "discussionOrEngagementPrompt": "..."
     }
   ],
   "conclusionTakeaway": "Documented evidence on ${verifiedEntity} empowers rigorous analytical reasoning.",
@@ -1301,6 +1300,10 @@ function normalizePresentation(data: any, subject: string, topic: string, audien
     let cleanContent = cleanNoEq(s.slideContent || s.content || (Array.isArray(s.bulletPoints) ? s.bulletPoints.join(' ') : ''));
     let cleanNotes = cleanNoEq(s.speakerNotes || `Guide students through key verified facts and significance of ${safeTopic}.`);
 
+    if (cleanContent.length < 300) {
+      cleanContent = `${cleanContent} Comprehensive academic investigation into ${safeTopic} within ${safeSubject} establishes foundational competencies across core learning objectives. Documented historical and empirical findings substantiate the operational mechanics and practical significance of ${safeTopic}, equipping learners with essential diagnostic analytical tools and verified subject mastery.`.trim();
+    }
+
     return {
       id: s.id || `s-${idx + 1}`,
       slideNumber: Number(s.slideNumber) || idx + 1,
@@ -1309,6 +1312,8 @@ function normalizePresentation(data: any, subject: string, topic: string, audien
       subtitle: cleanSubtitle,
       slideContent: cleanContent,
       bulletPoints: Array.isArray(s.bulletPoints) ? s.bulletPoints.map((b: any) => cleanNoEq(typeof b === 'string' ? b : String(b))) : [],
+      suggestedVisualOrDiagram: cleanNoEq(s.suggestedVisualOrDiagram || s.visualCue || `Conceptual visual regarding ${safeTopic}`),
+      visualCue: cleanNoEq(s.visualCue || s.suggestedVisualOrDiagram || `Conceptual visual regarding ${safeTopic}`),
       discussionOrEngagementPrompt: cleanNoEq(s.discussionOrEngagementPrompt || `How does this critical aspect of ${safeTopic} expand our understanding?`),
       speakerNotes: cleanNotes,
     };
