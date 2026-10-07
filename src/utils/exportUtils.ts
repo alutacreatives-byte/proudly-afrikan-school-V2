@@ -2008,11 +2008,6 @@ export function downloadPresentationHtml(rawResource: any) {
       </div>
 
       <div>
-        <div id="slide-visual-box" class="cue-box" style="display: none;">
-          <span class="cue-label">Suggested Visual / Diagram</span>
-          <span id="slide-visual-text"></span>
-        </div>
-
         <div id="slide-prompt-box" class="cue-box" style="display: none; border-left-color: #38bdf8;">
           <span class="cue-label" style="color: #38bdf8;">Discussion & Engagement Prompt</span>
           <span id="slide-prompt-text"></span>
@@ -2199,12 +2194,6 @@ export function exportPresentationDoc(rawResource: any, format: 'doc' | 'print')
         <ul style="font-size: 11.5pt; line-height: 1.8; color: #1f2937; margin: 12pt 0 16pt 18pt;">
           ${bullets.map((b: string) => `<li>${escapeHtml(b)}</li>`).join('')}
         </ul>
-
-        ${visual ? `
-          <div style="background-color: #f0fdf4; border-left: 4pt solid #10b981; padding: 8pt 12pt; border-radius: 4pt; margin-top: 12pt; font-size: 10pt; color: #065f46;">
-            <strong>Suggested Visual / Diagram:</strong> ${escapeHtml(visual)}
-          </div>
-        ` : ''}
 
         ${prompt ? `
           <div style="background-color: #eff6ff; border-left: 4pt solid #3b82f6; padding: 8pt 12pt; border-radius: 4pt; margin-top: 8pt; font-size: 10pt; color: #1e40af;">
