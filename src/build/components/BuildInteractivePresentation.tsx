@@ -1231,19 +1231,6 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
                 ))}
               </div>
             )}
-
-            {/* Visual Cue or Suggested Diagram */}
-            {currentSlide.visualCue && (
-              <div
-                style={{ transform: 'translateZ(25px)' }}
-                className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-200/90 font-mono text-xs flex items-center gap-2.5 backdrop-blur-sm"
-              >
-                <Sparkles className="w-4 h-4 text-[#D99B00] shrink-0" />
-                <span className="truncate">
-                  Suggested Pedagogical Visual: {currentSlide.visualCue}
-                </span>
-              </div>
-            )}
           </div>
 
           {/* Card Bottom: Navigation Hints and Slide Dots Progress */}
