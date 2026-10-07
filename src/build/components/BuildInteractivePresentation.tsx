@@ -1338,33 +1338,6 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
       </div>
 
       {/* ============================================================== */}
-      {/* Segmented Timeline Rail Bar                                    */}
-      {/* ============================================================== */}
-      <div className="w-full space-y-2">
-        <div className="w-full grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-1.5">
-          {slides.map((s, idx) => {
-            const isCurrent = idx === activeSlideIndex;
-            const isPassed = idx < activeSlideIndex;
-            return (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => goToSlide(idx)}
-                className={`h-2 rounded-full transition-all cursor-pointer ${
-                  isCurrent
-                    ? 'bg-gradient-to-r from-[#E05A2B] to-[#D99B00] ring-2 ring-[#E05A2B]/40'
-                    : isPassed
-                    ? 'bg-stone-800'
-                    : 'bg-stone-300 hover:bg-stone-400'
-                }`}
-                title={`Slide ${idx + 1}: ${s.title}`}
-              />
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ============================================================== */}
       {/* Speaker Notes Drawer (Collapsible & Pedagogically Formatted)   */}
       {/* ============================================================== */}
       {showSpeakerNotes && currentSlide.speakerNotes && (
