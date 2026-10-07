@@ -539,6 +539,28 @@
   }
 }
 
+@keyframes codepenWvzMexO {
+  0% {
+    background-position: 0% 0%;
+  }
+  33% {
+    background-position: 0% 50%;
+  }
+  66% {
+    background-position: 100% 0%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+.presentation-codepen-wvzmexo {
+  background: radial-gradient(circle at top right, violet 2%, #D38312 30%, transparent), radial-gradient(circle at bottom center, green -15%, blue 50%, yellow);
+  background-size: 300% 300%;
+  background-position: 0% 0%;
+  animation: codepenWvzMexO 20s ease infinite;
+}
+
 @keyframes presentationBgAnim {
   0% {
     background-position: 0% 50%;
