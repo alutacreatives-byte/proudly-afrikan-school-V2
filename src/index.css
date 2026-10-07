@@ -539,23 +539,67 @@
   }
 }
 
-@keyframes float-blob-1 {
-  0%, 100% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(60px, -50px) scale(1.15); }
-  66% { transform: translate(-40px, 50px) scale(0.9); }
+@keyframes presentationBgAnim {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
-@keyframes float-blob-2 {
-  0%, 100% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(-70px, 60px) scale(1.2); }
-  66% { transform: translate(50px, -40px) scale(0.95); }
+
+.presentation-bg-animated {
+  background-size: 300% 300%;
+  animation: presentationBgAnim 20s ease infinite;
 }
-@keyframes float-blob-3 {
-  0%, 100% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(50px, 70px) scale(0.85); }
-  66% { transform: translate(-60px, -50px) scale(1.25); }
+
+@keyframes meshFloat1 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(80px, -60px) scale(1.2);
+  }
+  66% {
+    transform: translate(-60px, 80px) scale(0.9);
+  }
 }
-@keyframes float-blob-4 {
-  0%, 100% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(-50px, -40px) scale(1.1); }
-  66% { transform: translate(60px, 50px) scale(0.95); }
+
+@keyframes meshFloat2 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(-90px, 70px) scale(1.15);
+  }
+  66% {
+    transform: translate(70px, -90px) scale(0.85);
+  }
+}
+
+@keyframes meshFloat3 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(70px, 90px) scale(0.95);
+  }
+  66% {
+    transform: translate(-80px, -70px) scale(1.25);
+  }
+}
+
+@keyframes meshFloat4 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(-70px, -80px) scale(1.1);
+  }
+  66% {
+    transform: translate(90px, 60px) scale(0.9);
+  }
 }
