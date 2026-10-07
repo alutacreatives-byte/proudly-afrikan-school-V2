@@ -23,8 +23,10 @@ import {
   Volume2,
   CheckCircle2,
   ExternalLink,
+  Bookmark,
 } from 'lucide-react';
 import { SavedResource } from '../types';
+import { saveResourceToStorage } from '../utils/storage';
 
 export interface SlideItem {
   id?: string;
@@ -51,6 +53,8 @@ interface BuildInteractivePresentationProps {
   setIsFullscreen: (fs: boolean) => void;
   onExportDoc?: () => void;
   onExportPdf?: () => void;
+  onSave?: () => void;
+  isSaved?: boolean;
 }
 
 // ==========================================
@@ -481,7 +485,19 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
   setIsFullscreen,
   onExportDoc,
   onExportPdf,
+  onSave,
+  isSaved = false,
 }) => {
+  const [internalSaved, setInternalSaved] = useState<boolean>(false);
+  const handleSave = () => {
+    if (onSave) {
+      onSave();
+    } else if (resource) {
+      saveResourceToStorage(resource);
+      setInternalSaved(true);
+      setTimeout(() => setInternalSaved(false), 2500);
+    }
+  };
   const data = (resource.data?.data && typeof resource.data.data === 'object' && !Array.isArray(resource.data.data))
     ? resource.data.data
     : (resource.data || {});
@@ -1064,16 +1080,40 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
             {copiedSuccess ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
           </button>
 
-          {/* Standalone HTML Deck Download */}
+          {/* Save Word (.doc) and PDF */}
           <button
             type="button"
-            onClick={handleDownloadStandaloneHtml}
-            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 border border-stone-200 text-stone-800 font-mono text-xs font-bold cursor-pointer transition-colors"
-            title="Download offline HTML presentation deck"
+            onClick={handleSave}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 font-mono text-xs font-bold uppercase transition-colors cursor-pointer"
+            title="Save presentation"
           >
-            <Download className="w-3.5 h-3.5 text-[#E05A2B]" />
-            <span>EXPORT HTML</span>
+            <Bookmark className="w-3.5 h-3.5 text-[#E05A2B]" />
+            <span>{isSaved || internalSaved ? 'Saved!' : 'Save'}</span>
           </button>
+
+          {onExportDoc && (
+            <button
+              type="button"
+              onClick={onExportDoc}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 font-mono text-xs font-bold uppercase transition-colors cursor-pointer"
+              title="Download Word (.doc)"
+            >
+              <Download className="w-3.5 h-3.5 text-stone-700" />
+              <span>Word (.doc)</span>
+            </button>
+          )}
+
+          {onExportPdf && (
+            <button
+              type="button"
+              onClick={onExportPdf}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 font-mono text-xs font-bold uppercase transition-colors cursor-pointer"
+              title="Download PDF"
+            >
+              <Download className="w-3.5 h-3.5 text-stone-700" />
+              <span>PDF</span>
+            </button>
+          )}
 
           {/* WebGL Fluid Toggle */}
           <button
@@ -1266,26 +1306,34 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Floating Lateral Navigation Arrows */}
+      {/* ============================================================== */}
+      {/* PREVIOUS and NEXT Navigation Directly Below Presentation       */}
+      {/* ============================================================== */}
+      <div className={`w-full flex items-center justify-between gap-4 py-2 ${isFullscreen ? 'px-4 z-40 bg-black/60 backdrop-blur-md rounded-2xl' : ''}`}>
         <button
           type="button"
           disabled={activeSlideIndex === 0}
           onClick={prevSlide}
-          aria-label="Previous Slide"
-          className="hidden absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-stone-900/80 backdrop-blur-md border border-white/15 text-white flex items-center justify-center hover:scale-110 hover:border-[#E05A2B] active:scale-95 disabled:opacity-20 disabled:hover:scale-100 transition-all z-30 cursor-pointer shadow-xl"
+          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white border border-stone-200 text-stone-800 font-mono text-xs font-bold uppercase hover:bg-stone-50 active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer"
         >
-          <ChevronLeft className="w-6 h-6 text-white" />
+          <ChevronLeft className="w-4 h-4 text-[#E05A2B]" />
+          <span>PREVIOUS</span>
         </button>
+
+        <div className={`font-mono text-xs font-bold ${isFullscreen ? 'text-stone-300' : 'text-stone-500'}`}>
+          SLIDE {activeSlideIndex + 1} OF {totalSlides}
+        </div>
 
         <button
           type="button"
           disabled={activeSlideIndex >= totalSlides - 1}
           onClick={nextSlide}
-          aria-label="Next Slide"
-          className="hidden absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-stone-900/80 backdrop-blur-md border border-white/15 text-white flex items-center justify-center hover:scale-110 hover:border-[#D99B00] active:scale-95 disabled:opacity-20 disabled:hover:scale-100 transition-all z-30 cursor-pointer shadow-xl"
+          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#E05A2B] via-[#EA8B1C] to-[#D99B00] text-white font-mono text-xs font-bold uppercase hover:opacity-95 active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer"
         >
-          <ChevronRight className="w-6 h-6 text-white" />
+          <span>NEXT</span>
+          <ChevronRight className="w-4 h-4 text-white" />
         </button>
       </div>
 
