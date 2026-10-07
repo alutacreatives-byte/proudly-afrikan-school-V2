@@ -3,7 +3,7 @@ import { MasterHeader, MainNavTab } from './components/MasterHeader';
 import { MasterFooter } from './components/MasterFooter';
 import StudyApp from './study/App';
 import QuizApp from './quiz/App';
-import BuildApp from './build/App';
+import BuildApp from './BuildApp';
 import { MySetsWorkspace } from './mysets/MySetsWorkspace';
 import { CentralPlannerView } from './planner/CentralPlannerView';
 import { PricingView } from './pricing/PricingView';
@@ -12,10 +12,10 @@ import { AuthModal } from './components/auth/AuthModal';
 import { AccountModal } from './components/auth/AccountModal';
 import { StudySet, AppView as StudyAppView } from './study/types';
 import { Quiz } from './quiz/types';
-import { SavedResource } from './build/types';
+import { SavedResource } from './BuildTypes';
 import { StorageService } from './study/services/storageService';
 import { getRecentQuizzes } from './quiz/utils/quizShare';
-import { getSavedResources } from './build/utils/storage';
+import { getSavedResources } from './BuildStorage';
 import { StudyTutorModal } from './study/components/StudyTutorModal';
 
 function AppContent() {
