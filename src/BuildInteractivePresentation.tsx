@@ -1171,8 +1171,8 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
         onTouchEnd={handleTouchEnd}
         onWheel={handleWheel}
         style={{ perspective: '1200px' }}
-        className={`relative w-full rounded-[2.5rem] bg-[#0E0E12] overflow-hidden flex items-center justify-center transition-all ${
-          isFullscreen ? 'h-full rounded-none' : 'min-h-[520px] sm:min-h-[580px] lg:min-h-[640px]'
+        className={`relative w-full max-w-full rounded-[2.5rem] bg-[#0E0E12] overflow-hidden flex items-center justify-center transition-all ${
+          isFullscreen ? 'h-full rounded-none' : 'min-h-[420px] sm:min-h-[580px] lg:min-h-[640px]'
         }`}
       >
         {/* Animated Radial Gradient Background from CodePen: https://codepen.io/BlogFire/pen/wvzMexO */}
@@ -1196,17 +1196,17 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
             transformStyle: 'preserve-3d',
             transition: 'transform 0.14s ease-out',
           }}
-          className={`relative z-20 w-full max-w-4xl mx-auto px-4 sm:px-8 py-6 sm:py-10 flex flex-col justify-between min-h-[460px] sm:min-h-[520px] transition-opacity duration-300 ${
+          className={`relative z-20 w-full max-w-4xl mx-auto px-3 sm:px-6 md:px-8 py-5 sm:py-8 lg:py-10 flex flex-col justify-between min-h-[400px] sm:min-h-[520px] transition-opacity duration-300 ${
             isTransitioning ? 'opacity-70 scale-[0.98]' : 'opacity-100 scale-100'
           }`}
         >
           {/* Card Top: Metadata and Concept Kicker with 3D Depth */}
           <div
             style={{ transform: 'translateZ(30px)' }}
-            className="flex items-center justify-between gap-4 pb-4 border-b border-white/10"
+            className="flex items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-white/10 flex-wrap"
           >
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#D99B00] px-3 py-1 rounded-full bg-[#D99B00]/15 border border-[#D99B00]/30 shadow-xs">
+            <div className="flex items-center gap-2 flex-wrap min-w-0">
+              <span className="font-mono text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#D99B00] px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[#D99B00]/15 border border-[#D99B00]/30 shadow-xs truncate max-w-[220px] sm:max-w-none">
                 {currentSlide.conceptBadge || `TOPIC INSIGHT • SLIDE ${currentSlide.slideNumber}`}
               </span>
               {(resource.data?.credibleSourceUrl || (resource as any).credibleSourceUrl) && (
@@ -1214,7 +1214,7 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
                   href={resource.data?.credibleSourceUrl || (resource as any).credibleSourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-mono text-[11px] font-bold hover:bg-emerald-500/30 transition-all cursor-pointer"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-mono text-[10px] sm:text-[11px] font-bold hover:bg-emerald-500/30 transition-all cursor-pointer"
                   title={`Researched & verified against credible sources: ${resource.data?.sourceName || (resource as any).sourceName || 'Web Archives'}`}
                 >
                   <CheckCircle2 className="w-3 h-3 text-emerald-400" />
@@ -1222,12 +1222,9 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
                   <ExternalLink className="w-2.5 h-2.5 opacity-80" />
                 </a>
               )}
-              <span className="font-mono text-xs text-stone-400 hidden sm:inline">
-                {resource.subject || 'Curriculum Domain'}
-              </span>
             </div>
 
-            <div className="font-mono text-xs font-bold text-stone-400 flex items-center gap-2">
+            <div className="font-mono text-[11px] sm:text-xs font-bold text-stone-400 flex items-center gap-2 shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-[#E05A2B]" />
               <span>
                 {currentSlide.slideNumber} OF {totalSlides}
@@ -1238,15 +1235,15 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
           {/* Card Middle: Main Pedagogical Content & Visuals */}
           <div
             style={{ transform: 'translateZ(50px)' }}
-            className="my-auto py-6 sm:py-8 space-y-6"
+            className="my-auto py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6"
           >
             {/* Slide Title with Brand Accent */}
-            <div className="space-y-3">
-              <h2 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-white leading-[1.05] drop-shadow-md">
+            <div className="space-y-2 sm:space-y-3">
+              <h2 className="font-display font-black text-2xl sm:text-4xl lg:text-6xl uppercase tracking-tight text-white leading-[1.08] sm:leading-[1.05] drop-shadow-md break-words">
                 {currentSlide.title}
               </h2>
               {currentSlide.subtitle && (
-                <p className="font-sans text-base sm:text-xl text-stone-300 max-w-2xl font-normal leading-relaxed">
+                <p className="font-sans text-sm sm:text-lg lg:text-xl text-stone-300 max-w-2xl font-normal leading-relaxed break-words">
                   {currentSlide.subtitle}
                 </p>
               )}
@@ -1254,8 +1251,8 @@ export const BuildInteractivePresentation: React.FC<BuildInteractivePresentation
 
             {/* Slide Content (Paragraphs) */}
             {currentSlide.slideContent && (
-              <div className="pt-4 space-y-4">
-                <p className="font-sans text-lg text-stone-100 font-normal leading-relaxed">
+              <div className="pt-2 sm:pt-4 space-y-3 sm:space-y-4">
+                <p className="font-sans text-sm sm:text-base lg:text-lg text-stone-100 font-normal leading-relaxed break-words">
                   {currentSlide.slideContent}
                 </p>
               </div>

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Upload, FileText, CheckCircle2, X, Loader2, FileUp, Sparkles } from 'lucide-react';
-import { extractTextFromFile } from '../../../quiz/utils/pdfExtractor';
+import { extractTextFromFile } from '../utils/pdfExtractor';
 
 export interface SourceMaterialUploadProps {
   sourceText?: string;

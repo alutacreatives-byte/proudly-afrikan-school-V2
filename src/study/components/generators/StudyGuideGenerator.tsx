@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FileText, 
   Sparkles, 
@@ -47,6 +47,20 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
   const [saved, setSaved] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [revealedAnswers, setRevealedAnswers] = useState<Record<number, boolean>>({});
+  const [flippedCards, setFlippedCards] = useState<Record<number, boolean>>({});
+  const [reduceMotion, setReduceMotion] = useState<boolean>(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduceMotion(mediaQuery.matches);
+    const handler = (e: MediaQueryListEvent) => setReduceMotion(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  const toggleCardFlip = (idx: number) => {
+    setFlippedCards((prev) => ({ ...prev, [idx]: !prev[idx] }));
+  };
 
   const resultRef = useScrollToResult(guide, isGenerating);
 
@@ -256,8 +270,7 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
                   : 'bg-[#E62E6B] hover:bg-[#d8245f]'
               }`}
             >
-              <Sparkles className="w-5 h-5 text-white" />
-              <span>{isGenerating ? 'Synthesizing Guide...' : 'GENERATE STUDY GUIDE'}</span>
+              <span>{isGenerating ? 'Generating…' : 'GENERATE'}</span>
             </button>
           </div>
         </div>
@@ -281,46 +294,133 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
                 </p>
               </div>
 
-              {/* Sections */}
-              <div className="space-y-8">
-                {guide.sections.map((section, idx) => (
-                  <div key={idx} className="p-6 rounded-2xl bg-stone-50/70 border border-stone-200 space-y-4">
-                    <h3 className="font-display font-black text-lg uppercase text-[#161616] flex items-center gap-2">
-                      <BookOpen className="w-4 h-4 text-[#E63956]" />
-                      {section.heading}
-                    </h3>
+              {/* Exactly 12 Interactive 3D Glass Cards in Responsive Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                {Array.from({ length: 12 }, (_, idx) => {
+                  const section = guide.sections[idx % guide.sections.length];
+                  const isFlipped = Boolean(flippedCards[idx]);
+                  return (
+                    <div 
+                      key={idx}
+                      className="w-full h-[480px] sm:h-[520px] cursor-pointer group focus:outline-hidden"
+                      style={{ perspective: '1600px' }}
+                      onClick={() => toggleCardFlip(idx)}
+                      tabIndex={0}
+                      role="button"
+                      aria-pressed={isFlipped}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleCardFlip(idx);
+                        }
+                      }}
+                    >
+                      <div 
+                        className={`relative w-full h-full duration-700 transition-all ${reduceMotion ? '' : 'transform-gpu group-hover:-translate-y-1.5'}`}
+                        style={{
+                          transformStyle: 'preserve-3d',
+                          transform: reduceMotion 
+                            ? 'none' 
+                            : (isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'),
+                          boxShadow: isFlipped 
+                            ? '0 30px 60px -15px rgba(0, 0, 0, 0.3)' 
+                            : '0 20px 40px rgba(100, 80, 60, 0.15)',
+                          borderRadius: '2rem',
+                        }}
+                      >
+                        {/* FRONT OF CARD (Futuristic 3D Glass Surface) */}
+                        <div 
+                          className={`absolute inset-0 w-full h-full bg-white/85 backdrop-blur-xl border border-white/90 rounded-[2rem] p-6 sm:p-8 shadow-[0_20px_50px_rgba(100,80,60,0.12),_inset_0_1px_2px_rgba(255,255,255,0.95)] flex flex-col justify-between overflow-hidden transition-all ${
+                            reduceMotion && isFlipped ? 'hidden' : 'flex'
+                          }`}
+                          style={{ backfaceVisibility: 'hidden' }}
+                        >
+                          <div className="space-y-4">
+                            {/* Card Header: Chapter badge & Flip indicator */}
+                            <div className="flex items-center justify-between pb-3 border-b border-stone-200/60">
+                              <span className="font-mono text-[11px] font-bold text-[#E63956] uppercase tracking-wider px-3 py-1 bg-pink-50/80 rounded-full border border-pink-200/80">
+                                CHAPTER {idx + 1}
+                              </span>
+                              <span className="font-mono text-[11px] font-bold text-stone-400 group-hover:text-[#E63956] transition-colors flex items-center gap-1">
+                                <span>Flip</span>
+                                <span className="text-sm">↻</span>
+                              </span>
+                            </div>
 
-                    <p className="text-stone-700 text-sm leading-relaxed font-normal">
-                      {section.content}
-                    </p>
+                            {/* Chapter Heading (Complete, specific, no ellipses) */}
+                            <h3 className="font-display font-black text-lg sm:text-xl uppercase text-[#161616] tracking-tight">
+                              {section.heading}
+                            </h3>
 
-                    {section.bulletPoints && section.bulletPoints.length > 0 && (
-                      <ul className="space-y-2 pt-2 border-t border-stone-200/70">
-                        {section.bulletPoints.map((bp, bIdx) => (
-                          <li key={bIdx} className="flex items-start gap-2 text-xs sm:text-sm text-stone-700 font-normal">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#E63956] mt-2 shrink-0" />
-                            <span>{bp}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-
-                    {section.keyTerms && section.keyTerms.length > 0 && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3">
-                        {section.keyTerms.map((kt, kIdx) => (
-                          <div key={kIdx} className="p-3 bg-white border border-stone-200 rounded-xl space-y-1">
-                            <span className="font-mono text-xs font-bold text-[#161616] uppercase block">
-                              {kt.term}
-                            </span>
-                            <span className="text-xs text-stone-600 font-normal">
-                              {kt.definition}
-                            </span>
+                            {/* Synopsis (No sliders) */}
+                            <div className="pr-1 space-y-2">
+                              <p className="text-stone-700 text-xs sm:text-sm leading-relaxed font-normal">
+                                {section.content}
+                              </p>
+                            </div>
                           </div>
-                        ))}
+
+                          {/* Card Footer */}
+                          <div className="pt-3 border-t border-stone-200/60 flex items-center justify-between text-[11px] font-mono text-stone-500">
+                            <span>Front (Synopsis)</span>
+                            <span className="text-[#E63956] font-bold group-hover:underline">Key Points →</span>
+                          </div>
+                        </div>
+
+                        {/* BACK OF CARD (Futuristic 3D Glass Surface) */}
+                        <div 
+                          className={`absolute inset-0 w-full h-full bg-[#FAF4EC]/90 backdrop-blur-xl border border-stone-200/80 rounded-[2rem] p-6 sm:p-8 shadow-[0_20px_50px_rgba(100,80,60,0.15),_inset_0_1px_2px_rgba(255,255,255,0.8)] flex flex-col justify-between overflow-hidden transition-all ${
+                            reduceMotion && !isFlipped ? 'hidden' : 'flex'
+                          }`}
+                          style={{ 
+                            backfaceVisibility: 'hidden',
+                            transform: reduceMotion ? 'none' : 'rotateY(180deg)' 
+                          }}
+                        >
+                          <div className="space-y-4 pr-1">
+                            {/* Back Header */}
+                            <div className="flex items-center justify-between pb-3 border-b border-stone-300/60">
+                              <span className="font-mono text-[11px] font-bold text-amber-800 uppercase tracking-wider px-3 py-1 bg-amber-100/80 rounded-full border border-amber-200/80">
+                                CHAPTER {idx + 1} • KEY POINTS
+                              </span>
+                              <span className="font-mono text-[11px] font-bold text-stone-500 group-hover:text-amber-800 transition-colors flex items-center gap-1">
+                                <span>Back</span>
+                                <span className="text-sm">↺</span>
+                              </span>
+                            </div>
+
+                            {/* Heading */}
+                            <h3 className="font-display font-black text-base sm:text-lg uppercase text-[#161616]">
+                              KEY POINTS
+                            </h3>
+
+                            {/* Bullet Points (No sliders) */}
+                            {section.bulletPoints && section.bulletPoints.length > 0 ? (
+                              <ul className="space-y-2">
+                                {section.bulletPoints.map((bp, bIdx) => (
+                                  <li key={bIdx} className="flex items-start gap-2 text-xs sm:text-sm text-stone-800 font-normal leading-relaxed">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 shrink-0" />
+                                    <span>{bp}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-stone-700 text-xs sm:text-sm font-normal leading-relaxed">
+                                {section.content}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Back Footer */}
+                          <div className="pt-3 border-t border-stone-300/60 flex items-center justify-between text-[11px] font-mono text-stone-600 mt-3 shrink-0">
+                            <span className="text-amber-800 font-bold">Reverse</span>
+                            <span className="hover:underline">← Front</span>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Important Takeaways */}

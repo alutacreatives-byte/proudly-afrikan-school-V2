@@ -253,8 +253,7 @@ export const StudyCourseGenerator: React.FC<StudyCourseGeneratorProps> = ({
                   : 'bg-[#E62E6B] hover:bg-[#d8245f]'
               }`}
             >
-              <Sparkles className="w-5 h-5 text-white" />
-              <span>{isGenerating ? 'Architecting Curriculum...' : 'GENERATE COURSE SYLLABUS'}</span>
+              <span>{isGenerating ? 'Generating…' : 'GENERATE'}</span>
             </button>
           </div>
         </div>

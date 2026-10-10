@@ -745,8 +745,7 @@ export const CreateSetModal: React.FC<CreateSetModalProps> = ({
                     : 'bg-[#D92B8A] hover:bg-[#c02479]'
                 }`}
               >
-                <Sparkles className="w-4 h-4" />
-                <span>{isGenerating ? 'Working on it…' : 'Continue & Generate ↗'}</span>
+                <span>{isGenerating ? 'Generating…' : 'GENERATE'}</span>
               </button>
             </>
           ) : (

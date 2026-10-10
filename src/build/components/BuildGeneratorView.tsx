@@ -33,12 +33,12 @@ import { BUILD_TOOLS_LIST } from './BuildToolsMenu';
 import { SourceMaterialUpload } from './SourceMaterialUpload';
 import { SavedResource, BuildToolId } from '../types';
 import { saveResourceToStorage } from '../utils/storage';
-import { useAuthCredit } from '../../context/AuthCreditContext';
-import { AiActionType } from '../../types/authCredit';
-import { exportBuildResource, exportUnifiedItem } from '../../utils/exportUtils';
-import { GlobalNavigationButtons } from '../../components/GlobalNavigationButtons';
-import { useScrollToResult } from '../../utils/useScrollToResult';
-import { buildDynamicTopicSlides } from '../utils/presentationBuilder';
+import { useAuthCredit } from './context/AuthCreditContext';
+import { AiActionType } from './types/authCredit';
+import { exportBuildResource, exportUnifiedItem } from './utils/exportUtils';
+import { GlobalNavigationButtons } from './components/GlobalNavigationButtons';
+import { useScrollToResult } from './utils/useScrollToResult';
+import { buildDynamicTopicSlides } from './presentationBuilder';
 import { BuildInteractivePresentation } from './BuildInteractivePresentation';
 
 interface BuildGeneratorViewProps {
@@ -468,16 +468,13 @@ export const BuildGeneratorView: React.FC<BuildGeneratorViewProps> = ({
           type="button"
           disabled={isGenerating}
           onClick={handleGenerate}
-          className={`w-full py-4.5 bg-gradient-to-r from-[#E05A2B] via-[#EA8B1C] to-[#D99B00] hover:opacity-95 text-white font-display text-sm sm:text-base font-black uppercase tracking-wider rounded-full shadow-[0_10px_28px_rgba(224,90,43,0.35)] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50 ${isGenerating ? 'animate-gradient-flow' : ''}`}
+          className={`w-full py-4.5 text-white font-display text-sm sm:text-base font-black uppercase tracking-wider rounded-full shadow-[0_10px_28px_rgba(224,90,43,0.35)] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50 ${
+            isGenerating
+              ? 'bg-gradient-to-r from-[#E05A2B] via-[#EA8B1C] to-[#D99B00] bg-[length:200%_200%] animate-gradient-flow'
+              : 'bg-gradient-to-r from-[#E05A2B] via-[#EA8B1C] to-[#D99B00] hover:opacity-95'
+          }`}
         >
-          <Sparkles className="w-5 h-5 text-white" />
-          <span>
-            {isGenerating
-              ? activeToolId === 'presentation'
-                ? `RESEARCHING "${(topic || 'TOPIC').slice(0, 20).toUpperCase()}" ONLINE & VERIFYING FACTS...`
-                : `GENERATING ${currentToolConfig.title.toUpperCase()}...`
-              : `GENERATE ${currentToolConfig.title.toUpperCase()}`}
-          </span>
+          <span>{isGenerating ? 'Generating…' : 'GENERATE'}</span>
         </button>
         {isGenerating && activeToolId === 'presentation' && (
           <p className="text-center font-mono text-xs text-stone-600 animate-pulse">

@@ -292,8 +292,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                   : 'bg-[#E62E6B] hover:bg-[#d8245f]'
               }`}
             >
-              <Sparkles className="w-5 h-5 text-white" />
-              <span>{isGenerating ? 'Generating Flashcards...' : 'GENERATE FLASHCARDS'}</span>
+              <span>{isGenerating ? 'Generating…' : 'GENERATE'}</span>
             </button>
           </div>
         </div>
