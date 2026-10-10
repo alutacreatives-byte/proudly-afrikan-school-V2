@@ -26,6 +26,96 @@ interface StudyGuideGeneratorProps {
   existingResource?: StudyGuideResult;
 }
 
+const get12DistinctChapters = (guide: StudyGuideResult) => {
+  const baseSections = guide.sections || [];
+  const takeaways = guide.importantTakeaways || [];
+  const questions = guide.reviewQuestions || [];
+  const chapters: Array<{ heading: string; content: string; bulletPoints: string[] }> = [];
+
+  for (const s of baseSections) {
+    if (s && s.heading) {
+      chapters.push({
+        heading: s.heading,
+        content: s.content || guide.overview || '',
+        bulletPoints: s.bulletPoints && s.bulletPoints.length > 0 ? s.bulletPoints : [s.content || 'Core domain analysis and synthesis.']
+      });
+    }
+  }
+
+  let tIdx = 0;
+  while (chapters.length < 12 && tIdx < takeaways.length) {
+    const t = takeaways[tIdx];
+    chapters.push({
+      heading: `Key Principle ${chapters.length + 1}: Strategic Synthesis`,
+      content: t,
+      bulletPoints: [t, `Essential academic insight for mastery in ${guide.subject || guide.topic || 'this module'}.`]
+    });
+    tIdx++;
+  }
+
+  let qIdx = 0;
+  while (chapters.length < 12 && qIdx < questions.length) {
+    const q = questions[qIdx];
+    chapters.push({
+      heading: `Analytical Focus ${chapters.length + 1}: Guided Inquiry`,
+      content: q.question,
+      bulletPoints: [
+        `Core Inquiry: ${q.question}`,
+        q.hint ? `Methodology Hint: ${q.hint}` : `Deep analytical investigation.`,
+        `Evaluative Standard: ${q.answer}`
+      ]
+    });
+    qIdx++;
+  }
+
+  const fallbackTopics = [
+    'Historical Context & Origins',
+    'Core Theoretical Frameworks',
+    'Structural Dynamics & Mechanics',
+    'Empirical Evidence & Case Studies',
+    'Comparative Regional Analysis',
+    'Advanced Methodological Approaches',
+    'Critique & Contemporary Perspectives',
+    'Practical Implementation Standards',
+    'Interdisciplinary Intersections',
+    'Future Research Frontiers & Legacy',
+    'Synthesized Mastery & Evaluation',
+    'Comprehensive Summary & Review'
+  ];
+
+  let fIdx = 0;
+  while (chapters.length < 12 && fIdx < fallbackTopics.length) {
+    const title = fallbackTopics[fIdx];
+    if (!chapters.some(c => c.heading.toLowerCase().includes(title.toLowerCase()))) {
+      chapters.push({
+        heading: `${title}: ${guide.topic || 'Module Study'}`,
+        content: `Detailed investigation into ${title.toLowerCase()} within the study of ${guide.topic || guide.title || 'the curriculum'}.`,
+        bulletPoints: [
+          `Core principle and primary definition.`,
+          `Historical or empirical record in verified archives.`,
+          `High-yield academic takeaway for assessment preparation.`
+        ]
+      });
+    }
+    fIdx++;
+  }
+
+  while (chapters.length < 12) {
+    const n = chapters.length + 1;
+    chapters.push({
+      heading: `Curriculum Chapter ${n}: Advanced Mastery`,
+      content: `Advanced analytical module focusing on core principles, evidence, and critical evaluation for ${guide.topic || 'this subject'}.`,
+      bulletPoints: [
+        `Fundamental definitions and underlying mechanisms.`,
+        `Real-world empirical case evidence and data points.`,
+        `Strategic synthesis for academic excellence.`
+      ]
+    });
+  }
+
+  return chapters.slice(0, 12);
+};
+
 export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
   onBack,
   onGoHome,
@@ -294,15 +384,14 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
                 </p>
               </div>
 
-              {/* Exactly 12 Interactive 3D Glass Cards in Responsive Grid */}
+              {/* Exactly 12 Vibrant Transparent 3D Glass Flashcards in Responsive Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                {Array.from({ length: 12 }, (_, idx) => {
-                  const section = guide.sections[idx % guide.sections.length];
+                {get12DistinctChapters(guide).map((ch, idx) => {
                   const isFlipped = Boolean(flippedCards[idx]);
                   return (
                     <div 
                       key={idx}
-                      className="w-full h-[480px] sm:h-[520px] cursor-pointer group focus:outline-hidden"
+                      className="w-full min-h-[460px] sm:min-h-[500px] h-auto cursor-pointer group focus:outline-hidden"
                       style={{ perspective: '1600px' }}
                       onClick={() => toggleCardFlip(idx)}
                       tabIndex={0}
@@ -323,53 +412,49 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
                             ? 'none' 
                             : (isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'),
                           boxShadow: isFlipped 
-                            ? '0 30px 60px -15px rgba(0, 0, 0, 0.3)' 
+                            ? '0 30px 60px -15px rgba(230, 57, 86, 0.25)' 
                             : '0 20px 40px rgba(100, 80, 60, 0.15)',
                           borderRadius: '2rem',
                         }}
                       >
-                        {/* FRONT OF CARD (Futuristic 3D Glass Surface) */}
+                        {/* FRONT OF CARD: Vibrant Transparent 3D Glass Surface */}
                         <div 
-                          className={`absolute inset-0 w-full h-full bg-white/85 backdrop-blur-xl border border-white/90 rounded-[2rem] p-6 sm:p-8 shadow-[0_20px_50px_rgba(100,80,60,0.12),_inset_0_1px_2px_rgba(255,255,255,0.95)] flex flex-col justify-between overflow-hidden transition-all ${
+                          className={`absolute inset-0 w-full h-full bg-gradient-to-br from-white/40 via-white/20 to-pink-50/30 backdrop-blur-2xl border border-white/80 rounded-[2rem] p-6 sm:p-8 shadow-[0_20px_50px_rgba(230,57,86,0.12),_inset_0_1px_3px_rgba(255,255,255,0.9)] flex flex-col justify-between overflow-hidden transition-all ${
                             reduceMotion && isFlipped ? 'hidden' : 'flex'
                           }`}
                           style={{ backfaceVisibility: 'hidden' }}
                         >
                           <div className="space-y-4">
-                            {/* Card Header: Chapter badge & Flip indicator */}
-                            <div className="flex items-center justify-between pb-3 border-b border-stone-200/60">
-                              <span className="font-mono text-[11px] font-bold text-[#E63956] uppercase tracking-wider px-3 py-1 bg-pink-50/80 rounded-full border border-pink-200/80">
+                            <div className="flex items-center justify-between pb-3 border-b border-white/50">
+                              <span className="font-mono text-[11px] font-bold text-[#E63956] uppercase tracking-wider px-3 py-1 bg-white/70 backdrop-blur-md rounded-full border border-pink-200 shadow-xs">
                                 CHAPTER {idx + 1}
                               </span>
-                              <span className="font-mono text-[11px] font-bold text-stone-400 group-hover:text-[#E63956] transition-colors flex items-center gap-1">
+                              <span className="font-mono text-[11px] font-bold text-stone-600 group-hover:text-[#E63956] transition-colors flex items-center gap-1">
                                 <span>Flip</span>
                                 <span className="text-sm">↻</span>
                               </span>
                             </div>
 
-                            {/* Chapter Heading (Complete, specific, no ellipses) */}
                             <h3 className="font-display font-black text-lg sm:text-xl uppercase text-[#161616] tracking-tight">
-                              {section.heading}
+                              {ch.heading}
                             </h3>
 
-                            {/* Synopsis (No sliders) */}
-                            <div className="pr-1 space-y-2">
-                              <p className="text-stone-700 text-xs sm:text-sm leading-relaxed font-normal">
-                                {section.content}
+                            <div className="space-y-2">
+                              <p className="text-stone-900 text-xs sm:text-sm leading-relaxed font-normal">
+                                {ch.content}
                               </p>
                             </div>
                           </div>
 
-                          {/* Card Footer */}
-                          <div className="pt-3 border-t border-stone-200/60 flex items-center justify-between text-[11px] font-mono text-stone-500">
+                          <div className="pt-3 border-t border-white/50 flex items-center justify-between text-[11px] font-mono text-stone-700">
                             <span>Front (Synopsis)</span>
                             <span className="text-[#E63956] font-bold group-hover:underline">Key Points →</span>
                           </div>
                         </div>
 
-                        {/* BACK OF CARD (Futuristic 3D Glass Surface) */}
+                        {/* BACK OF CARD: Vibrant Transparent 3D Glass Surface */}
                         <div 
-                          className={`absolute inset-0 w-full h-full bg-[#FAF4EC]/90 backdrop-blur-xl border border-stone-200/80 rounded-[2rem] p-6 sm:p-8 shadow-[0_20px_50px_rgba(100,80,60,0.15),_inset_0_1px_2px_rgba(255,255,255,0.8)] flex flex-col justify-between overflow-hidden transition-all ${
+                          className={`absolute inset-0 w-full h-full bg-gradient-to-br from-[#FAF4EC]/60 via-amber-50/40 to-pink-100/50 backdrop-blur-2xl border border-amber-200/85 rounded-[2rem] p-6 sm:p-8 shadow-[0_20px_50px_rgba(217,43,138,0.15),_inset_0_1px_3px_rgba(255,255,255,0.9)] flex flex-col justify-between overflow-hidden transition-all ${
                             reduceMotion && !isFlipped ? 'hidden' : 'flex'
                           }`}
                           style={{ 
@@ -377,43 +462,39 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
                             transform: reduceMotion ? 'none' : 'rotateY(180deg)' 
                           }}
                         >
-                          <div className="space-y-4 pr-1">
-                            {/* Back Header */}
-                            <div className="flex items-center justify-between pb-3 border-b border-stone-300/60">
-                              <span className="font-mono text-[11px] font-bold text-amber-800 uppercase tracking-wider px-3 py-1 bg-amber-100/80 rounded-full border border-amber-200/80">
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between pb-3 border-b border-amber-200/60">
+                              <span className="font-mono text-[11px] font-bold text-amber-900 uppercase tracking-wider px-3 py-1 bg-white/70 backdrop-blur-md rounded-full border border-amber-200 shadow-xs">
                                 CHAPTER {idx + 1} • KEY POINTS
                               </span>
-                              <span className="font-mono text-[11px] font-bold text-stone-500 group-hover:text-amber-800 transition-colors flex items-center gap-1">
+                              <span className="font-mono text-[11px] font-bold text-stone-700 group-hover:text-amber-900 transition-colors flex items-center gap-1">
                                 <span>Back</span>
                                 <span className="text-sm">↺</span>
                               </span>
                             </div>
 
-                            {/* Heading */}
                             <h3 className="font-display font-black text-base sm:text-lg uppercase text-[#161616]">
                               KEY POINTS
                             </h3>
 
-                            {/* Bullet Points (No sliders) */}
-                            {section.bulletPoints && section.bulletPoints.length > 0 ? (
+                            {ch.bulletPoints && ch.bulletPoints.length > 0 ? (
                               <ul className="space-y-2">
-                                {section.bulletPoints.map((bp, bIdx) => (
-                                  <li key={bIdx} className="flex items-start gap-2 text-xs sm:text-sm text-stone-800 font-normal leading-relaxed">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 shrink-0" />
+                                {ch.bulletPoints.map((bp, bIdx) => (
+                                  <li key={bIdx} className="flex items-start gap-2 text-xs sm:text-sm text-stone-900 font-normal leading-relaxed">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#E63956] mt-1.5 shrink-0" />
                                     <span>{bp}</span>
                                   </li>
                                 ))}
                               </ul>
                             ) : (
-                              <p className="text-stone-700 text-xs sm:text-sm font-normal leading-relaxed">
-                                {section.content}
+                              <p className="text-stone-900 text-xs sm:text-sm font-normal leading-relaxed">
+                                {ch.content}
                               </p>
                             )}
                           </div>
 
-                          {/* Back Footer */}
-                          <div className="pt-3 border-t border-stone-300/60 flex items-center justify-between text-[11px] font-mono text-stone-600 mt-3 shrink-0">
-                            <span className="text-amber-800 font-bold">Reverse</span>
+                          <div className="pt-3 border-t border-amber-200/60 flex items-center justify-between text-[11px] font-mono text-stone-800 mt-3 shrink-0">
+                            <span className="text-amber-900 font-bold">Reverse</span>
                             <span className="hover:underline">← Front</span>
                           </div>
                         </div>
