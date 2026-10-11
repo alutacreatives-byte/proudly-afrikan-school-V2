@@ -21,6 +21,7 @@ import { TutorChatGenerator } from './components/generators/TutorChatGenerator';
 import { PacStudyGame } from './components/generators/PacStudyGame';
 import { StudyCourseGenerator } from './components/generators/StudyCourseGenerator';
 import { StudyLearningPathGenerator } from './components/generators/StudyLearningPathGenerator';
+import { StudyFocusGenerator } from './components/generators/StudyFocusGenerator';
 import { StudyMyResources } from './components/StudyMyResources';
 import { StudyToolsMenu } from './components/StudyToolsMenu';
 import { FlashcardsView } from './components/FlashcardsView';
@@ -382,15 +383,13 @@ export default function StudyApp({
       );
     }
 
-    // 8. Learning Pathway Generator (Tool 07)
+    // 3. Study Focus - Botanical Focus Timer Companion
     if (activeTool === 'learning-path') {
       return renderWithMenu(
-        <StudyLearningPathGenerator
-          key="gen-learning-path"
+        <StudyFocusGenerator
+          key="study-focus-companion"
           onBack={handleBack}
           onGoHome={handleGoHome}
-          onSaved={refreshSavedCount}
-          existingResource={activeResource as LearningPathResult}
         />
       );
     }

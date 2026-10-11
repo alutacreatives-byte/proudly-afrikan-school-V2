@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   FileText, 
   Layers, 
-  GitBranch, 
+  Leaf, 
   FileCheck2, 
   MessageSquare, 
   Gamepad2 
@@ -12,7 +12,7 @@ import { StudyToolType } from '../types';
 export const STUDY_TOOLS_MENU_LIST = [
   { id: 'study-guide' as StudyToolType, num: '01', title: 'Study Guide Generator', icon: FileText },
   { id: 'flashcards' as StudyToolType, num: '02', title: 'Flashcard Generator', icon: Layers },
-  { id: 'learning-path' as StudyToolType, num: '03', title: 'Learning Roadmap', icon: GitBranch },
+  { id: 'learning-path' as StudyToolType, num: '03', title: 'STUDY FOCUS', icon: Leaf },
   { id: 'essay-grader' as StudyToolType, num: '04', title: 'Essay Grader', icon: FileCheck2 },
   { id: 'pdf-quiz' as StudyToolType, num: '05', title: 'Tutor Chat', icon: MessageSquare },
   { id: 'focus-quest' as StudyToolType, num: '06', title: 'Pac-Study Maze', icon: Gamepad2 },
