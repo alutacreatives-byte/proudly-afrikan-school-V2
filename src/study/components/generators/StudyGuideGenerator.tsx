@@ -673,7 +673,7 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
 
                             <ul className="space-y-2.5 sm:space-y-3 lg:space-y-3.5 flex-1 flex flex-col justify-start">
                               {ch.bulletPoints.map((bp, bIdx) => (
-                                <li key={bIdx} className="flex items-start gap-2 sm:gap-2.5 text-xs sm:text-[12.5px] lg:text-[13px] text-stone-900 font-normal leading-relaxed sm:leading-[1.6] break-words font-sans">
+                                <li key={bIdx} className="flex items-start gap-2 sm:gap-2.5 text-xs sm:text-[12.5px] lg:text-[14px] text-stone-900 font-normal leading-relaxed sm:leading-[1.6] break-words font-sans">
                                   <span className="w-1.5 h-1.5 rounded-full bg-[#E63956] mt-1.5 shrink-0" />
                                   <span className="flex-1 min-w-0">{bp}</span>
                                 </li>
