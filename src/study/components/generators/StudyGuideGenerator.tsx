@@ -629,12 +629,7 @@ export const StudyGuideGenerator: React.FC<StudyGuideGeneratorProps> = ({
                           </div>
 
                           <div className="pt-3 border-t border-white/50 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-stone-700 shrink-0 mt-3 sm:mt-4">
-                            <span className="flex items-center gap-1.5">
-                              <span className="font-semibold text-stone-800">Front</span>
-                              <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-pink-100/70 text-[#E63956] font-bold font-mono">
-                                46 words
-                              </span>
-                            </span>
+                            <span className="font-semibold text-stone-800">Front</span>
                             <span className="text-[#E63956] font-bold group-hover:underline">Key Points →</span>
                           </div>
                         </div>
