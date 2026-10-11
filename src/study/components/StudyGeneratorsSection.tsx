@@ -44,11 +44,11 @@ const STUDY_TOOLS: ToolItem[] = [
   {
     id: 'learning-path',
     toolNumber: '03',
-    tag: 'PROGRESSIVE ROADMAP',
-    title: 'LEARNING ROADMAP BUILDER',
-    subtitle: 'Construct step-by-step competency milestones and skill progression roadmaps tailored to your goals.',
+    tag: 'BOTANICAL COMPANION',
+    title: 'STUDY FOCUS',
+    subtitle: 'Nurture 9 glowing, blossoming flowers with an interactive focus timer and presence tracking.',
     icon: GitBranch,
-    btnText: 'CREATE ROADMAP →',
+    btnText: 'START FOCUS →',
   },
   {
     id: 'essay-grader',

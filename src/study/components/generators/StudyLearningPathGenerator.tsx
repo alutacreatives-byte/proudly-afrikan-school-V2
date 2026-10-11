@@ -129,7 +129,7 @@ export const StudyLearningPathGenerator: React.FC<StudyLearningPathGeneratorProp
             </span>
           </div>
           <h1 className="font-display font-black text-2xl sm:text-3xl text-[#161616] uppercase tracking-tight">
-            LEARNING ROADMAP BUILDER
+            STUDY FOCUS
           </h1>
         </div>
 

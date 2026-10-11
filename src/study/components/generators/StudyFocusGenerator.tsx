@@ -11,8 +11,9 @@ import {
   Flame, 
   Leaf, 
   Flower2, 
-  ShieldAlert, 
-  Clock 
+  Clock,
+  AlertTriangle,
+  Info
 } from 'lucide-react';
 import './studyFocusFlowers.css';
 
@@ -45,7 +46,9 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
   const [isPageHidden, setIsPageHidden] = useState<boolean>(false);
   const [wiltFactor, setWiltFactor] = useState<number>(0); // 0 (healthy) -> 1 (fully wilted)
   const [wiltedSecondsTotal, setWiltedSecondsTotal] = useState<number>(0);
-  const [showWiltedAlert, setShowWiltedAlert] = useState<boolean>(false);
+
+  // Tooltip / popover for Attention Slipping badge on mobile tap / hover
+  const [showAttentionTooltip, setShowAttentionTooltip] = useState<boolean>(false);
 
   // Sound effects
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
@@ -178,11 +181,10 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
         if (isRunning && !isPaused && !isCompleted) {
           const awayMs = Date.now() - lastActiveTimestampRef.current;
           const awaySec = Math.floor(awayMs / 1000);
-          if (awaySec > 3) {
+          if (awaySec > 2) {
             // Wilt gradually: increases with time away (max 1.0)
             setWiltFactor(prev => Math.min(1.0, prev + awaySec * 0.035));
             setWiltedSecondsTotal(prev => prev + awaySec);
-            setShowWiltedAlert(true);
             playChime('wilt');
           }
         }
@@ -199,7 +201,6 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
     if (!isRunning || isPaused || isCompleted) return;
 
     lastActiveTimestampRef.current = Date.now();
-
     const interval = setInterval(() => {
       const now = Date.now();
       const deltaSec = Math.max(1, Math.round((now - lastActiveTimestampRef.current) / 1000));
@@ -248,7 +249,6 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
 
     const updated = [newRecord, ...completedSessions].slice(0, 15);
     setCompletedSessions(updated);
-
     try {
       localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(updated));
       localStorage.removeItem(STORAGE_KEY_CURRENT);
@@ -273,7 +273,6 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
     setIsRunning(true);
     setIsPaused(false);
     setIsCompleted(false);
-    setShowWiltedAlert(false);
     lastActiveTimestampRef.current = Date.now();
   };
 
@@ -288,7 +287,9 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
     playChime('click');
     setIsRunning(true);
     setIsPaused(false);
-    setShowWiltedAlert(false);
+    // When the learner selects RESUME FOCUS, remove the warning and restore the plant's healthy growth
+    setWiltFactor(0);
+    setShowAttentionTooltip(false);
     lastActiveTimestampRef.current = Date.now();
   };
 
@@ -300,7 +301,7 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
     setSecondsRemaining(selectedDuration * 60);
     setWiltFactor(0);
     setWiltedSecondsTotal(0);
-    setShowWiltedAlert(false);
+    setShowAttentionTooltip(false);
     localStorage.removeItem(STORAGE_KEY_CURRENT);
   };
 
@@ -310,7 +311,7 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
   const rawProgress = totalSeconds > 0 ? (elapsedSeconds / totalSeconds) : 0;
   const progressPercent = isCompleted ? 100 : Math.min(100, Math.round(rawProgress * 100));
 
-  // Plant growth scale: from 0.5 seedling to 1.05 magnificent full flower
+  // Plant growth scale: from 0.5 seedling to 1.05 magnificent full bouquet
   const growthScale = isCompleted ? 1.08 : 0.52 + (rawProgress * 0.48);
 
   // Bloom factor for petal opening
@@ -321,9 +322,12 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
   const secsDisplay = (secondsRemaining % 60).toString().padStart(2, '0');
 
   // Wilting visual styles (droop, desaturate, rotate downwards)
-  const wiltDroopAngle = wiltFactor * 35; // degrees droop
-  const wiltDesaturate = wiltFactor * 70; // percentage
-  const wiltBrightness = 1 - (wiltFactor * 0.4);
+  const wiltDroopAngle = wiltFactor * 32; // degrees droop
+  const wiltDesaturate = wiltFactor * 68; // percentage
+  const wiltBrightness = 1 - (wiltFactor * 0.38);
+
+  // Flag for whether the plant is wilting or attention has slipped
+  const isWiltingCondition = isPageHidden || wiltFactor > 0.05;
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 sm:py-8 space-y-8 animate-fadeIn font-sans">
@@ -335,7 +339,7 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
             <span>•</span>
             <span className="flex items-center gap-1 text-emerald-700">
               <Leaf className="w-3.5 h-3.5" />
-              BOTANICAL STUDY FOCUS
+              STUDY FOCUS
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight flex items-center gap-2.5">
@@ -405,14 +409,14 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
           {/* Floating glowing pollen dust during focus */}
           {isRunning && !isPaused && (
             <>
-              {[...Array(12)].map((_, i) => (
+              {[...Array(14)].map((_, i) => (
                 <div
                   key={`pollen-${i}`}
                   className="absolute w-1.5 h-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_#fde047]"
                   style={{
                     bottom: '42%',
-                    left: `${40 + (i * 4) - 20}%`,
-                    animation: `flower-floating-pollen ${3 + (i % 3)}s ease-out infinite ${i * 0.5}s`,
+                    left: `${38 + (i * 3.5) - 20}%`,
+                    animation: `flower-floating-pollen ${3 + (i % 3)}s ease-out infinite ${i * 0.45}s`,
                   }}
                 />
               ))}
@@ -420,24 +424,13 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
           )}
         </div>
 
-        {/* Wilt Alert Banner */}
-        {showWiltedAlert && wiltFactor > 0.15 && (
-          <div className="relative z-30 mb-4 max-w-md w-full bg-amber-950/80 border border-amber-500/40 backdrop-blur-md rounded-2xl px-4 py-3 flex items-start gap-3 text-amber-200 animate-bounce">
-            <ShieldAlert className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-            <div className="text-xs leading-relaxed">
-              <span className="font-bold text-amber-300 block mb-0.5">Focus Attention Slipping!</span>
-              You navigated away from this tab. Your plants started to wilt from neglect. Resume active focus to revive the blossoms!
-            </div>
-          </div>
-        )}
-
         {/* Status Pill Badge */}
         <div className="relative z-20 mb-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-mono font-medium tracking-wide">
             {isCompleted ? (
               <>
                 <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
-                <span className="text-amber-200 font-bold">FULL BLOSSOM COMPLETED</span>
+                <span className="text-amber-200 font-bold">FULL 9-FLOWER BOUQUET BLOSSOMED</span>
               </>
             ) : isPaused ? (
               <>
@@ -447,7 +440,7 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
             ) : isRunning ? (
               <>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span className="text-emerald-300 font-semibold">GROWING & FLOURISHING ({Math.round(progressPercent)}%)</span>
+                <span className="text-emerald-300 font-semibold">9 FLOWERS FLOURISHING ({Math.round(progressPercent)}%)</span>
                 {wiltFactor > 0.05 && (
                   <span className="text-amber-300 text-[11px] ml-1">
                     [Wilted: {Math.round(wiltFactor * 100)}%]
@@ -464,7 +457,7 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
         </div>
 
         {/* ============================================================== */}
-        {/* BOTANICAL VIRTUAL POTTED PLANT STAGE (CodePen Reproduction)   */}
+        {/* BOTANICAL VIRTUAL POTTED PLANT STAGE (9 GROWING FLOWERS)       */}
         {/* ============================================================== */}
         <div className="relative z-10 w-full max-w-lg flex flex-col items-center justify-center select-none py-2">
           {/* Plant Canvas Container with Scale and Wilt Filter */}
@@ -474,24 +467,26 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
               filter: `saturate(${100 - wiltDesaturate}%) brightness(${wiltBrightness})`,
             }}
           >
-            {/* Scaler wrapper for growing stem & blossoms */}
+            {/* Scaler wrapper for growing stems & blossoms */}
             <div 
               className="flowers-container w-full h-full flex justify-center items-end"
               style={{
-                transform: `scale(${growthScale}) translateY(${wiltFactor * 16}px)`,
+                transform: `scale(${growthScale})`,
                 transformOrigin: 'bottom center',
+                transition: 'transform 0.6s cubic-bezier(0.34, 1.3, 0.64, 1)',
               }}
             >
-              {/* FLOWER 1: Central Crimson Glowing Flower */}
+              {/* ============================================================== */}
+              {/* FLOWER 1: Centerpiece Tall Crimson Rose / Bloom                */}
+              {/* ============================================================== */}
               <div 
                 className="flower-unit flower-unit--1 transition-transform duration-700"
                 style={{
-                  transform: `rotate(${wiltDroopAngle * 0.4}deg)`,
+                  transform: `translateX(-50%) rotate(${0 + (wiltDroopAngle * 0.4)}deg)`,
                 }}
               >
-                {/* Flower Head */}
                 <div 
-                  className="flower__leafs flower__leafs--1"
+                  className="flower__leafs"
                   style={{
                     transform: `scale(${bloomFactor})`,
                   }}
@@ -506,7 +501,6 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
                   <div className="flower__light flower__light--3" />
                   <div className="flower__light flower__light--4" />
                 </div>
-                {/* Flower Stem */}
                 <div className="flower__line">
                   <div className="flower__line__leaf flower__line__leaf--1" />
                   <div className="flower__line__leaf flower__line__leaf--2" />
@@ -515,17 +509,19 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
                 </div>
               </div>
 
-              {/* FLOWER 2: Right Blooming Cyan Flower */}
+              {/* ============================================================== */}
+              {/* FLOWER 2: Mid-Left Azure / Cyan Flower                        */}
+              {/* ============================================================== */}
               <div 
                 className="flower-unit flower-unit--2 transition-transform duration-700"
                 style={{
-                  transform: `rotate(${20 + (wiltDroopAngle * 0.6)}deg)`,
+                  transform: `translateX(-50%) rotate(${-12 + (wiltDroopAngle * 0.65)}deg)`,
                 }}
               >
                 <div 
-                  className="flower__leafs flower__leafs--2"
+                  className="flower__leafs"
                   style={{
-                    transform: `scale(${bloomFactor * 0.92})`,
+                    transform: `scale(${bloomFactor * 0.94})`,
                   }}
                 >
                   <div className="flower__leaf flower__leaf--1" />
@@ -542,17 +538,19 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
                 </div>
               </div>
 
-              {/* FLOWER 3: Left Blooming Orchid Flower */}
+              {/* ============================================================== */}
+              {/* FLOWER 3: Mid-Right Violet / Purple Flower                     */}
+              {/* ============================================================== */}
               <div 
                 className="flower-unit flower-unit--3 transition-transform duration-700"
                 style={{
-                  transform: `rotate(${-18 + (wiltDroopAngle * 0.6)}deg)`,
+                  transform: `translateX(-50%) rotate(${14 + (wiltDroopAngle * 0.65)}deg)`,
                 }}
               >
                 <div 
-                  className="flower__leafs flower__leafs--3"
+                  className="flower__leafs"
                   style={{
-                    transform: `scale(${bloomFactor * 0.92})`,
+                    transform: `scale(${bloomFactor * 0.94})`,
                   }}
                 >
                   <div className="flower__leaf flower__leaf--1" />
@@ -566,6 +564,177 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
                 <div className="flower__line">
                   <div className="flower__line__leaf flower__line__leaf--2" />
                   <div className="flower__line__leaf flower__line__leaf--4" />
+                </div>
+              </div>
+
+              {/* ============================================================== */}
+              {/* FLOWER 4: Left Angled Golden Amber Bloom                       */}
+              {/* ============================================================== */}
+              <div 
+                className="flower-unit flower-unit--4 transition-transform duration-700"
+                style={{
+                  transform: `translateX(-50%) rotate(${-22 + (wiltDroopAngle * 0.8)}deg)`,
+                }}
+              >
+                <div 
+                  className="flower__leafs"
+                  style={{
+                    transform: `scale(${bloomFactor * 0.88})`,
+                  }}
+                >
+                  <div className="flower__leaf flower__leaf--1" />
+                  <div className="flower__leaf flower__leaf--2" />
+                  <div className="flower__leaf flower__leaf--3" />
+                  <div className="flower__leaf flower__leaf--4" />
+                  <div className="flower__white-circle" />
+                  <div className="flower__light flower__light--2" />
+                  <div className="flower__light flower__light--4" />
+                </div>
+                <div className="flower__line">
+                  <div className="flower__line__leaf flower__line__leaf--1" />
+                  <div className="flower__line__leaf flower__line__leaf--4" />
+                </div>
+              </div>
+
+              {/* ============================================================== */}
+              {/* FLOWER 5: Right Angled Emerald Jade Bloom                      */}
+              {/* ============================================================== */}
+              <div 
+                className="flower-unit flower-unit--5 transition-transform duration-700"
+                style={{
+                  transform: `translateX(-50%) rotate(${24 + (wiltDroopAngle * 0.8)}deg)`,
+                }}
+              >
+                <div 
+                  className="flower__leafs"
+                  style={{
+                    transform: `scale(${bloomFactor * 0.88})`,
+                  }}
+                >
+                  <div className="flower__leaf flower__leaf--1" />
+                  <div className="flower__leaf flower__leaf--2" />
+                  <div className="flower__leaf flower__leaf--3" />
+                  <div className="flower__leaf flower__leaf--4" />
+                  <div className="flower__white-circle" />
+                  <div className="flower__light flower__light--1" />
+                  <div className="flower__light flower__light--3" />
+                </div>
+                <div className="flower__line">
+                  <div className="flower__line__leaf flower__line__leaf--2" />
+                  <div className="flower__line__leaf flower__line__leaf--3" />
+                </div>
+              </div>
+
+              {/* ============================================================== */}
+              {/* FLOWER 6: Outer Left Low Flaring Coral Pink Bloom              */}
+              {/* ============================================================== */}
+              <div 
+                className="flower-unit flower-unit--6 transition-transform duration-700"
+                style={{
+                  transform: `translateX(-50%) rotate(${-32 + (wiltDroopAngle * 0.9)}deg)`,
+                }}
+              >
+                <div 
+                  className="flower__leafs"
+                  style={{
+                    transform: `scale(${bloomFactor * 0.82})`,
+                  }}
+                >
+                  <div className="flower__leaf flower__leaf--1" />
+                  <div className="flower__leaf flower__leaf--2" />
+                  <div className="flower__leaf flower__leaf--3" />
+                  <div className="flower__leaf flower__leaf--4" />
+                  <div className="flower__white-circle" />
+                  <div className="flower__light flower__light--2" />
+                </div>
+                <div className="flower__line">
+                  <div className="flower__line__leaf flower__line__leaf--3" />
+                </div>
+              </div>
+
+              {/* ============================================================== */}
+              {/* FLOWER 7: Outer Right Low Flaring Indigo Bloom                 */}
+              {/* ============================================================== */}
+              <div 
+                className="flower-unit flower-unit--7 transition-transform duration-700"
+                style={{
+                  transform: `translateX(-50%) rotate(${34 + (wiltDroopAngle * 0.9)}deg)`,
+                }}
+              >
+                <div 
+                  className="flower__leafs"
+                  style={{
+                    transform: `scale(${bloomFactor * 0.82})`,
+                  }}
+                >
+                  <div className="flower__leaf flower__leaf--1" />
+                  <div className="flower__leaf flower__leaf--2" />
+                  <div className="flower__leaf flower__leaf--3" />
+                  <div className="flower__leaf flower__leaf--4" />
+                  <div className="flower__white-circle" />
+                  <div className="flower__light flower__light--1" />
+                </div>
+                <div className="flower__line">
+                  <div className="flower__line__leaf flower__line__leaf--1" />
+                </div>
+              </div>
+
+              {/* ============================================================== */}
+              {/* FLOWER 8: Front-Center High Magenta Bloom                      */}
+              {/* ============================================================== */}
+              <div 
+                className="flower-unit flower-unit--8 transition-transform duration-700"
+                style={{
+                  transform: `translateX(-50%) rotate(${-3 + (wiltDroopAngle * 0.45)}deg)`,
+                }}
+              >
+                <div 
+                  className="flower__leafs"
+                  style={{
+                    transform: `scale(${bloomFactor * 0.96})`,
+                  }}
+                >
+                  <div className="flower__leaf flower__leaf--1" />
+                  <div className="flower__leaf flower__leaf--2" />
+                  <div className="flower__leaf flower__leaf--3" />
+                  <div className="flower__leaf flower__leaf--4" />
+                  <div className="flower__white-circle" />
+                  <div className="flower__light flower__light--1" />
+                  <div className="flower__light flower__light--2" />
+                  <div className="flower__light flower__light--4" />
+                </div>
+                <div className="flower__line">
+                  <div className="flower__line__leaf flower__line__leaf--2" />
+                  <div className="flower__line__leaf flower__line__leaf--4" />
+                </div>
+              </div>
+
+              {/* ============================================================== */}
+              {/* FLOWER 9: Mid-Front Tangerine Sunburst Bloom                   */}
+              {/* ============================================================== */}
+              <div 
+                className="flower-unit flower-unit--9 transition-transform duration-700"
+                style={{
+                  transform: `translateX(-50%) rotate(${5 + (wiltDroopAngle * 0.55)}deg)`,
+                }}
+              >
+                <div 
+                  className="flower__leafs"
+                  style={{
+                    transform: `scale(${bloomFactor * 0.9})`,
+                  }}
+                >
+                  <div className="flower__leaf flower__leaf--1" />
+                  <div className="flower__leaf flower__leaf--2" />
+                  <div className="flower__leaf flower__leaf--3" />
+                  <div className="flower__leaf flower__leaf--4" />
+                  <div className="flower__white-circle" />
+                  <div className="flower__light flower__light--2" />
+                  <div className="flower__light flower__light--3" />
+                </div>
+                <div className="flower__line">
+                  <div className="flower__line__leaf flower__line__leaf--1" />
+                  <div className="flower__line__leaf flower__line__leaf--3" />
                 </div>
               </div>
 
@@ -684,13 +853,15 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
             ))}
           </div>
 
-          {/* Main Action Controls: Start Focus, Pause, Resume, Reset */}
-          <div className="mt-6 flex items-center justify-center gap-3">
+          {/* ============================================================== */}
+          {/* MAIN ACTION CONTROLS & ATTENTION WARNING BADGE                 */}
+          {/* ============================================================== */}
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-md">
             {!isRunning && !isPaused && !isCompleted && (
               <button
                 type="button"
                 onClick={handleStart}
-                className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-mono text-sm font-bold uppercase tracking-wider shadow-lg shadow-emerald-900/40 hover:shadow-emerald-500/30 flex items-center gap-2.5 transition-all transform hover:scale-105 cursor-pointer"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-mono text-sm font-bold uppercase tracking-wider shadow-lg shadow-emerald-900/40 hover:shadow-emerald-500/30 flex items-center justify-center gap-2.5 transition-all transform hover:scale-105 cursor-pointer"
               >
                 <Play className="w-4 h-4 fill-current" />
                 Start Focus
@@ -698,56 +869,115 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
             )}
 
             {isRunning && (
-              <button
-                type="button"
-                onClick={handlePause}
-                className="px-7 py-3.5 rounded-2xl bg-amber-500/90 hover:bg-amber-500 text-stone-950 font-mono text-sm font-bold uppercase tracking-wider shadow-lg shadow-amber-950/40 flex items-center gap-2.5 transition-all cursor-pointer"
-              >
-                <Pause className="w-4 h-4 fill-current" />
-                Pause Focus
-              </button>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
+                {/* When attention is slipping (e.g. learner returned or tab hidden/wilting), show the compact flashing badge */}
+                {isWiltingCondition && (
+                  <div className="relative group/warning w-full sm:w-auto flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowAttentionTooltip(!showAttentionTooltip)}
+                      onMouseEnter={() => setShowAttentionTooltip(true)}
+                      onMouseLeave={() => setShowAttentionTooltip(false)}
+                      className="px-4 py-3 rounded-2xl bg-rose-600/90 hover:bg-rose-600 border border-rose-400/80 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 animate-attention-flash cursor-pointer transition-all"
+                      title="Your flowers are wilting. Return to your focus session to help them bloom again."
+                    >
+                      <AlertTriangle className="w-4 h-4 text-rose-200 shrink-0" />
+                      <span>ATTENTION SLIPPING</span>
+                    </button>
+
+                    {/* Popover / Tooltip on hover or tap */}
+                    <div 
+                      className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-stone-900/95 border border-rose-500/60 rounded-xl text-rose-100 text-xs font-sans shadow-2xl backdrop-blur-md z-40 transition-all pointer-events-none text-center ${
+                        showAttentionTooltip ? 'opacity-100 scale-100' : 'opacity-0 scale-95 hidden group-hover/warning:block group-hover/warning:opacity-100 group-hover/warning:scale-100'
+                      }`}
+                    >
+                      Your flowers are wilting. Return to your focus session to help them bloom again.
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-stone-900" />
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-center">
+                  <button
+                    type="button"
+                    onClick={handlePause}
+                    className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-amber-500/90 hover:bg-amber-500 text-stone-950 font-mono text-sm font-bold uppercase tracking-wider shadow-lg shadow-amber-950/40 flex items-center justify-center gap-2.5 transition-all cursor-pointer"
+                  >
+                    <Pause className="w-4 h-4 fill-current" />
+                    Pause Focus
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="p-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-stone-400 hover:text-rose-300 border border-white/10 transition-all cursor-pointer shrink-0"
+                    title="Cancel Session"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             )}
 
             {isPaused && !isCompleted && (
-              <>
-                <button
-                  type="button"
-                  onClick={handleResume}
-                  className="px-7 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-mono text-sm font-bold uppercase tracking-wider shadow-lg shadow-emerald-950/40 flex items-center gap-2.5 transition-all cursor-pointer"
-                >
-                  <Play className="w-4 h-4 fill-current" />
-                  Resume Focus
-                </button>
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="p-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-stone-300 hover:text-white border border-white/10 transition-all cursor-pointer"
-                  title="Reset session"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                </button>
-              </>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
+                {/* ATTENTION SLIPPING warning badge beside RESUME FOCUS if plant is wilting or page was hidden */}
+                {isWiltingCondition && (
+                  <div className="relative group/warning w-full sm:w-auto flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowAttentionTooltip(!showAttentionTooltip)}
+                      onMouseEnter={() => setShowAttentionTooltip(true)}
+                      onMouseLeave={() => setShowAttentionTooltip(false)}
+                      className="px-4 py-3 rounded-2xl bg-rose-600/90 hover:bg-rose-600 border border-rose-400/80 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 animate-attention-flash cursor-pointer transition-all"
+                      title="Your flowers are wilting. Return to your focus session to help them bloom again."
+                    >
+                      <AlertTriangle className="w-4 h-4 text-rose-200 shrink-0" />
+                      <span>ATTENTION SLIPPING</span>
+                    </button>
+
+                    {/* Popover / Tooltip on hover or tap */}
+                    <div 
+                      className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-stone-900/95 border border-rose-500/60 rounded-xl text-rose-100 text-xs font-sans shadow-2xl backdrop-blur-md z-40 transition-all pointer-events-none text-center ${
+                        showAttentionTooltip ? 'opacity-100 scale-100' : 'opacity-0 scale-95 hidden group-hover/warning:block group-hover/warning:opacity-100 group-hover/warning:scale-100'
+                      }`}
+                    >
+                      Your flowers are wilting. Return to your focus session to help them bloom again.
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-stone-900" />
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-center">
+                  <button
+                    type="button"
+                    onClick={handleResume}
+                    className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-mono text-sm font-bold uppercase tracking-wider shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2.5 transition-all cursor-pointer"
+                  >
+                    <Play className="w-4 h-4 fill-current" />
+                    Resume Focus
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="p-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-stone-300 hover:text-white border border-white/10 transition-all cursor-pointer shrink-0"
+                    title="Reset session"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             )}
 
             {isCompleted && (
               <button
                 type="button"
                 onClick={handleReset}
-                className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 text-stone-950 font-mono text-sm font-bold uppercase tracking-wider shadow-xl shadow-amber-500/30 hover:scale-105 flex items-center gap-2.5 transition-all cursor-pointer"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 text-stone-950 font-mono text-sm font-bold uppercase tracking-wider shadow-xl shadow-amber-500/30 hover:scale-105 flex items-center justify-center gap-2.5 transition-all cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4" />
                 Sow Another Seed
-              </button>
-            )}
-
-            {isRunning && (
-              <button
-                type="button"
-                onClick={handleReset}
-                className="p-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-stone-400 hover:text-rose-300 border border-white/10 transition-all cursor-pointer"
-                title="Cancel Session"
-              >
-                <RotateCcw className="w-4 h-4" />
               </button>
             )}
           </div>
@@ -760,7 +990,7 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
               </div>
               <h3 className="text-lg font-bold text-emerald-200">Session Flourished!</h3>
               <p className="text-xs text-emerald-300/80 mt-1">
-                You maintained unbroken focus for {selectedDuration} minutes. Your plant has fully blossomed and is now archived in your study garden.
+                You maintained unbroken focus for {selectedDuration} minutes. All 9 flowers have fully blossomed into a vibrant bouquet and are saved in your botanical records.
               </p>
               <div className="mt-3 pt-3 border-t border-emerald-800/60 flex items-center justify-around text-xs font-mono">
                 <div>
@@ -768,8 +998,12 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
                   <span className="text-stone-400 text-[10px]">STUDY TIME</span>
                 </div>
                 <div>
-                  <span className="text-amber-300 block text-base font-bold">100%</span>
-                  <span className="text-stone-400 text-[10px]">BLOOM HARVEST</span>
+                  <span className="text-amber-300 block text-base font-bold">9 / 9</span>
+                  <span className="text-stone-400 text-[10px]">FLOWERS BLOOMED</span>
+                </div>
+                <div>
+                  <span className="text-emerald-300 block text-base font-bold">100%</span>
+                  <span className="text-stone-400 text-[10px]">VITALITY</span>
                 </div>
               </div>
             </div>
@@ -777,50 +1011,76 @@ export const StudyFocusGenerator: React.FC<StudyFocusGeneratorProps> = ({ onBack
         </div>
       </div>
 
-      {/* Persistence & Focus Garden History */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-xs">
-        <div className="flex items-center justify-between pb-4 border-b border-stone-200 mb-4">
-          <div className="flex items-center gap-2">
-            <History className="w-4 h-4 text-emerald-600" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-stone-800 font-mono">
-              Botanical Focus History
-            </h2>
+      {/* Botanical Study Garden History & Records */}
+      <div className="bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-xs">
+        <div className="flex items-center justify-between pb-4 border-b border-stone-200">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+              <History className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-stone-900">
+                Completed Botanical Focus Sessions
+              </h2>
+              <p className="text-xs text-stone-500">
+                Persisted session records of cultivated flowers and unbroken presence.
+              </p>
+            </div>
           </div>
-          <span className="text-xs font-mono text-stone-500">
-            {completedSessions.length} sessions recorded
-          </span>
+          {completedSessions.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Clear all completed session records?')) {
+                  setCompletedSessions([]);
+                  localStorage.removeItem(STORAGE_KEY_SESSIONS);
+                }
+              }}
+              className="text-[11px] font-mono text-stone-400 hover:text-rose-600 transition-colors cursor-pointer"
+            >
+              Clear Records
+            </button>
+          )}
         </div>
 
         {completedSessions.length === 0 ? (
-          <div className="py-8 text-center text-stone-500 text-xs">
-            <Leaf className="w-8 h-8 text-stone-300 mx-auto mb-2" />
-            No harvested plants yet. Start a session above to grow your virtual botanical sanctuary!
+          <div className="py-12 text-center text-stone-400">
+            <Flower2 className="w-12 h-12 stroke-[1.2] mx-auto mb-2 text-stone-300" />
+            <p className="text-sm font-medium text-stone-500">No completed sessions yet</p>
+            <p className="text-xs text-stone-400 mt-1 max-w-sm mx-auto">
+              Start a 15, 25, 45, or 60-minute focus session above. Keep your tab open to nurture all 9 glowing flowers into full bloom.
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="mt-4 divide-y divide-stone-100">
             {completedSessions.map((session) => (
-              <div
-                key={session.id}
-                className="p-3.5 rounded-xl border border-stone-200 bg-stone-50/60 hover:bg-white hover:border-emerald-300 transition-all flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-lg bg-emerald-100 border border-emerald-200 text-emerald-700 flex items-center justify-center">
-                    <Flower2 className="w-4 h-4" />
+              <div key={session.id} className="py-3 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100/70 text-emerald-700 flex items-center justify-center font-bold text-xs font-mono">
+                    {session.durationMinutes}m
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-stone-800 font-mono">
-                      {session.durationMinutes} Min Session
+                    <div className="text-sm font-semibold text-stone-800 flex items-center gap-2">
+                      <span>{session.durationMinutes}-Minute Botanical Focus</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-mono border border-emerald-200">
+                        9 Flowers Bloomed
+                      </span>
                     </div>
-                    <div className="text-[10px] text-stone-500">
+                    <div className="text-xs text-stone-400 font-mono mt-0.5">
                       {session.completedAt}
+                      {session.wiltedSeconds > 0 && (
+                        <span className="text-amber-600 ml-2">
+                          (Away time: {session.wiltedSeconds}s)
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
+
                 <div className="text-right">
-                  <span className="text-xs font-bold font-mono text-emerald-700">
-                    {session.bloomScore}%
+                  <span className="text-xs font-mono font-bold text-emerald-600">
+                    Vitality: {session.bloomScore}%
                   </span>
-                  <div className="text-[9px] font-mono text-stone-400 uppercase">Bloom</div>
                 </div>
               </div>
             ))}
