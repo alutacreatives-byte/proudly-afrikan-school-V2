@@ -1,4 +1,4 @@
-import { SavedResource } from '../types';
+import { SavedResource } from './BuildTypes';
 
 export const BUILD_STORAGE_KEY = 'proudly_afrikan_build_resources';
 

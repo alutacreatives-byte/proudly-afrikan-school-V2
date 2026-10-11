@@ -5,7 +5,7 @@ import { AllGeneratorsSection } from './AllGeneratorsSection';
 import { BuildFaqSection } from './BuildFaqSection';
 import { GeneratorModal } from './GeneratorModal';
 import { BuildGeneratorView } from './BuildGeneratorView';
-import { SavedResource, BuildToolId } from './types';
+import { SavedResource, BuildToolId } from './BuildTypes';
 
 interface BuildAppProps {
   initialResource?: SavedResource | null;

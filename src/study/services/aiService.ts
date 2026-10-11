@@ -296,12 +296,19 @@ export async function generateStudyGuide(input: StudyToolInput): Promise<StudyGu
   const sourceContext = input.sourceMaterial ? `\n\nSource material to base the study guide on:\n${input.sourceMaterial}` : '';
 
   const prompt = `
-Create a comprehensive, structured Study Guide for students and learners.
+Create a comprehensive, academic, and structured 12-chapter Study Guide.
 
 Topic:
 ${topic}
 Category / Subject: ${input.category || 'General Academic'}
 Grade / Target Level: ${input.gradeLevel || 'Secondary / Higher Education'}${sourceContext}
+
+CRITICAL FLASHCARD & CHAPTER SPECIFICATIONS:
+1. Provide exactly 12 distinct sections (chapters 1 through 12).
+2. For each section, "heading" must be a concise, complete title (e.g., "1. Napatan Origins & Sovereign Dynasties").
+3. For each section, "content" must be a substantive chapter-specific synopsis containing EXACTLY 46 words (excluding heading).
+4. For each section, "bulletPoints" must contain EXACTLY 3 distinct, chapter-specific bullet points.
+5. Never repeat content or bullet points across cards or between synopsis and key points. Preserve accurate, deep factual details.
 
 Return ONLY valid JSON matching this schema:
 {
@@ -312,24 +319,15 @@ Return ONLY valid JSON matching this schema:
   "sections": [
     {
       "heading": "1. Foundational Core Principles",
-      "content": "In-depth explanatory text breaking down the mechanisms...",
-      "bulletPoints": ["Key takeaway point 1", "Key takeaway point 2"],
+      "content": "A detailed 46-word academic synopsis explaining central concepts, historical context, and significance...",
+      "bulletPoints": [
+        "First distinct high-yield fact detailing critical evidence or mechanisms for the chapter.",
+        "Second distinct high-yield fact expanding upon crucial institutional or technical dimensions.",
+        "Third distinct high-yield fact analyzing lasting historical significance or legacy."
+      ],
       "keyTerms": [
         { "term": "Core Term", "definition": "Clear concise definition" }
       ]
-    },
-    {
-      "heading": "2. Methodologies & Practical Applications",
-      "content": "How these concepts apply in real-world scenarios...",
-      "bulletPoints": ["Applied example 1", "Applied example 2"],
-      "keyTerms": [
-        { "term": "Applied Framework", "definition": "Definition" }
-      ]
-    },
-    {
-      "heading": "3. Advanced Synthesis & Exam Retention",
-      "content": "Key connections, common pitfalls to avoid, and synthesis...",
-      "bulletPoints": ["Synthesis insight 1", "Memory trigger 2"]
     }
   ],
   "keyTerms": [
